@@ -1,5 +1,7 @@
 'use strict'
 
+const { Schema, Component, Operation } = require('@slatestudio/adept')
+
 module.exports = {
   aws: {
     dynamo: require('./lib/aws/dynamo')
@@ -9,6 +11,9 @@ module.exports = {
     lambda:     require('./lib/server/lambda'),
     serverless: require('./lib/server/serverless')
   },
+  Schema,
+  Component,
+  Operation,
   App:          require('./lib/App'),
   Document:     require('./lib/Document'),
   Handler:      require('./lib/Handler'),
