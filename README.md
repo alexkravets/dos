@@ -5,5 +5,6 @@ TODO:
 - Verify parameters agains schema, drop parameters that are not specified in
   schema
 
-- Types normalization: limit
+- Types normalization for query parameters: limit
 
+- Normalize data and error format of responses
