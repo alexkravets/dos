@@ -4,7 +4,7 @@ const { Schema, Component, Operation } = require('@slatestudio/adept')
 
 module.exports = {
   aws: {
-    dynamo: require('./lib/aws/dynamo')
+    Dynamo: require('./lib/aws/dynamo')
   },
   server: {
     handler:    require('./lib/server/handler'),
