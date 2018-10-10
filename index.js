@@ -7,8 +7,8 @@ module.exports = {
     dynamo: require('./lib/aws/dynamo')
   },
   server: {
+    handler:    require('./lib/server/handler'),
     Http:       require('./lib/server/Http'),
-    lambda:     require('./lib/server/lambda'),
     serverless: require('./lib/server/serverless')
   },
   Schema,
