@@ -1,6 +1,6 @@
 'use strict'
 
-const { Schema, Component, Operation } = require('@slatestudio/adept')
+const { Schema, Component, Operation, Security } = require('@slatestudio/adept')
 
 module.exports = {
   aws: {
@@ -14,6 +14,7 @@ module.exports = {
   Schema,
   Component,
   Operation,
+  Security,
   App:          require('./lib/App'),
   Document:     require('./lib/Document'),
   Handler:      require('./lib/Handler'),
