@@ -1,0 +1,22 @@
+firstName:
+  type: string
+
+lastName:
+  type: string
+
+age:
+  type: number
+
+sex:
+  $ref: ProfileSex
+
+parameters:
+  $ref: ProfileParameters
+
+alternativeParameters:
+  $ref: ProfileParameters
+
+tags:
+  type: array
+  items:
+    $ref: ProfileTag

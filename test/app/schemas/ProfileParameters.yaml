@@ -1,0 +1,7 @@
+shoeSize:
+  type:    number
+  default: 42
+
+shirtSize:
+  type:    string
+  default: M
