@@ -10,6 +10,10 @@ chai.use(chaiAsPromised)
 const { expect } = chai
 
 describe('Dynamo :: Document storage driver class', () => {
+
+  before(async() => await Profile.createCollection())
+  after(async() => await Profile.deleteCollection())
+
   it('should create collection sucessfully', () => {
     expect(Wrong.createCollection()).to.be.fulfilled
   })

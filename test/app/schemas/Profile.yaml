@@ -20,3 +20,7 @@ tags:
   type: array
   items:
     $ref: ProfileTag
+
+isActive:
+  type:    boolean
+  default: false

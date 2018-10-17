@@ -1,34 +1,19 @@
 'use strict'
 
-const models = require('test/app/models')
-
-before(async() => {
-  for (const name in models) {
-    const model = models[name]
-
-    if (model.createCollection) {
-      await model.createCollection()
-    }
-  }
-})
-
-after(async() => {
-  for (const name in models) {
-    const model = models[name]
-
-    if (model.createCollection) {
-      await model.deleteCollection()
-    }
-  }
-})
+const { Profile } = require('test/app/models')
 
 describe('AWS', () => {
   require('./aws/dynamo/Dynamo.spec')
 })
 
 require('./App.spec')
+require('./Document.spec')
 
 describe('Operations', () => {
+
+  before(async() => await Profile.createCollection())
+  after(async() => await Profile.deleteCollection())
+
   require('./operations/Create.spec')
   require('./operations/Delete.spec')
   require('./operations/Index.spec')
