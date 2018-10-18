@@ -1,6 +1,6 @@
 {
   "name": "@slatestudio/common-service",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "description": "Common API service library",
   "main": "index.js",
   "repository": {
@@ -30,7 +30,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "aws-sdk": "^2.315.0",
+    "aws-sdk": "^2.337.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "eslint": "^5.1.0",
