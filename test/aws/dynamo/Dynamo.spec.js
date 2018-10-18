@@ -11,12 +11,8 @@ const { expect } = chai
 
 describe('Dynamo :: Document storage driver class', () => {
 
-  before(async() => {
-    await Profile.createCollection()
-  })
-  after(async() => {
-    await Profile.deleteCollection()
-  })
+  before(async() => await Profile.createCollection())
+  after(async() => await Profile.deleteCollection())
 
   describe('Dynamo.createCollection()', () => {
     it('creates collection sucessfully', () => {
@@ -92,6 +88,13 @@ describe('Dynamo :: Document storage driver class', () => {
       expect(documents.objects[1].attributes.firstName).to.equal('Alexander')
     })
 
+    it('gets list of documents with sort descending by default', async() => {
+      const documents = await Profile.index(null, {}, {})
+
+      expect(documents.objects[0].attributes.firstName).to.equal('Dmitry')
+      expect(documents.objects[1].attributes.firstName).to.equal('Alexander')
+    })
+
     it('gets list of documents from second page', async() => {
       const documentsList = await Profile.index(null, {}, { limit: 1 })
       const { lastEvaluatedKey } = documentsList
@@ -132,18 +135,11 @@ describe('Dynamo :: Document storage driver class', () => {
         lastName:  'Sidorov'
       })
       const documents = await Profile.index(null, { firstName: 'Alexander' }, { limit: 2 })
-      // const { lastEvaluatedKey } = documents
-      // const secondPage = await Profile.index(null, { firstName: 'Alexander' }, {
-      //   limit: 2,
-      //   exclusiveStartKey: lastEvaluatedKey
-      // })
 
       expect(documents.count).to.equal(2)
       expect(documents.lastEvaluatedKey).not.to.equal(undefined)
       expect(documents.objects.length).to.equal(2)
       expect(documents.objects[0].attributes.firstName).to.equal('Alexander')
-
-      // expect(secondPage.count).to.equal(2)
     })
 
     it('gets list of documents with sort descending', async() => {
