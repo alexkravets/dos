@@ -11,50 +11,60 @@ const { expect } = chai
 
 describe('Dynamo :: Document storage driver class', () => {
 
-  before(async() => await Profile.createCollection())
-  after(async() => await Profile.deleteCollection())
-
-  it('should create collection sucessfully', () => {
-    expect(Wrong.createCollection()).to.be.fulfilled
+  before(async() => {
+    await Profile.createCollection()
+  })
+  after(async() => {
+    await Profile.deleteCollection()
   })
 
-  it('should throw error for create already existing collection', () => {
-    expect(Wrong.createCollection()).to.be.fulfilled
+  describe('Dynamo.createCollection()', () => {
+    it('creates collection sucessfully', () => {
+      expect(Wrong.createCollection()).to.be.fulfilled
+    })
+
+    it('doing nothing with already existing collection', () => {
+      expect(Wrong.createCollection()).to.be.fulfilled
+    })
   })
 
-  it('should delete collection sucessfully', () => {
-    expect(Wrong.deleteCollection()).to.be.fulfilled
+  describe('Dynamo.deleteCollection()', () => {
+    it('removes collection sucessfully', () => {
+      expect(Wrong.deleteCollection()).to.be.fulfilled
+    })
   })
 
-  it('should create and return new document', async() => {
-    const attributes = {
-      firstName: 'Alexander',
-      lastName:  'Kravets'
-    }
+  describe('Dynamo._create(Item)', () => {
+    it('creates and returns new document', async() => {
+      const attributes = {
+        firstName: 'Alexander',
+        lastName:  'Kravets'
+      }
 
-    const document = await Profile.create(null, attributes)
+      const document = await Profile.create(null, attributes)
 
-    expect(document.attributes).to.include(attributes)
-  })
+      expect(document.attributes).to.include(attributes)
+    })
 
-  it('should throw error for create document in not existing table', () => {
-    const attributes = {
-      firstName: 'Alexander',
-      lastName:  'Kravets'
-    }
+    it('should throw error for create document in not existing table', () => {
+      const attributes = {
+        firstName: 'Alexander',
+        lastName:  'Kravets'
+      }
 
-    expect(Wrong.create(null, attributes)).to.be
-      .rejectedWith(Error, 'Cannot do operations on a non-existent table')
+      expect(Wrong.create(null, attributes)).to.be
+        .rejectedWith(Error, 'Cannot do operations on a non-existent table')
+    })
   })
 
   describe('Dynamo._index(query, options)', () => {
-    it('should get list of documents', async() => {
+    it('gets list of documents', async() => {
       const documents = await Profile.index(null, {}, {})
 
       expect(documents.count).to.equal(1)
     })
 
-    it('should get list of documents with limit 1', async() => {
+    it('gets list of documents with limit 1', async() => {
       const documents = await Profile.index(null, {}, { limit: 1 })
 
       expect(documents.count).to.equal(1)
@@ -62,7 +72,7 @@ describe('Dynamo :: Document storage driver class', () => {
       expect(documents.objects.length).to.equal(1)
     })
 
-    it('should get list of documents with sort ascending', async() => {
+    it('gets list of documents with sort ascending', async() => {
       const attributes = {
         firstName: 'Dmitry',
         lastName:  'Panchenko'
@@ -75,14 +85,14 @@ describe('Dynamo :: Document storage driver class', () => {
       expect(documents.objects[1].attributes.firstName).to.equal('Dmitry')
     })
 
-    it('should get list of documents with sort descending', async() => {
+    it('gets list of documents with sort descending', async() => {
       const documents = await Profile.index(null, {}, { sort: 'desc' })
 
       expect(documents.objects[0].attributes.firstName).to.equal('Dmitry')
       expect(documents.objects[1].attributes.firstName).to.equal('Alexander')
     })
 
-    it('should get list of documents from second page', async() => {
+    it('gets list of documents from second page', async() => {
       const documentsList = await Profile.index(null, {}, { limit: 1 })
       const { lastEvaluatedKey } = documentsList
       const documents = await Profile.index(null, {}, { exclusiveStartKey: lastEvaluatedKey })
@@ -92,7 +102,7 @@ describe('Dynamo :: Document storage driver class', () => {
       expect(documents.objects.length).to.equal(1)
     })
 
-    it('should get list of documents with query param with empty result on second page', async() => {
+    it('gets list of documents with query param with empty result on second page', async() => {
       const documents = await Profile.index(null, { firstName: 'Alexander' }, { limit: 1 })
       const { lastEvaluatedKey } = documents
       const secondPage = await Profile.index(null, { firstName: 'Alexander' }, {
@@ -108,7 +118,7 @@ describe('Dynamo :: Document storage driver class', () => {
       expect(secondPage.count).to.equal(0)
     })
 
-    it('should get list of documents with query param with results spread over the table', async() => {
+    it('gets list of documents with query param with results spread over the table', async() => {
       await Profile.create(null, {
         firstName: 'Alexander',
         lastName:  'Petrov'
@@ -136,40 +146,40 @@ describe('Dynamo :: Document storage driver class', () => {
       // expect(secondPage.count).to.equal(2)
     })
 
-    it('should get list of documents with sort descending', async() => {
+    it('gets list of documents with sort descending', async() => {
       const documents = await Profile.index(null, {}, { sort: 'desc' })
 
       expect(documents.objects[0].attributes.firstName).to.equal('Dmitry')
       expect(documents.objects[1].attributes.firstName).to.equal('Alexander')
     })
 
-    it('should throw error for list documents if table does not exist', () => {
+    it('throw error for list documents if table does not exist', () => {
       expect(Wrong.index(null, {}, {})).to.be
         .rejectedWith(Error, 'Cannot do operations on a non-existent table')
     })
   })
 
   describe('Dynamo._read(id)', () => {
-    it('should get document by id', async() => {
+    it('gets document by id', async() => {
       const documents = await Profile.index(null, { firstName: 'Alexander' })
       const doc = await Profile.read(null, { id: documents.objects[0].attributes.id })
 
       expect(doc.attributes.firstName).to.equal('Alexander')
     })
 
-    it('should throw error if requested by ID document does not exist', () => {
+    it('throw error if requested by ID document does not exist', () => {
       expect(Profile.read(null, { id: 'wrong-id' })).to.be
         .rejectedWith(Error, 'Profile document is not found')
     })
 
-    it('should throw error for read document in not existing table', () => {
+    it('throw error for read document in not existing table', () => {
       expect(Wrong.read(null, { id: 'wrong-key-for-wrong-table' })).to.be
         .rejectedWith(Error, 'Cannot do operations on a non-existent table')
     })
   })
 
-  describe('Dynamo._update(id, attributes)', () => {
-    it('should delete document from table (set isDeleted) and try to read it again', async() => {
+  describe('Dynamo._delete(id)', () => {
+    it('removes document from table (set isDeleted) and try to read it again', async() => {
       const documents = await Profile.index(null, { firstName: 'Dmitry' })
       const id = documents.objects[0].attributes.id
       await Profile.delete(null, { id })
@@ -177,14 +187,14 @@ describe('Dynamo :: Document storage driver class', () => {
         .rejectedWith(Error, 'Profile document is not found')
     })
 
-    it('should throw error for delete document in not existing table', () => {
+    it('throw error for delete document in not existing table', () => {
       expect(Wrong.delete(null, { id: 'wrong-key-for-wrong-table' })).to.be
         .rejectedWith(Error, 'Cannot do operations on a non-existent table')
     })
   })
 
-  describe('Dynamo._delete(id)', () => {
-    it('should update document', async() => {
+  describe('Dynamo._update(id, attributes)', () => {
+    it('updates document', async() => {
       const attributes = {
         firstName: 'Alexander updated'
       }
@@ -195,11 +205,11 @@ describe('Dynamo :: Document storage driver class', () => {
       expect(doc.attributes.firstName).to.equal(attributes.firstName)
     })
 
-    it('should throw error for update not existing document', async() => {
+    it('throw error for update not existing document', async() => {
       expect(Profile.update(null, { id: 'wrong-id' }, {})).rejectedWith(Error, 'Profile document is not found')
     })
 
-    it('should throw error for update document in not existing table', () => {
+    it('throw error for update document in not existing table', () => {
       expect(Wrong.read(null, { id: 'wrong-key-for-wrong-table' })).to.be
         .rejectedWith(Error, 'Cannot do operations on a non-existent table')
     })
