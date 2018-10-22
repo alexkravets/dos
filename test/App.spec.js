@@ -10,10 +10,18 @@ const modules = require('test/app/api')
 let app
 
 describe('App', () => {
-  it('App.constructor(config, models, modules)', () => {
-    app = new App(config, models, modules)
-    const { spec } = app
+  describe('App.constructor(config, models, modules)', () => {
+    it('composes app specification', () => {
+      app = new App(config, models, modules)
+      const { spec } = app
 
-    expect(spec).to.have.property('paths')
+      expect(spec).to.have.property('paths')
+    })
+  })
+
+  describe('.buildSpec()', () => {
+    it('builds YAML specification', () => {
+      app.buildSpec()
+    })
   })
 })

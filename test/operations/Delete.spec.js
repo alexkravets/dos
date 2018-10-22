@@ -18,11 +18,24 @@ describe('Delete', () => {
     id = result.data.id
   })
 
-  it('should delete document', async() => {
-    const query   = { id }
-    const handler = new DeleteProfile({ query })
+  describe('.exec()', () => {
+    it('deletes document by ID', async() => {
+      const query   = { id }
+      const handler = new DeleteProfile({ query })
 
-    const { statusCode } = await handler.exec()
-    expect(statusCode).to.equal(204)
+      const { result } = await handler.exec()
+      expect(result).to.be.undefined
+    })
+
+    it('returns DocumentNotFound error if document not found', async() => {
+      const query   = { id: 'DOCUMENT_ID' }
+      const handler = new DeleteProfile({ query })
+
+      const { result, statusCode } = await handler.exec()
+
+      expect(result).to.have.property('error')
+      expect(statusCode).to.equal(404)
+      expect(result.error.code).to.equal('DocumentNotFound')
+    })
   })
 })

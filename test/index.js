@@ -6,14 +6,15 @@ describe('AWS', () => {
   require('./aws/dynamo/Dynamo.spec')
 })
 
-require('./App.spec')
 require('./Document.spec')
+require('./App.spec')
 
 describe('Operations', () => {
 
-  before(async() => await Profile.createCollection())
-  after(async() => await Profile.deleteCollection())
+  before(() => Profile.createCollection())
+  after(() => Profile.deleteCollection())
 
+  require('./operations/BaseOperation.spec')
   require('./operations/Create.spec')
   require('./operations/Delete.spec')
   require('./operations/Index.spec')
