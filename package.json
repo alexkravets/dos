@@ -1,6 +1,6 @@
 {
   "name": "@slatestudio/common-service",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "Common API service library",
   "main": "index.js",
   "repository": {
@@ -16,7 +16,7 @@
   "author": "Alexander Kravets <alex@slatestudio.com>",
   "license": "ISC",
   "dependencies": {
-    "@slatestudio/adept": "1.6.2",
+    "@slatestudio/adept": "1.6.3",
     "bluebird": "^3.5.2",
     "chalk": "^2.4.1",
     "config": "^2.0.1",
