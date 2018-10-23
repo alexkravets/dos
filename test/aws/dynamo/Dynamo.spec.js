@@ -1,13 +1,30 @@
 'use strict'
 
 const chai           = require('chai')
-const chaiAsPromised = require('chai-as-promised')
 const { Profile }    = require('test/app/models')
 const Wrong          = require('test/app/models/Wrong')
 
-chai.use(chaiAsPromised)
-
 const { expect } = chai
+
+const toBeFulfilled = async(fn) => {
+  try {
+    return await fn()
+  } catch (error) {
+    console.log('!', error)
+    throw new Error('Should be fulfilled')
+  }
+}
+
+const toBeRejectedWith = async(fn, message) => {
+  try {
+    await fn()
+  } catch (error) {
+    if (!message || error.message === message) {
+      return
+    }
+  }
+  throw new Error(`Should be rejected with "${message}"`)
+}
 
 describe('Dynamo :: Document storage driver class', () => {
 
@@ -15,19 +32,16 @@ describe('Dynamo :: Document storage driver class', () => {
   after(async() => await Profile.deleteCollection())
 
   describe('Dynamo.createCollection()', () => {
-    it('creates collection sucessfully', () => {
-      expect(Wrong.createCollection()).to.be.fulfilled
-    })
+    it('creates collection sucessfully', () =>
+      toBeFulfilled(() => Wrong.createCollection()))
 
-    it('doing nothing with already existing collection', () => {
-      expect(Wrong.createCollection()).to.be.fulfilled
-    })
+    it('doing nothing with already existing collection', () =>
+      toBeFulfilled(() => Wrong.createCollection()))
   })
 
   describe('Dynamo.deleteCollection()', () => {
-    it('removes collection sucessfully', () => {
-      expect(Wrong.deleteCollection()).to.be.fulfilled
-    })
+    it('removes collection sucessfully', () =>
+      toBeFulfilled(() => Wrong.deleteCollection()))
   })
 
   describe('Dynamo._create(Item)', () => {
@@ -48,8 +62,7 @@ describe('Dynamo :: Document storage driver class', () => {
         lastName:  'Kravets'
       }
 
-      expect(Wrong.create({}, attributes)).to.be
-        .rejectedWith(Error, 'Cannot do operations on a non-existent table')
+      return toBeRejectedWith(() => Wrong.create({}, attributes), 'Cannot do operations on a non-existent table')
     })
   })
 
@@ -149,10 +162,8 @@ describe('Dynamo :: Document storage driver class', () => {
       expect(documents.objects[1].attributes.firstName).to.equal('Alexander')
     })
 
-    it('throw error for list documents if table does not exist', () => {
-      expect(Wrong.index({}, {}, {})).to.be
-        .rejectedWith(Error, 'Cannot do operations on a non-existent table')
-    })
+    it('throw error for list documents if table does not exist', () =>
+      toBeRejectedWith(() => Wrong.index({}, {}, {}), 'Cannot do operations on a non-existent table'))
   })
 
   describe('Dynamo._read(id)', () => {
@@ -163,15 +174,11 @@ describe('Dynamo :: Document storage driver class', () => {
       expect(doc.attributes.firstName).to.equal('Alexander')
     })
 
-    it('throw error if requested by ID document does not exist', () => {
-      expect(Profile.read({}, { id: 'wrong-id' })).to.be
-        .rejectedWith(Error, 'Profile document is not found')
-    })
+    it('throw error if requested by ID document does not exist', () =>
+      toBeRejectedWith(() => Profile.read({}, { id: 'wrong-id' }), 'Profile document is not found'))
 
-    it('throw error for read document in not existing table', () => {
-      expect(Wrong.read({}, { id: 'wrong-key-for-wrong-table' })).to.be
-        .rejectedWith(Error, 'Cannot do operations on a non-existent table')
-    })
+    it('throw error for read document in not existing table', () =>
+      toBeRejectedWith(() => Wrong.read({}, { id: 'wrong-key-for-wrong-table' }), 'Cannot do operations on a non-existent table'))
   })
 
   describe('Dynamo._delete(id)', () => {
@@ -179,14 +186,11 @@ describe('Dynamo :: Document storage driver class', () => {
       const documents = await Profile.index({}, { firstName: 'Dmitry' })
       const id = documents.objects[0].attributes.id
       await Profile.delete({}, { id })
-      expect(Profile.read({}, { id })).to.be
-        .rejectedWith(Error, 'Profile document is not found')
+      return toBeRejectedWith(() => Profile.read({}, { id }), 'Profile document is not found')
     })
 
-    it('throw error for delete document in not existing table', () => {
-      expect(Wrong.delete({}, { id: 'wrong-key-for-wrong-table' })).to.be
-        .rejectedWith(Error, 'Cannot do operations on a non-existent table')
-    })
+    it('throw error for delete document in not existing table', () =>
+      toBeRejectedWith(() => Wrong.delete({}, { id: 'wrong-key-for-wrong-table' }), 'Cannot do operations on a non-existent table'))
   })
 
   describe('Dynamo._update(id, attributes)', () => {
@@ -201,14 +205,11 @@ describe('Dynamo :: Document storage driver class', () => {
       expect(doc.attributes.firstName).to.equal(attributes.firstName)
     })
 
-    it('throw error for update not existing document', async() => {
-      expect(Profile.update({}, { id: 'wrong-id' }, {})).rejectedWith(Error, 'Profile document is not found')
-    })
+    it('throw error for update not existing document', async() =>
+      toBeRejectedWith(() => Profile.update({}, { id: 'wrong-id' }, {}), 'Profile document is not found'))
 
-    it('throw error for update document in not existing table', () => {
-      expect(Wrong.read({}, { id: 'wrong-key-for-wrong-table' })).to.be
-        .rejectedWith(Error, 'Cannot do operations on a non-existent table')
-    })
+    it('throw error for update document in not existing table', () =>
+      toBeRejectedWith(() => Wrong.read({}, { id: 'wrong-key-for-wrong-table' }), 'Cannot do operations on a non-existent table'))
   })
 
 })
