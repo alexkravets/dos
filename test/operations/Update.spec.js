@@ -59,6 +59,7 @@ describe('Update', () => {
       expect(result).to.have.property('error')
       expect(statusCode).to.equal(400)
       expect(result.error.code).to.equal('InvalidRequestParameters')
+      expect(result.error.originalErrors[0].message).to.equal('Missing required property: mutation')
     })
   })
 })
