@@ -182,7 +182,7 @@ describe('Dynamo :: Document storage driver', () => {
 
   describe('Dynamo._delete(id)', () => {
     it('flags document as deleted', async() => {
-      let { objects } = await Profile.index({}, { firstName: 'Dmitry' })
+      const { objects } = await Profile.index({}, { firstName: 'Dmitry' })
 
       const { id } = objects[0]
       await Profile.delete({}, { id })
@@ -192,8 +192,7 @@ describe('Dynamo :: Document storage driver', () => {
 
       expect(deletedProfile.id).to.not.equal(id)
       await expectError(() => Profile.read({}, { id }), 'DocumentNotFound')
-      // TODO: Fix update operation to take isDeleted into account
-      // await expectError(() => Profile.update({}, { id }, { firstName: 'Sasha' }), 'DocumentNotFound')
+      await expectError(() => Profile.update({}, { id }, { firstName: 'Sasha' }), 'DocumentNotFound')
     })
 
     it('throws an error if table does not exist', async() => {
