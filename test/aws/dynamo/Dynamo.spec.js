@@ -1,68 +1,62 @@
 'use strict'
 
-const chai           = require('chai')
-const { Profile }    = require('test/app/models')
-const Wrong          = require('test/app/models/Wrong')
+const { expect } = require('chai')
+const { Profile, Book } = require('test/app/models')
 
-const { expect } = chai
-
-const toBeFulfilled = async(fn) => {
-  try {
-    return await fn()
-  } catch (error) {
-    console.log('!', error)
-    throw new Error('Should be fulfilled')
-  }
-}
-
-const toBeRejectedWith = async(fn, message) => {
+const expectError = async(fn, errorName) => {
   try {
     await fn()
+
   } catch (error) {
-    if (!message || error.message === message) {
-      return
-    }
+    expect(error.code).to.equal(errorName)
+    return
+
   }
-  throw new Error(`Should be rejected with "${message}"`)
+
+  throw new Error(`Expected error ${errorName} was not thrown`)
 }
 
-describe('Dynamo :: Document storage driver class', () => {
+describe('Dynamo :: Document storage driver', () => {
+  before(() => Profile.createCollection())
+  after(() => Profile.deleteCollection())
 
-  before(async() => await Profile.createCollection())
-  after(async() => await Profile.deleteCollection())
 
   describe('Dynamo.createCollection()', () => {
-    it('creates collection sucessfully', () =>
-      toBeFulfilled(() => Wrong.createCollection()))
+    it('creates collection table', async() => {
+      await Book.createCollection()
+    })
 
-    it('doing nothing with already existing collection', () =>
-      toBeFulfilled(() => Wrong.createCollection()))
+    it('does nothing if collection table already exists', async() => {
+      await Book.createCollection()
+    })
   })
 
   describe('Dynamo.deleteCollection()', () => {
-    it('removes collection sucessfully', () =>
-      toBeFulfilled(() => Wrong.deleteCollection()))
+    it('removes collection sucessfully', async() => {
+      await Book.deleteCollection()
+    })
   })
 
   describe('Dynamo._create(Item)', () => {
-    it('creates and returns new document', async() => {
+    it('creates document', async() => {
       const attributes = {
         firstName: 'Alexander',
         lastName:  'Kravets'
       }
 
-      const document = await Profile.create({}, attributes)
+      const { id }  = await Profile.create({}, attributes)
+      const profile = await Profile.read({}, { id })
 
-      expect(document.attributes).to.include(attributes)
+      expect(profile.attributes).to.include(attributes)
     })
 
-    it('should throw error for create document in not existing table', () => {
+    it('throws an error if table does not exist', async() => {
       const attributes = {
         firstName: 'Alexander',
         lastName:  'Kravets'
       }
 
-      return toBeRejectedWith(() => Wrong.create({}, attributes), 'Cannot do operations on a non-existent table')
+      await expectError(() => Book.create({}, attributes), 'ResourceNotFoundException')
     })
   })
 
@@ -162,35 +156,49 @@ describe('Dynamo :: Document storage driver class', () => {
       expect(documents.objects[1].attributes.firstName).to.equal('Alexander')
     })
 
-    it('throw error for list documents if table does not exist', () =>
-      toBeRejectedWith(() => Wrong.index({}, {}, {}), 'Cannot do operations on a non-existent table'))
+    it('throws an error if table does not exist', async() => {
+      await expectError(() => Book.index({}, {}, {}), 'ResourceNotFoundException')
+    })
   })
 
   describe('Dynamo._read(id)', () => {
-    it('gets document by id', async() => {
-      const documents = await Profile.index({}, { firstName: 'Alexander' })
-      const doc = await Profile.read({}, { id: documents.objects[0].attributes.id })
+    it('reads document', async() => {
+      const { objects } = await Profile.index({}, { firstName: 'Alexander' })
+      const { id } = objects[0]
 
-      expect(doc.attributes.firstName).to.equal('Alexander')
+      const profile = await Profile.read({}, { id })
+
+      expect(profile.attributes.firstName).to.equal('Alexander')
     })
 
-    it('throw error if requested by ID document does not exist', () =>
-      toBeRejectedWith(() => Profile.read({}, { id: 'wrong-id' }), 'Profile document is not found'))
+    it('throws an error if document does not exist', async() => {
+      await expectError(() => Profile.read({}, { id: 'PROFILE_ID' }), 'DocumentNotFound')
+    })
 
-    it('throw error for read document in not existing table', () =>
-      toBeRejectedWith(() => Wrong.read({}, { id: 'wrong-key-for-wrong-table' }), 'Cannot do operations on a non-existent table'))
+    it('throws an error if document is not found', async() => {
+      await expectError(() => Book.read({}, { id: 'BOOK_ID' }), 'ResourceNotFoundException')
+    })
   })
 
   describe('Dynamo._delete(id)', () => {
-    it('removes document from table (set isDeleted) and try to read it again', async() => {
-      const documents = await Profile.index({}, { firstName: 'Dmitry' })
-      const id = documents.objects[0].attributes.id
+    it('flags document as deleted', async() => {
+      let { objects } = await Profile.index({}, { firstName: 'Dmitry' })
+
+      const { id } = objects[0]
       await Profile.delete({}, { id })
-      return toBeRejectedWith(() => Profile.read({}, { id }), 'Profile document is not found')
+
+      const result = await Profile.index({}, { firstName: 'Dmitry' })
+      const deletedProfile = result.objects[0]
+
+      expect(deletedProfile.id).to.not.equal(id)
+      await expectError(() => Profile.read({}, { id }), 'DocumentNotFound')
+      // TODO: Fix update operation to take isDeleted into account
+      // await expectError(() => Profile.update({}, { id }, { firstName: 'Sasha' }), 'DocumentNotFound')
     })
 
-    it('throw error for delete document in not existing table', () =>
-      toBeRejectedWith(() => Wrong.delete({}, { id: 'wrong-key-for-wrong-table' }), 'Cannot do operations on a non-existent table'))
+    it('throws an error if table does not exist', async() => {
+      await expectError(() => Book.delete({}, { id: 'BOOK_ID' }), 'ResourceNotFoundException')
+    })
   })
 
   describe('Dynamo._update(id, attributes)', () => {
@@ -198,18 +206,23 @@ describe('Dynamo :: Document storage driver class', () => {
       const attributes = {
         firstName: 'Alexander updated'
       }
-      const documents = await Profile.index({}, { firstName: 'Alexander' })
-      const id = documents.objects[0].attributes.id
-      const doc = await Profile.update({}, { id }, attributes)
 
-      expect(doc.attributes.firstName).to.equal(attributes.firstName)
+      const { objects } = await Profile.index({}, { firstName: 'Alexander' })
+      const { id } = objects[0]
+
+      await Profile.update({}, { id }, attributes)
+      const updatedProfile = await Profile.read({}, { id })
+
+      expect(updatedProfile.attributes).to.include(attributes)
     })
 
-    it('throw error for update not existing document', async() =>
-      toBeRejectedWith(() => Profile.update({}, { id: 'wrong-id' }, {}), 'Profile document is not found'))
+    it('throws an error if document is not found', async() => {
+      await expectError(() => Profile.update({}, { id: 'BOOK_ID' }, {}), 'DocumentNotFound')
+    })
 
-    it('throw error for update document in not existing table', () =>
-      toBeRejectedWith(() => Wrong.read({}, { id: 'wrong-key-for-wrong-table' }), 'Cannot do operations on a non-existent table'))
+    it('throws an error if table does not exist', async() => {
+      await expectError(() => Book.read({}, { id: 'BOOK_ID' }), 'ResourceNotFoundException')
+    })
   })
 
 })
