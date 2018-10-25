@@ -6,16 +6,28 @@ const App     = require('lib/App')
 const config  = require('config')
 const models  = require('test/app/models')
 const modules = require('test/app/api')
+const { Profile, Book } = models
 
 let app
 
 describe('App', () => {
+  after(async() => {
+    await Profile.deleteCollection()
+    await Book.deleteCollection()
+  })
+
   describe('App.constructor(config, models, modules)', () => {
     it('composes app specification', () => {
       app = new App(config, models, modules)
       const { spec } = app
 
       expect(spec).to.have.property('paths')
+    })
+  })
+
+  describe('.start()', () => {
+    it('starts HTTP server', async() => {
+      await app.start()
     })
   })
 
