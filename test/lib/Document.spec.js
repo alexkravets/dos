@@ -133,7 +133,7 @@ describe('Document', () => {
       expect(profile.id).to.equal(profileId)
     })
 
-    it.skip('returns first document using query with default sort order', async() => {
+    it('returns first document using query with default sort order', async() => {
       const profile = await Profile.read({}, { firstName: 'Alexander' })
       expect(profile).to.exist
     })
@@ -168,7 +168,7 @@ describe('Document', () => {
       expect(object.attributes).to.include({ updatedBy: 'USER_ID' })
     })
 
-    it.skip('updates first document using query with default sort order', async() => {
+    it('updates first document using query with default sort order', async() => {
       await Profile.update({}, { firstName: 'Alexander' }, { firstName: 'Yu Min' })
       const profile = await Profile.read({}, { firstName: 'Yu Min' })
       expect(profile).to.exist
