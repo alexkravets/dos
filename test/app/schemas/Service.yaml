@@ -1,0 +1,14 @@
+name:
+  description: 'Service name'
+  type:        'string'
+  required:    true
+
+version:
+  description: 'Service version'
+  type:        'string'
+  required:    true
+
+apiVersion:
+  description: 'API version'
+  type:        'string'
+  required:    true
