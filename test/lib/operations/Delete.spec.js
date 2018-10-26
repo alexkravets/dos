@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const { DeleteProfile, CreateProfile } = require('test/app/api')[0]
+const { DeleteProfile, CreateProfile } = require('test/app/api')[1]
 
 let id
 

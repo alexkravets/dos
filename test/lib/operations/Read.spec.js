@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const { ReadProfile, CreateProfile, ReadProfileParameters } = require('test/app/api')[0]
+const { ReadProfile, CreateProfile, ReadProfileParameters } = require('test/app/api')[1]
 
 let id
 

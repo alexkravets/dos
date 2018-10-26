@@ -103,7 +103,12 @@ describe('Document', () => {
     })
 
     it('sets createdBy if userId is defined in context', async() => {
-      const object = await Profile.create({ userId: 'USER_ID' }, { firstName: 'Alexander' })
+      let object
+
+      object = await Profile.create({ userId: 'USER_ID' }, { firstName: 'Alexander' })
+      expect(object.attributes).to.include({ createdBy: 'USER_ID' })
+
+      object = await Profile.read({}, { id: object.id })
       expect(object.attributes).to.include({ createdBy: 'USER_ID' })
     })
 
@@ -136,6 +141,10 @@ describe('Document', () => {
     it('returns first document using query with default sort order', async() => {
       const profile = await Profile.read({}, { firstName: 'Alexander' })
       expect(profile).to.exist
+    })
+
+    it('throws DocumentNotFound error if document not found', async() => {
+      await expectError(() => Profile.read({}, { firstName: 'Larisa' }), 'DocumentNotFound')
     })
   })
 

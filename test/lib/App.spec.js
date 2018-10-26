@@ -18,6 +18,8 @@ describe('App', () => {
 
   describe('App.constructor(config, models, modules)', () => {
     it('composes app specification', () => {
+      models.NoCreateCollectionModel = {}
+
       app = new App(config, models, modules)
       const { spec } = app
 
@@ -34,6 +36,12 @@ describe('App', () => {
   describe('.buildSpec()', () => {
     it('builds YAML specification', () => {
       app.buildSpec()
+    })
+  })
+
+  describe('.buildServerless()', () => {
+    it('builds serverless config', () => {
+      app.buildServerless()
     })
   })
 })

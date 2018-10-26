@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const { CreateProfile, UpdateProfile } = require('test/app/api')[0]
+const { CreateProfile, UpdateProfile } = require('test/app/api')[1]
 
 describe('BaseOperation', () => {
   describe('.buildValidators()', () => {

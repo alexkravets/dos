@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const { CreateProfile, CreateCustomProfile } = require('test/app/api')[0]
+const { CreateProfile, CreateCustomProfile } = require('test/app/api')[1]
 
 describe('Create', () => {
   describe('.exec()', () => {

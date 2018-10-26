@@ -30,4 +30,5 @@ describe('Operations', () => {
   require('./lib/operations/Update.spec')
 })
 
+require('./lib/Handler.spec')
 require('./lib/App.spec')

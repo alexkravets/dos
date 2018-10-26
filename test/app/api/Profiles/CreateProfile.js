@@ -16,6 +16,14 @@ class CreateProfile extends Create {
   static get mutation() {
     return CreateProfileMutation
   }
+
+  async before() {
+    console.info('Before create profile action')
+  }
+
+  async after() {
+    console.info('After create profile action')
+  }
 }
 
 module.exports = CreateProfile

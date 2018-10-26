@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const { IndexProfiles } = require('test/app/api')[0]
+const { IndexProfiles } = require('test/app/api')[1]
 
 describe('Index', () => {
   describe('.exec()', () => {
