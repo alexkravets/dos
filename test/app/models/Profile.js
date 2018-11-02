@@ -12,7 +12,7 @@ class Profile extends Dynamo(Document) {
     return this._attributes.parameters
   }
 
-  async updateCustomProfile(context, mutation) {
+  async updateCustomProfile(mutation) {
     await this.save({ type: 'custom', ...mutation })
     return this
   }
