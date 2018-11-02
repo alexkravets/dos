@@ -1,5 +1,6 @@
 'use strict'
 
+const chalk      = require('chalk')
 const { expect } = require('chai')
 const { Profile, Book } = require('test/app/models')
 
@@ -19,7 +20,6 @@ const expectError = async(fn, errorName) => {
 describe('Dynamo :: Document storage driver', () => {
   before(() => Profile.createCollection())
   after(() => Profile.deleteCollection())
-
 
   describe('Dynamo.createCollection()', () => {
     it('creates collection table', async() => {
@@ -57,6 +57,35 @@ describe('Dynamo :: Document storage driver', () => {
       }
 
       await expectError(() => Book.create({}, attributes), 'ResourceNotFoundException')
+    })
+
+    it('throws an error if document with the same key to be created', async() => {
+      class ModifiedBook extends Book {
+        static documentId(attributes) {
+          return attributes.firstName
+        }
+
+        static get documentSchema() {
+          return this.schemas.Book
+        }
+      }
+
+      const attributes = {
+        firstName: 'Alexander',
+        lastName:  'Kravets'
+      }
+
+      try {
+        await ModifiedBook.deleteCollection()
+
+      } catch (error) {
+        console.log(chalk`{dim Collection for ModifiedBook does not exists}`)
+
+      }
+
+      await ModifiedBook.createCollection()
+      await ModifiedBook.create({}, attributes)
+      await expectError(() => ModifiedBook.create({}, attributes), 'DocumentExists')
     })
   })
 
@@ -223,5 +252,4 @@ describe('Dynamo :: Document storage driver', () => {
       await expectError(() => Book.read({}, { id: 'BOOK_ID' }), 'ResourceNotFoundException')
     })
   })
-
 })
