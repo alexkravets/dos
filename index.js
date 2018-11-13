@@ -1,28 +1,26 @@
 'use strict'
 
-const { Schema, Component, Operation, Security } = require('@slatestudio/adept')
+const { Schema, Component, Security } = require('@slatestudio/adept')
+
+const aws = {
+  Dynamo: require('./lib/aws/dynamo')
+}
 
 module.exports = {
-  aws: {
-    Dynamo: require('./lib/aws/dynamo')
-  },
-  server: {
-    handler:    require('./lib/server/handler'),
-    Http:       require('./lib/server/Http'),
-    serverless: require('./lib/server/serverless')
-  },
+  aws,
   Schema,
   Component,
-  Operation,
   Security,
   App:            require('./lib/App'),
+  Router:         require('./lib/Router'),
+  Http:           require('./lib/Http'),
+  Serverless:     require('./lib/Serverless'),
   Document:       require('./lib/Document'),
-  Handler:        require('./lib/Handler'),
+  Operation:      require('./lib/Operation'),
   Create:         require('./lib/operations/Create'),
   Delete:         require('./lib/operations/Delete'),
   Index:          require('./lib/operations/Index'),
   Read:           require('./lib/operations/Read'),
   Update:         require('./lib/operations/Update'),
-  BaseOperation:  require('./lib/operations/BaseOperation'),
   OperationError: require('./lib/errors/OperationError')
 }

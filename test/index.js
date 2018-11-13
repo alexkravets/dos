@@ -22,7 +22,6 @@ describe('Operations', () => {
     }
   })
 
-  require('./lib/operations/BaseOperation.spec')
   require('./lib/operations/Create.spec')
   require('./lib/operations/Delete.spec')
   require('./lib/operations/Index.spec')
@@ -30,5 +29,5 @@ describe('Operations', () => {
   require('./lib/operations/Update.spec')
 })
 
-require('./lib/Handler.spec')
+require('./lib/Operation.spec')
 require('./lib/App.spec')

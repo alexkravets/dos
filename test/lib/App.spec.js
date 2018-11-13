@@ -6,16 +6,10 @@ const App     = require('lib/App')
 const config  = require('config')
 const models  = require('test/app/models')
 const modules = require('test/app/api')
-const { Profile, Book } = models
 
 let app
 
 describe('App', () => {
-  after(async() => {
-    await Profile.deleteCollection()
-    await Book.deleteCollection()
-  })
-
   describe('App.constructor(config, models, modules)', () => {
     it('composes app specification', () => {
       models.NoCreateCollectionModel = {}
@@ -33,15 +27,15 @@ describe('App', () => {
     })
   })
 
-  describe('.buildSpec()', () => {
-    it('builds YAML specification', () => {
-      app.buildSpec()
+  describe('.spec', () => {
+    it('returns API specification', () => {
+      expect(app.spec).to.have.property('paths')
     })
   })
 
-  describe('.buildServerless()', () => {
-    it('builds serverless config', () => {
-      app.buildServerless()
+  describe('.serverless', () => {
+    it('returns serverless configuration', () => {
+      expect(app.serverless).to.have.property('provider')
     })
   })
 })
