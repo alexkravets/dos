@@ -188,6 +188,28 @@ describe('Dynamo :: Document storage driver', () => {
     it('throws an error if table does not exist', async() => {
       await expectError(() => Book.index({}, {}, {}), 'ResourceNotFoundException')
     })
+
+    it('gets list of documents with parameters for nested query', async() => {
+      await Profile.create({}, {
+        firstName: 'Alexander',
+        parameters: {
+          shirtSize: 'L'
+        }
+      })
+
+      await Profile.create({}, {
+        firstName: 'Dmitry',
+        parameters: {
+          shirtSize: 'M'
+        }
+      })
+
+      const documents = await Profile.index({}, { 'parameters.shirtSize': 'M' })
+
+      expect(documents.count).to.equal(1)
+      expect(documents.objects.length).to.equal(1)
+      expect(documents.objects[0].attributes.firstName).to.equal('Dmitry')
+    })
   })
 
   describe('Dynamo._read(id)', () => {
