@@ -190,25 +190,59 @@ describe('Dynamo :: Document storage driver', () => {
     })
 
     it('gets list of documents with parameters for nested query', async() => {
-      await Profile.create({}, {
+      await Profile._create({
+        createdAt: new Date().toJSON(),
         firstName: 'Alexander',
         parameters: {
-          shirtSize: 'L'
+          shirt: {
+            size: 'L'
+          }
         }
       })
 
-      await Profile.create({}, {
+      await Profile._create({
+        createdAt: new Date().toJSON(),
         firstName: 'Dmitry',
         parameters: {
-          shirtSize: 'M'
+          shirt: {
+            size: 'M'
+          }
         }
       })
 
-      const documents = await Profile.index({}, { 'parameters.shirtSize': 'M' })
+      const documents = await Profile.index({}, { 'parameters.shirt.size': 'M' })
 
       expect(documents.count).to.equal(1)
       expect(documents.objects.length).to.equal(1)
       expect(documents.objects[0].attributes.firstName).to.equal('Dmitry')
+    })
+
+    it('gets list of documents using IN query', async() => {
+      await Profile.create({}, {
+        firstName: 'Ihor',
+        parameters: {
+          tshirtSize: 'M'
+        }
+      })
+      await Profile.create({}, {
+        firstName: 'Ihor',
+        parameters: {
+          tshirtSize: 'L'
+        }
+      })
+      await Profile.create({}, {
+        firstName: 'Bill',
+        parameters: {
+          tshirtSize: 'S'
+        }
+      })
+
+      const documents = await Profile.index({}, { 'parameters.tshirtSize': ['L', 'M'] })
+
+      expect(documents.count).to.equal(2)
+      expect(documents.objects.length).to.equal(2)
+      expect(documents.objects[0].attributes.parameters.tshirtSize).to.equal('L')
+      expect(documents.objects[1].attributes.parameters.tshirtSize).to.equal('M')
     })
   })
 
