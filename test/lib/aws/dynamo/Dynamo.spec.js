@@ -244,6 +244,32 @@ describe('Dynamo :: Document storage driver', () => {
       expect(documents.objects[0].attributes.parameters.tshirtSize).to.equal('L')
       expect(documents.objects[1].attributes.parameters.tshirtSize).to.equal('M')
     })
+
+    it('gets list of documents using CONTAINS query', async() => {
+      await Profile.create({}, {
+        firstName: 'Ihor',
+        activities: {
+          sport: [ 'football' ]
+        }
+      })
+      await Profile.create({}, {
+        firstName: 'Ihor',
+        activities: {
+          sport: [ 'football', 'tennis' ]
+        }
+      })
+      await Profile.create({}, {
+        firstName: 'Bill',
+        activities: {
+          sport: [ 'golf' ]
+        }
+      })
+
+      const documents = await Profile.index({}, { 'activities.sport:contains': 'football' })
+
+      expect(documents.count).to.equal(2)
+      expect(documents.objects.length).to.equal(2)
+    })
   })
 
   describe('Dynamo._read(id)', () => {
