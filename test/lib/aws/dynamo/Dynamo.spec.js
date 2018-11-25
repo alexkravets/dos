@@ -326,6 +326,42 @@ describe('Dynamo :: Document storage driver', () => {
       expect(updatedProfile.attributes).to.include(attributes)
     })
 
+    it('APPENDS attrubute to array ', async() => {
+      await Profile.create({}, {
+        firstName: 'Max',
+        tags: ['great']
+      })
+
+      const attributes = {
+        'tags:append': 'good'
+      }
+
+      const { objects } = await Profile.index({}, { firstName: 'Max' })
+      const { id } = objects[0]
+
+      await Profile.update({}, { id }, attributes)
+      const updatedProfile = await Profile.read({}, { id })
+
+      expect(updatedProfile.attributes).to.have.property('tags')
+      expect(updatedProfile.attributes.tags).to.include('good')
+    })
+
+    it('throws an document is not found error if conditional check fails for unique array attribute', async() => {
+      await Profile.create({}, {
+        firstName: 'Max',
+        tags: ['great']
+      })
+
+      const attributes = {
+        'tags:append': 'great'
+      }
+
+      const { objects } = await Profile.index({}, { firstName: 'Max' })
+      const { id } = objects[0]
+
+      await expectError(() => Profile.update({}, { id }, attributes), 'DocumentNotFound')
+    })
+
     it('throws an error if document is not found', async() => {
       await expectError(() => Profile.update({}, { id: 'BOOK_ID' }, {}), 'DocumentNotFound')
     })
