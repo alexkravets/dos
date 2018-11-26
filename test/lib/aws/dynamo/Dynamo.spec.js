@@ -178,10 +178,29 @@ describe('Dynamo :: Document storage driver', () => {
       expect(documents.objects[0].attributes.firstName).to.equal('Alexander')
     })
 
+
+    it('gets list of documents with query param with empty lastEvaluatedKey in result', async() => {
+      await Profile.create({}, {
+        firstName: 'Alexander',
+        lastName:  'Ivanoff'
+      })
+      await Profile.create({}, {
+        firstName: 'Alexander',
+        lastName:  'Makedonskiy'
+      })
+      const documents = await Profile.index({}, { firstName: 'Alexander' }, { limit: 4 })
+
+      expect(documents.count).to.equal(4)
+      expect(documents.lastEvaluatedKey).to.be.undefined
+      expect(documents.objects.length).to.equal(4)
+      expect(documents.objects[0].attributes.firstName).to.equal('Alexander')
+
+    })
+
     it('gets list of documents with sort descending', async() => {
       const documents = await Profile.index({}, {}, { sort: 'desc' })
 
-      expect(documents.objects[0].attributes.firstName).to.equal('Dmitry')
+      expect(documents.objects[0].attributes.firstName).to.equal('Alexander')
       expect(documents.objects[1].attributes.firstName).to.equal('Alexander')
     })
 
