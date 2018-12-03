@@ -1,101 +1,89 @@
 'use strict'
 
+const Read   = require('lib/operations/Read')
+const Index  = require('lib/operations/Index')
+const Create = require('lib/operations/Create')
+const Update = require('lib/operations/Update')
+const Delete = require('lib/operations/Delete')
 const Operation  = require('lib/Operation')
 const { expect } = require('chai')
-const { Health } = require('test/app/api')[0]
-const { CreateProfile, UpdateProfile } = require('test/app/api')[1]
 
-describe('Operation()', () => {
-  describe('.buildValidators()', () => {
-    it('throws error if `actionMethodName` is not defined for resource class', async() => {
-      class BadOperation extends CreateProfile {
-        static get actionMethodName() {
-          return 'methodDoesNotExist'
-        }
-      }
-
-      const test = () => BadOperation.buildValidators()
-      expect(test).to.throw()
-    })
-
-    it('throws error if `actionMethodName` is not defined for resource instance', async() => {
-      class BadOperation extends UpdateProfile {
-        static get actionMethodName() {
-          return 'methodDoesNotExist'
-        }
-      }
-
-      const test = () => BadOperation.buildValidators()
-      expect(test).to.throw()
-    })
+describe('Read.resource', () => {
+  it('throws Error if resource method is not overloaded', () => {
+    expect(() => Read.resource).to
+      .throw('Operation `Read` requires `resource` to be defined')
   })
+})
 
-  describe('.action()', () => {
-    it('sets result to null', async() => {
-      class DefaultAction extends Operation {
-      }
-
-      const operation = new DefaultAction()
-      await operation.action()
-
-      expect(operation.result).to.be.null
-    })
+describe('Index.resource', () => {
+  it('throws Error if resource method is not overloaded', () => {
+    expect(() => Index.resource).to
+      .throw('Operation `Index` requires `resource` to be defined')
   })
+})
 
-  describe('._verifySuccessResult()', () => {
-    it('does not verify result if output is not defined, resets result to undefined', async() => {
-      class NoOutput extends Health {
-        static get output() {
-          return null
-        }
-
-        get shouldVerifyResponse() {
-          return true
-        }
-      }
-
-      const operation = new NoOutput({})
-      const { statusCode } = await operation.exec()
-
-      expect(statusCode).to.be.equal(204)
-    })
+describe('Create.resource', () => {
+  it('throws Error if resource method is not overloaded', () => {
+    expect(() => Create.resource).to
+      .throw('Operation `Create` requires `resource` to be defined')
   })
+})
 
-  describe('._verifyResult()', () => {
-    it('does not verify response if shouldVerifyResponse is false', async() => {
-      const operation = new Health({})
-      await operation.exec()
-    })
+describe('Update.resource', () => {
+  it('throws Error if resource method is not overloaded', () => {
+    expect(() => Update.resource).to
+      .throw('Operation `Update` requires `resource` to be defined')
   })
+})
 
-  describe('._response()', () => {
-    it('normalizes headers', async() => {
-      class InHeadersWeTrust extends Health {
-        async action() {
-          this.headers = { 'X-In-Headers-We-Trust': 'no' }
-
-          await super.action()
-        }
-      }
-
-      const operation = new InHeadersWeTrust({})
-      await operation.exec()
-    })
+describe('Delete.resource', () => {
+  it('throws Error if resource method is not overloaded', () => {
+    expect(() => Delete.resource).to
+      .throw('Operation `Delete` requires `resource` to be defined')
   })
+})
 
-  describe('.exec()', () => {
-    it('throws OperationError for unhandled exception', async() => {
-      class BreakingBad extends Health {
-        async action() {
-          this.boom()
-        }
-      }
+describe('Operation.statusCode(status)', () => {
+  it('throws Error if invalid status', () => {
+    expect(() => Operation.statusCode('BAD_STATUS')).to
+      .throw('Invalid status `BAD_STATUS` for operation `Operation`')
 
-      const operation = new BreakingBad({})
-      const { result, statusCode } = await operation.exec()
+    expect(() => Operation.statusCode(null)).to
+      .throw('Invalid status `null` for operation `Operation`')
 
-      expect(statusCode).to.equal(500)
-      expect(result.error.code).to.equal('OperationError')
-    })
+    expect(() => Operation.statusCode()).to
+      .throw('Invalid status `undefined` for operation `Operation`')
+  })
+})
+
+describe('Operation.outputSchema', () => {
+  it('returns null if resource is not overloaded', () => {
+    expect(Operation.outputSchema).to.equal(null)
+  })
+})
+
+describe('.composer', () => {
+  it('throws Error if composer is missing in the context', () => {
+    const operation = new Operation({})
+
+    expect(() => operation.composer).to
+      .throw('Operation `Operation` context is missing `composer`')
+  })
+})
+
+describe('._errorStatus(error)', () => {
+  it('returns `Internal Server Error` if error code is not found in errors map', () => {
+    const operation = new Operation({})
+    const error  = { code: 'ERROR_CODE' }
+    const status = operation._errorStatus(error)
+
+    expect(status).to.equal('Internal Server Error')
+  })
+})
+
+describe('.result', () => {
+  it('returns `null` if result is not set', () => {
+    const operation = new Operation({})
+    expect(operation.result).to.equal(null)
   })
 })

@@ -1,33 +1,37 @@
 'use strict'
 
-describe('AWS', () => {
-  require('./lib/aws/dynamo/Dynamo.spec')
+describe('Schema', () => {
+  require('./lib/Schema.spec')
 })
 
-require('./lib/Document.spec')
-
-describe('Operations', () => {
-  const { Profile } = require('test/app/models')
-  const api = require('test/app/api')
-
-  before(() => Profile.createCollection())
-  after(() => Profile.deleteCollection())
-
-  before(() => {
-    for (const module of api) {
-      for (const operationId in module) {
-        const _Operation = module[operationId]
-        _Operation.buildValidators()
-      }
-    }
-  })
-
-  require('./lib/operations/Create.spec')
-  require('./lib/operations/Delete.spec')
-  require('./lib/operations/Index.spec')
-  require('./lib/operations/Read.spec')
-  require('./lib/operations/Update.spec')
+describe('Component', () => {
+  require('./lib/Component.spec')
 })
 
-require('./lib/Operation.spec')
-require('./lib/App.spec')
+describe('Document', () => {
+  require('./lib/Document.spec')
+})
+
+describe('Operation', () => {
+  require('./lib/Operation.spec')
+})
+
+describe('Composer', () => {
+  require('./lib/Composer.spec')
+})
+
+describe('App', () => {
+  require('./lib/App.spec')
+})
+
+describe('Router', () => {
+  require('./lib/Router.spec')
+})
+
+describe('Http', () => {
+  require('./lib/Http.spec')
+})
+
+describe('Security', () => {
+  require('./lib/Security.spec')
+})

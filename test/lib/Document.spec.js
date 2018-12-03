@@ -1,253 +1,185 @@
 'use strict'
 
-const Document    = require('lib/Document')
-const Dynamo      = require('lib/aws/dynamo')
+const Composer    = require('lib/Composer')
 const { expect }  = require('chai')
-const { Profile } = require('test/app/models')
+const UserProfile = require('test/example/models/UserProfile')
 
-const expectError = async(fn, errorName) => {
-  try {
-    await fn()
-
-  } catch (error) {
-    expect(error.code).to.equal(errorName)
-    return
-
+class CustomUserProfile extends UserProfile {
+  static beforeCreate(context, attributes) {
+    attributes.beforeCreate = 'beforeCreate'
   }
 
-  throw new Error(`Expected error ${errorName} was not thrown`)
+  static afterCreate(context, customUserProfile) {
+    customUserProfile.attributes.afterCreate = 'afterCreate'
+  }
+
+  static beforeUpdate(context, query, attributes) {
+    attributes.beforeUpdate = 'beforeUpdate'
+  }
+
+  static afterUpdate(context, query, attributes, customUserProfile) {
+    customUserProfile.attributes.afterUpdate = 'afterUpdate'
+  }
+
+  static beforeDelete(context, query) {
+    query.beforeDelete = 'beforeDelete'
+  }
+
+  static afterDelete(context, query) {
+    query.afterDelete = 'afterDelete'
+  }
 }
 
-describe('Document', () => {
-  const buffer = []
-  const log = message => buffer.push(message)
+const schemasPath = './test/example/schemas'
+const components  = [ UserProfile ]
+const composer    = new Composer(schemasPath, { components })
 
-  class CustomProfile extends Dynamo(Document) {
-    static get documentSchema() {
-      return Profile.documentSchema
-    }
+describe('Document.schema', () => {
+  it('returns extended schema of the document', () => {
+    const propertyNames = Object.keys(UserProfile.schema.source)
+    expect(propertyNames).to.deep.equal([
+      'firstName',
+      'lastName',
+      'age',
+      'gender',
+      'id',
+      'createdAt',
+      'updatedAt',
+      'createdBy',
+      'updatedBy'
+    ])
+  })
+})
 
-    static async beforeCreate(context, attributes) {
-      attributes.sex = 'Male'
-    }
+describe('Document.bodySchema', () => {
+  it('returns schema of the document body', () => {
+    const propertyNames = Object.keys(UserProfile.bodySchema.source)
+    expect(propertyNames).to.deep.equal([ 'firstName', 'lastName', 'age', 'gender' ])
+  })
+})
 
-    static async afterCreate(context, object) {
-      object._attributes.type = 'Custom'
-    }
+describe('Document.index(context, query = {}, options = {})', () => {
+  it('returns list of document instances', async() => {
+    const { objects: userProfiles, count } = await UserProfile.index()
+    const [ userProfile ] = userProfiles
 
-    static async beforeUpdate(context, query, attributes) {
-      attributes.tags = [ 'Updated' ]
-    }
+    expect(userProfile.json).to.include({ firstName: 'Alexander', lastName: 'Kravets' })
+    expect(count).to.equal(1)
+  })
+})
 
-    static async afterUpdate(context, query, attributes, object) {
-      object._attributes.type = 'Custom'
-    }
+describe('Document.create(context, query, attributes)', () => {
+  const query = {}
+  const attributes = { firstName: 'Alexander', lastName: 'Kravets', age: 32 }
 
-    static async beforeDelete(context, query) {
-      log(`Start delete: ${query}`)
-    }
+  it('creates document instance with default values', async() => {
+    const userProfile = await UserProfile.create({ composer }, query, attributes)
 
-    static async afterDelete(context, query) {
-      log(`End delete: ${query}`)
-    }
-  }
+    expect(userProfile.json).to.include({
+      id:        'USER_PROFILE_ID',
+      firstName: 'Alexander',
+      lastName:  'Kravets',
+      age:       32,
+      gender:    'Male'
+    })
 
-  before(async() => {
-    await Profile.createCollection()
-    await CustomProfile.createCollection()
+    expect(userProfile.json).to.include.keys([ 'createdAt', 'updatedAt' ])
   })
 
-  after(async() => {
-    await Profile.deleteCollection()
-    await CustomProfile.deleteCollection()
-  })
+  it('creates document instance with callbacks', async() => {
+    const userId = 'USER_ID'
+    const userProfile = await CustomUserProfile.create({ composer, userId }, query, attributes)
 
-  describe('Document.commonSchema', () => {
-    it('returns Common schema instance', () => {
-      expect(Profile.commonSchema).to.exist
+    expect(userProfile.json).to.include({
+      createdBy:    userId,
+      beforeCreate: 'beforeCreate',
+      afterCreate:  'afterCreate'
     })
   })
+})
 
-  describe('Document.documentSchema', () => {
-    it('returns document schema based on class name', () => {
-      expect(Profile.documentSchema).to.exist
-    })
+describe('Document.read(context, query)', () => {
+  it('returns document instance', async() => {
+    const userProfile = await UserProfile.read({}, { id: 'USER_PROFILE_ID' })
 
-    it('throws an error if schema is not defined', () => {
-      class NoSchema extends Document {}
-
-      expect(() => NoSchema.documentSchema).to.throw('NoSchema schema is not found')
-    })
-  })
-
-  describe('Document.schema', () => {
-    it('returns document schema merged with common schema', () => {
-      expect(Profile.schema).to.exist
-    })
-
-    it('returns document schema only if common schema is not defined', () => {
-      class NoCommon extends Document {
-        static get documentSchema() {
-          return Profile.documentSchema
-        }
-      }
-
-      expect(NoCommon.schema).to.exist
+    expect(userProfile.json).to.include({
+      id:        'USER_PROFILE_ID',
+      firstName: 'Alexander',
+      lastName:  'Kravets'
     })
   })
+})
 
-  describe('Document.create(context, attributes)', () => {
-    it('uses default values specified in documentSchema', async() => {
-      const object = await Profile.create({}, { firstName: 'Alexander' })
-      expect(object.attributes).to.include({ isActive: false })
+describe('Document.update(context, query, attributes)', () => {
+  const attributes = { firstName: 'Stanislav' }
+
+  it('updates document instance', async() => {
+    const id = 'USER_PROFILE_ID'
+    const userProfile = await UserProfile.update({}, { id }, attributes)
+
+    expect(userProfile.json).to.include({
+      id:        'USER_PROFILE_ID',
+      firstName: 'Stanislav',
+      lastName:  'Kravets'
     })
 
-    it('sets createdBy if userId is defined in context', async() => {
-      let object
-
-      object = await Profile.create({ userId: 'USER_ID' }, { firstName: 'Alexander' })
-      expect(object.attributes).to.include({ createdBy: 'USER_ID' })
-
-      object = await Profile.read({}, { id: object.id })
-      expect(object.attributes).to.include({ createdBy: 'USER_ID' })
-    })
-
-    it('supports beforeCreate and afterCreate methods', async() => {
-      const object = await CustomProfile.create({}, { firstName: 'Alexander' })
-      expect(object.attributes).to.include({ sex: 'Male', type: 'Custom' })
-    })
+    expect(userProfile.json).to.include.keys([ 'updatedAt' ])
   })
 
-  describe('Document.index(context, query)', () => {
-    it('returns list of documents', async() => {
-      const { objects } = await Profile.index({})
-      expect(objects).to.have.lengthOf(2)
+  it('updates document instance with callbacks', async() => {
+    const userId = 'USER_ID'
+
+    const userProfile = await CustomUserProfile.update({ composer, userId }, { userId }, attributes)
+
+    expect(userProfile.json).to.include({
+      id:           'USER_PROFILE_ID',
+      updatedBy:    userId,
+      beforeUpdate: 'beforeUpdate',
+      afterUpdate:  'afterUpdate'
     })
   })
+})
 
-  describe('Document.read(context, query)', () => {
-    let profileId
+describe('Document.delete(context, attributes)', () => {
+  it('deletes document instance', async() => {
+    const query  = { id: 'USER_PROFILE_ID' }
+    const result = await UserProfile.delete({}, query)
 
-    before(async() => {
-      const profile = await Profile.create({}, { firstName: 'Alexander', lastName: 'Kravets' })
-      profileId = profile.id
-    })
-
-    it('returns document by ID', async() => {
-      const profile = await Profile.read({}, { id: profileId })
-      expect(profile.id).to.equal(profileId)
-    })
-
-    it('returns first document using query with default sort order', async() => {
-      const profile = await Profile.read({}, { firstName: 'Alexander' })
-      expect(profile).to.exist
-    })
-
-    it('throws DocumentNotFound error if document not found', async() => {
-      await expectError(() => Profile.read({}, { firstName: 'Larisa' }), 'DocumentNotFound')
-    })
+    expect(result).to.be.undefined
   })
 
-  describe('Document.update(context, query, attributes)', () => {
-    let profileId
-    let customProfileId
+  it('deletes document instance with callbacks', async() => {
+    const query  = { id: 'USER_PROFILE_ID' }
+    await CustomUserProfile.delete({}, query)
 
-    before(async() => {
-      const profile = await Profile.create({}, { firstName: 'Alexander' })
-      profileId = profile.id
-
-      const customProfile = await CustomProfile.create({}, { firstName: 'Alexander' })
-      customProfileId = customProfile.id
-    })
-
-    it('updates document', async() => {
-      await Profile.update({}, { id: profileId }, { lastName: 'Kravets' })
-      const profile = await Profile.read({}, { id: profileId })
-      expect(profile.attributes).to.include({ firstName: 'Alexander', lastName: 'Kravets' })
-    })
-
-    it('supports beforeUpdate and afterUpdate methods', async() => {
-      const object = await CustomProfile.update({}, { id: customProfileId }, { lastName: 'Kravets' })
-      expect(object.attributes).to.include({ type: 'Custom', lastName: 'Kravets' })
-      expect(object.attributes.tags[0]).to.equal('Updated')
-    })
-
-    it('sets updatedBy if userId is defined in context', async() => {
-      const object = await Profile.update({ userId: 'USER_ID' }, { id: profileId}, { firstName: 'Sasha' })
-      expect(object.attributes).to.include({ updatedBy: 'USER_ID' })
-    })
-
-    it('updates first document using query with default sort order', async() => {
-      await Profile.update({}, { firstName: 'Alexander' }, { firstName: 'Yu Min' })
-      const profile = await Profile.read({}, { firstName: 'Yu Min' })
-      expect(profile).to.exist
+    expect(query).to.include({
+      beforeDelete: 'beforeDelete',
+      afterDelete:  'afterDelete'
     })
   })
+})
 
-  describe('Document.delete(context, query)', () => {
-    let profileId
-    let customProfileId
-
-    before(async() => {
-      const profile = await Profile.create({}, { firstName: 'Olga' })
-      profileId = profile.id
-
-      const customProfile = await CustomProfile.create({}, { firstName: 'Olga' })
-      customProfileId = customProfile.id
+describe('.save(parameters = {})', () => {
+  it('updates existing document instance', async() => {
+    const userProfile = new UserProfile({}, {
+      id: 'USER_PROFILE_ID'
     })
 
-    it('updates document', async() => {
-      await Profile.delete({}, { id: profileId })
-      await expectError(() => Profile.read({}, { id: profileId }), 'DocumentNotFound')
-    })
+    userProfile.attributes.firstName = 'Stanislav'
+    await userProfile.save()
 
-    it('supports beforeUpdate and afterUpdate methods', async() => {
-      await CustomProfile.delete({}, { id: customProfileId })
-      expect(buffer).to.have.lengthOf(2)
-    })
+    expect(userProfile.attributes).to.include({ firstName: 'Stanislav' })
   })
 
-  describe('.save(parameters = {})', () => {
-    it('creates a new document', async() => {
-      let object = new Profile()
-      expect(object.id).to.not.exist
-
-      await object.save({ firstName: 'Stas' })
-
-      expect(object.attributes).to.include({ firstName: 'Stas' })
-      expect(object.id).to.exist
-
-      object = await Profile.read({}, { id: object.id })
-      expect(object.attributes).to.include({ firstName: 'Stas' })
+  it('creates new document instance', async() => {
+    const userId = 'USER_ID'
+    const userProfile = new UserProfile({ composer, userId }, {
+      firstName: 'Alexander'
     })
 
-    it('updates an existing document', async() => {
-      let object = await Profile.create({}, { name: 'Alexander' })
-      object._attributes.lastName = 'Kravets'
+    await userProfile.save()
 
-      await object.save()
-
-      object = await Profile.read({}, { id: object.id })
-      expect(object.attributes).to.include({ lastName: 'Kravets' })
-    })
-
-    it('updates an existing document with specific parameters', async() => {
-      let object = await Profile.create({}, { name: 'Alexander' })
-
-      await object.save({ lastName: 'Kravets' })
-      expect(object.attributes).to.include({ lastName: 'Kravets' })
-
-      object = await Profile.read({}, { id: object.id })
-      expect(object.attributes).to.include({ lastName: 'Kravets' })
-    })
-  })
-
-  describe('.toJSON()', () => {
-    it('returns document attributes', () => {
-      const attributes = { firstName: 'Alexander' }
-      const profile = new Profile({}, attributes)
-
-      expect(profile.toJSON()).to.include(attributes)
-    })
+    expect(userProfile.attributes).to.include({ createdBy: userId })
+    expect(userProfile.attributes).to.include.keys([ 'id', 'createdAt' ])
   })
 })

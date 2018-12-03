@@ -1,0 +1,14 @@
+firstName:
+  type: string
+  required: true
+
+lastName:
+  type: string
+  required: true
+
+age:
+  type: number
+
+gender:
+  $ref: Gender
+  default: Male

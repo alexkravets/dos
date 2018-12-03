@@ -1,17 +1,15 @@
+spec:
+  info:
+    title:   Common Service
+    version: '1.0'
+  basePath: /
+  host: localhost:3000
+  schemes:
+    - http
+
 service: Service
 
 provider:
   profile: private
   stage:   test
   region:  eu-central-1
-
-dynamodb:
-  isLocal: true
-
-spec:
-  title:    'Common Service'
-  version:  1.0.0
-  basePath: /api/v1/service
-  host:     localhost:3000
-  schemes:
-    - http
