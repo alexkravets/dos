@@ -219,7 +219,7 @@ describe('.start()', () => {
       expect(error.response.object.error).to.include({
         code:       'OperationError',
         status:     'Internal Server Error',
-        message:    'Unhandled exception',
+        message:    'Simulated unhandled exception',
         statusCode: 500
       })
       expect(error.response.object.error).to.have.property('originalError')

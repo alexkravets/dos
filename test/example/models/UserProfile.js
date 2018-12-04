@@ -33,8 +33,8 @@ class UserProfile extends Document {
 
   static _read(query) {
     if (query.id == 'EXCEPTION') {
-      const error = new Error('Unhandled exception')
-      error.originalError = { message: 'Simulated error' }
+      const error = new Error('Simulated unhandled exception')
+      error.originalError = { message: 'Original error message' }
 
       throw error
     }
