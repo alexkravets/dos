@@ -8,7 +8,7 @@ const UserProfile = require('test/example/models/UserProfile')
 
 const schemasPath = './test/example/schemas'
 const components  = [ UserProfile ]
-const operations  = require('test/example/operations')
+const operations  = require('test/example/api')
 
 let composer
 before(() => {

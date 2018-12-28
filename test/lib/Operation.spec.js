@@ -62,6 +62,12 @@ describe('Operation.outputSchema', () => {
   })
 })
 
+describe('Operation.tags', () => {
+  it('returns empty array if tags is not overloaded', () => {
+    expect(Operation.tags).to.be.empty
+  })
+})
+
 describe('.composer', () => {
   it('throws Error if composer is missing in the context', () => {
     const operation = new Operation({})

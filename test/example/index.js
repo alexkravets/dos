@@ -3,7 +3,7 @@
 const App         = require('lib/App')
 const config      = require('config')
 const Composer    = require('lib/Composer')
-const operations  = require('test/example/operations')
+const operations  = require('test/example/api')
 const schemasPath = './test/example/schemas'
 
 const composer = new Composer(schemasPath, { operations, config })
