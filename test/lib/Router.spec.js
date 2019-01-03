@@ -14,13 +14,6 @@ describe('._method(req)', () => {
   })
 })
 
-describe('._path(req)', () => {
-  it('support AWS Lambda interface', () => {
-    const path = app.router._path({ requestContext: { path: '/' } })
-    expect(path).to.equal('/')
-  })
-})
-
 describe('._query(req)', () => {
   it('support AWS Lambda interface', () => {
     const query = app.router._query({ queryStringParameters: { limit: 2 } })
