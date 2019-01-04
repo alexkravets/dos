@@ -167,6 +167,18 @@ describe('.cleanup(object, schemas = {})', () => {
     tags: {
       type:  'array',
       items: 'string'
+    },
+    appointments: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          startsAt: {
+            type:   'string',
+            format: 'date-time'
+          }
+        }
+      }
     }
   }
 
@@ -184,7 +196,11 @@ describe('.cleanup(object, schemas = {})', () => {
       preferences: {
         mobileNumber: '+380504112177',
         email1:       'alex@slatestudio.com'
-      }
+      },
+      appointments: [{
+        startsAt: new Date().toJSON(),
+        endsAt:   new Date().toJSON()
+      }]
     }
 
     schemas.Profile.cleanup(profile, schemas)
@@ -195,6 +211,7 @@ describe('.cleanup(object, schemas = {})', () => {
 
     expect(profile.sex).to.be.undefined
     expect(profile.preferences.email1).to.be.undefined
+    expect(profile.appointments[0]).to.not.have.property('endsAt')
   })
 
   it('cleanups schemas without referenced schemas', () => {
@@ -227,6 +244,26 @@ describe('.cleanup(object, schemas = {})', () => {
 
     expect(() => schema.cleanup({ gender: 'Male' }))
       .to.throw('Schema MiniProfile is referensing missing schema Gender')
+  })
+
+  it('throws Error if referenced schema is missing in for array item', () => {
+    const profileSchema = new Schema('Profile', profileSchemaSource)
+    const schema = profileSchema.clone('MiniProfile', {
+      only: [ 'name' ],
+      extend: {
+        arrayWithBrokenReference: {
+          type:  'array',
+          items: {
+            $ref: 'Gender'
+          }
+        }
+      }
+    })
+
+    expect(() => schema.cleanup({
+      name: 'Alexander',
+      arrayWithBrokenReference: [ 'Male' ]
+    })).to.throw('Schema MiniProfile.arrayWithBrokenReference is referensing missing schema Gender')
   })
 })
 
