@@ -32,6 +32,13 @@ describe('Composer.validateSchemas(schemas, scope)', () => {
     Composer.validateSchemas(schemas, 'Schemas')
   })
 
+  it('throws error if schema is missing in schemas', () => {
+    const schemas = Composer.loadSchemas(schemasPath)
+    schemas['NoSchema'] = undefined
+    expect(() => Composer.validateSchemas(schemas, 'Schemas'))
+      .to.throw('Schema `NoSchema` is not defined')
+  })
+
   it('throws error if object without jsonSchema is included in schemas', () => {
     const schemas = Composer.loadSchemas(schemasPath)
     schemas['InvalidSchema'] = {}

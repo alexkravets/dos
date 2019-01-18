@@ -1,6 +1,6 @@
 {
   "name": "@slatestudio/common-service",
-  "version": "1.1.5",
+  "version": "1.1.7",
   "description": "Common API service library",
   "main": "index.js",
   "repository": {
