@@ -28,10 +28,10 @@ describe('Router', () => {
   require('./lib/Router.spec')
 })
 
-describe('Http', () => {
-  require('./lib/Http.spec')
-})
-
 describe('Security', () => {
   require('./lib/Security.spec')
+})
+
+describe('OperationError', () => {
+  require('./lib/OperationError.spec')
 })

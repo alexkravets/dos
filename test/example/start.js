@@ -1,4 +1,4 @@
-'use strict'
+// 'use strict'
 
-const app = require('./index')
-app.start()
+// const app = require('./index')
+// app.start()

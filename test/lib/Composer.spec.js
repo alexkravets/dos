@@ -206,3 +206,9 @@ describe('.operations', () => {
     expect(composer.operations).to.be.not.undefined
   })
 })
+
+describe('.components', () => {
+  it('returns components', async() => {
+    expect(composer.components).to.be.not.undefined
+  })
+})

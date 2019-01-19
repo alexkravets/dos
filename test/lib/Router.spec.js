@@ -29,13 +29,6 @@ describe('._method(req)', () => {
   })
 })
 
-describe('._query(req)', () => {
-  it('support AWS Lambda interface', () => {
-    const query = app.router._query({ queryStringParameters: { limit: 2 } })
-    expect(query).to.include({ limit: 2 })
-  })
-})
-
 describe('.process(req)', () => {
   it('support operation execution by req.operationId', async() => {
     const { statusCode } = await app.router.process({ operationId: 'Health' })

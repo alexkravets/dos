@@ -1,26 +1,11 @@
 # Common Service
 
-Architecture:
-=============
-
-### Composer
-
+**Composer**
  - Load all data schemas
  - Create schemas for all components
  - Create input, output schemas for all operations
  - Validate schemas
  - Initialize validator
-
-### Transport
-
-**HTTP Server**
- - Receives HTTP(s) requests
- - Reads stream into body string
- - Passes request to operation router for execution
- - Gets string result and status code from router
- - Sends response to client
-
-### Execution
 
 **Router**
  - Auto-responds to OPTIONS / CORS requests

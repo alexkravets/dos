@@ -1,6 +1,6 @@
 {
   "name": "@slatestudio/common-service",
-  "version": "1.1.7",
+  "version": "2.0.0",
   "description": "Common API service library",
   "main": "index.js",
   "repository": {
@@ -24,7 +24,6 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.compact": "^3.0.1",
     "lodash.endswith": "^4.2.1",
-    "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
     "lodash.isstring": "^4.0.1",
     "lodash.isundefined": "^3.0.1",
@@ -37,7 +36,6 @@
     "z-schema": "^3.24.1"
   },
   "devDependencies": {
-    "@slatestudio/common-client": "0.3.0",
     "chai": "^4.1.2",
     "eslint": "^5.1.0",
     "mocha": "^5.2.0",
