@@ -31,3 +31,7 @@ describe('Security', () => {
 describe('OperationError', () => {
   require('./lib/OperationError.spec')
 })
+
+describe('OperationContext', () => {
+  require('./lib/OperationContext.spec')
+})

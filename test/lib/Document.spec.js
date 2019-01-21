@@ -3,6 +3,7 @@
 const Composer    = require('lib/Composer')
 const { expect }  = require('chai')
 const UserProfile = require('test/example/models/UserProfile')
+const OperationContext = require('lib/OperationContext')
 
 class CustomUserProfile extends UserProfile {
   static beforeCreate(context, attributes) {
@@ -33,6 +34,7 @@ class CustomUserProfile extends UserProfile {
 const schemasPath = './test/example/schemas'
 const components  = [ UserProfile ]
 const composer    = new Composer(schemasPath, { components })
+const context     = new OperationContext('DocumentTest', composer)
 
 describe('Document.schema', () => {
   it('returns extended schema of the document', () => {
@@ -60,7 +62,7 @@ describe('Document.bodySchema', () => {
 
 describe('Document.index(context, query = {}, options = {})', () => {
   it('returns list of document instances', async() => {
-    const { objects: userProfiles, count } = await UserProfile.index()
+    const { objects: userProfiles, count } = await UserProfile.index(context)
     const [ userProfile ] = userProfiles
 
     expect(userProfile.json).to.include({ firstName: 'Alexander', lastName: 'Kravets' })
@@ -73,7 +75,7 @@ describe('Document.create(context, query, attributes)', () => {
   const attributes = { firstName: 'Alexander', lastName: 'Kravets', age: 32 }
 
   it('creates document instance with default values', async() => {
-    const userProfile = await UserProfile.create({ composer }, query, attributes)
+    const userProfile = await UserProfile.create(context, query, attributes)
 
     expect(userProfile.json).to.include({
       id:        'USER_PROFILE_ID',
@@ -87,8 +89,11 @@ describe('Document.create(context, query, attributes)', () => {
   })
 
   it('creates document instance with callbacks', async() => {
-    const userId = 'USER_ID'
-    const userProfile = await CustomUserProfile.create({ composer, userId }, query, attributes)
+    const userId  = 'USER_ID'
+    const context = new OperationContext('DocumentTest', composer)
+    context.set({ userId })
+
+    const userProfile = await CustomUserProfile.create(context, query, attributes)
 
     expect(userProfile.json).to.include({
       createdBy:    userId,
@@ -100,7 +105,7 @@ describe('Document.create(context, query, attributes)', () => {
 
 describe('Document.read(context, query)', () => {
   it('returns document instance', async() => {
-    const userProfile = await UserProfile.read({}, { id: 'USER_PROFILE_ID' })
+    const userProfile = await UserProfile.read(context, { id: 'USER_PROFILE_ID' })
 
     expect(userProfile.json).to.include({
       id:        'USER_PROFILE_ID',
@@ -115,7 +120,7 @@ describe('Document.update(context, query, attributes)', () => {
 
   it('updates document instance', async() => {
     const id = 'USER_PROFILE_ID'
-    const userProfile = await UserProfile.update({}, { id }, attributes)
+    const userProfile = await UserProfile.update(context, { id }, attributes)
 
     expect(userProfile.json).to.include({
       id:        'USER_PROFILE_ID',
@@ -127,9 +132,11 @@ describe('Document.update(context, query, attributes)', () => {
   })
 
   it('updates document instance with callbacks', async() => {
-    const userId = 'USER_ID'
+    const userId  = 'USER_ID'
+    const context = new OperationContext('DocumentTest', composer)
+    context.set({ userId })
 
-    const userProfile = await CustomUserProfile.update({ composer, userId }, { userId }, attributes)
+    const userProfile = await CustomUserProfile.update(context, { userId }, attributes)
 
     expect(userProfile.json).to.include({
       id:           'USER_PROFILE_ID',
@@ -143,14 +150,14 @@ describe('Document.update(context, query, attributes)', () => {
 describe('Document.delete(context, attributes)', () => {
   it('deletes document instance', async() => {
     const query  = { id: 'USER_PROFILE_ID' }
-    const result = await UserProfile.delete({}, query)
+    const result = await UserProfile.delete(context, query)
 
     expect(result).to.be.undefined
   })
 
   it('deletes document instance with callbacks', async() => {
     const query  = { id: 'USER_PROFILE_ID' }
-    await CustomUserProfile.delete({}, query)
+    await CustomUserProfile.delete(context, query)
 
     expect(query).to.include({
       beforeDelete: 'beforeDelete',
@@ -161,7 +168,7 @@ describe('Document.delete(context, attributes)', () => {
 
 describe('.save(parameters = {})', () => {
   it('updates existing document instance', async() => {
-    const userProfile = new UserProfile({}, {
+    const userProfile = new UserProfile(context, {
       id: 'USER_PROFILE_ID'
     })
 
@@ -172,8 +179,11 @@ describe('.save(parameters = {})', () => {
   })
 
   it('creates new document instance', async() => {
-    const userId = 'USER_ID'
-    const userProfile = new UserProfile({ composer, userId }, {
+    const userId  = 'USER_ID'
+    const context = new OperationContext('DocumentTest', composer)
+    context.set({ userId })
+
+    const userProfile = new UserProfile(context, {
       firstName: 'Alexander'
     })
 

@@ -5,6 +5,7 @@ const Index  = require('lib/operations/Index')
 const Create = require('lib/operations/Create')
 const Update = require('lib/operations/Update')
 const Delete = require('lib/operations/Delete')
+const Composer   = require('lib/Composer')
 const Operation  = require('lib/Operation')
 const { expect } = require('chai')
 
@@ -70,16 +71,15 @@ describe('Operation.tags', () => {
 
 describe('.composer', () => {
   it('throws Error if composer is missing in the context', () => {
-    const operation = new Operation({})
-
-    expect(() => operation.composer).to
-      .throw('Operation `Operation` context is missing `composer`')
+    expect(() => new Operation({})).to
+      .throw('Composer is not defined while operation context initialization')
   })
 })
 
 describe('._errorStatus(error)', () => {
   it('returns `Internal Server Error` if error code is not found in errors map', () => {
-    const operation = new Operation({})
+    const composer  = new Composer(null, { operations: [], config: {}})
+    const operation = new Operation({ composer })
     const error  = { code: 'ERROR_CODE' }
     const status = operation._errorStatus(error)
 
@@ -89,7 +89,8 @@ describe('._errorStatus(error)', () => {
 
 describe('.result', () => {
   it('returns `null` if result is not set', () => {
-    const operation = new Operation({})
+    const composer  = new Composer(null, { operations: [], config: {}})
+    const operation = new Operation({ composer })
     expect(operation.result).to.equal(null)
   })
 })
