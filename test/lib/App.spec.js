@@ -41,15 +41,16 @@ describe('.process(req)', () => {
   })
 
   it('responds to / with Swagger UI', async() => {
-    const { body } = await app.process({ path: '/', method: 'get' })
-    expect(body).to.include('/Spec')
+    const { result } = await app.process({ path: '/', method: 'get' })
+    expect(result).to.include('/Spec')
   })
 
   it('responds to /Spec with Specification', async() => {
-    const { body } = await app.process({ path: '/Spec', method: 'get' })
+    const { result } = await app.process({ path: '/Spec', method: 'get' })
+    const resultJson   = JSON.stringify(result, null, 2)
     const composerJson = JSON.stringify(app.spec, null, 2)
 
-    expect(body).to.equal(composerJson)
+    expect(resultJson).to.equal(composerJson)
   })
 
   it('responds to /IndexUserProfiles with data array and meta object', async() => {
@@ -116,16 +117,12 @@ describe('.process(req)', () => {
     expect(statusCode).to.equal(204)
   })
 
-  it('returns CORS headers for OPTION requests', async() => {
+  it('returns 204 for OPTION requests', async() => {
     const url    = `${host}/DeleteUserProfile?id=USER_PROFILE_ID`
     const method = 'options'
 
-    const { headers } = await app.process({ url, method, path: '/DeleteUserProfile' })
-    expect(headers).to.include.keys([
-      'Access-Control-Allow-Headers',
-      'Access-Control-Allow-Methods',
-      'Access-Control-Allow-Origin'
-    ])
+    const { statusCode } = await app.process({ url, method, path: '/DeleteUserProfile' })
+    expect(statusCode).to.equal(204)
   })
 
   it('returns 404, OperationNotFound if wrong method', async() => {
