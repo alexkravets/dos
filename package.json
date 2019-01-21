@@ -11,8 +11,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "start": "NODE_PATH=./ NODE_CONFIG_DIR=./test/config node test/example/start.js",
-    "test": "eslint lib/ test/ && NODE_PATH=./ NODE_CONFIG_DIR=./test/config nyc --reporter html --reporter text mocha --exit"
+    "test": "eslint lib/ test/ && NODE_PATH=./ NODE_CONFIG_DIR=./test/config nyc --reporter text mocha --exit"
   },
   "author": "Alexander Kravets <alex@slatestudio.com>",
   "license": "ISC",

@@ -6,10 +6,3 @@ spec:
   host: localhost:3000
   schemes:
     - http
-
-service: Service
-
-provider:
-  profile: private
-  stage:   test
-  region:  eu-central-1

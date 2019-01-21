@@ -1,5 +1,6 @@
 'use strict'
 
+const App        = require('lib/App')
 const { expect } = require('chai')
 
 const host = 'http://localhost:3000'
@@ -15,54 +16,74 @@ describe('.operationsMap', () => {
   })
 })
 
-describe('.router', () => {
+describe('._path(req)', () => {
+  it('uses `/` as path if base path matches requested path', () => {
+    const config = {
+      spec: { basePath: '/test' }
+    }
+
+    const app = new App(null, { components: [], operations: [], config })
+    expect(app._path({ path: '/test' })).to.equal('/')
+  })
+})
+
+describe('._method(req)', () => {
+  it('support AWS Lambda interface', () => {
+    const method = app._method({ httpMethod: 'get' })
+    expect(method).to.equal('get')
+  })
+})
+
+describe('.process(req)', () => {
+  it('support operation execution by req.operationId', async() => {
+    const { statusCode } = await app.process({ operationId: 'Health' })
+    expect(statusCode).to.equal(200)
+  })
+
   it('responds to / with Swagger UI', async() => {
-    const { body } = await app.router.process({ path: '/', method: 'get' })
+    const { body } = await app.process({ path: '/', method: 'get' })
     expect(body).to.include('/Spec')
   })
 
   it('responds to /Spec with Specification', async() => {
-    const { body } = await app.router.process({ path: '/Spec', method: 'get' })
-    const composerJson = JSON.stringify(app.composer.spec, null, 2)
+    const { body } = await app.process({ path: '/Spec', method: 'get' })
+    const composerJson = JSON.stringify(app.spec, null, 2)
 
     expect(body).to.equal(composerJson)
   })
 
   it('responds to /IndexUserProfiles with data array and meta object', async() => {
-    const headers  = { Authorization: 'AUTHORIZATION' }
-    const url      = `${host}/IndexUserProfiles?limit=10&sort=asc`
-    const { body } = await app.router.process({ path: '/IndexUserProfiles', method: 'get', url, headers })
-    const object   = JSON.parse(body)
+    const headers    = { Authorization: 'AUTHORIZATION' }
+    const url        = `${host}/IndexUserProfiles?limit=10&sort=asc`
+    const { result } = await app.process({ path: '/IndexUserProfiles', method: 'get', url, headers })
 
-    expect(object).to.have.property('data')
-    expect(object.data).to.have.lengthOf(1)
-    expect(object.meta.count).to.equal(1)
+    expect(result).to.have.property('data')
+    expect(result.data).to.have.lengthOf(1)
+    expect(result.meta.count).to.equal(1)
   })
 
-  it('responds to /ReadUserProfile with data object', async() => {
+  it('responds to /ReadUserProfile with data', async() => {
     const operationId = 'ReadUserProfile'
     const queryStringParameters = { id: 'USER_PROFILE_ID' }
-    const { body } = await app.router.process({ operationId, queryStringParameters })
-    const object   = JSON.parse(body)
+    const { result } = await app.process({ operationId, queryStringParameters })
 
-    expect(object).to.have.property('data')
-    expect(object.data).to.include({
+    expect(result).to.have.property('data')
+    expect(result.data).to.include({
       id: 'USER_PROFILE_ID'
     })
   })
 
-  it('responds to /CreateUserProfile with created data object', async() => {
+  it('responds to /CreateUserProfile with created data', async() => {
     const operationId = 'CreateUserProfile'
-    const json = JSON.stringify({
+    const body = JSON.stringify({
       firstName: 'Stanislav',
       lastName:  'Kravets'
     })
 
-    const { body } = await app.router.process({ operationId, body: json })
-    const object   = JSON.parse(body)
+    const { result } = await app.process({ operationId, body })
 
-    expect(object).to.have.property('data')
-    expect(object.data).to.include({
+    expect(result).to.have.property('data')
+    expect(result.data).to.include({
       id: 'USER_PROFILE_ID',
       firstName: 'Stanislav',
       lastName:  'Kravets',
@@ -70,19 +91,18 @@ describe('.router', () => {
     })
   })
 
-  it('responds to /UpdateUserProfile with updated data object', async() => {
+  it('responds to /UpdateUserProfile with updated data', async() => {
     const operationId           = 'UpdateUserProfile'
     const queryStringParameters = { id: 'USER_PROFILE_ID' }
-    const json = JSON.stringify({
+    const body = JSON.stringify({
       firstName: 'Stanislav',
       lastName:  'Kravets'
     })
 
-    const { body } = await app.router.process({ operationId, queryStringParameters, body: json })
-    const object   = JSON.parse(body)
+    const { result } = await app.process({ operationId, queryStringParameters, body })
 
-    expect(object).to.have.property('data')
-    expect(object.data).to.include({
+    expect(result).to.have.property('data')
+    expect(result.data).to.include({
       firstName: 'Stanislav',
       lastName:  'Kravets'
     })
@@ -92,7 +112,7 @@ describe('.router', () => {
     const operationId           = 'DeleteUserProfile'
     const queryStringParameters = { id: 'USER_PROFILE_ID' }
 
-    const { statusCode } = await app.router.process({ operationId, queryStringParameters })
+    const { statusCode } = await app.process({ operationId, queryStringParameters })
     expect(statusCode).to.equal(204)
   })
 
@@ -100,7 +120,7 @@ describe('.router', () => {
     const url    = `${host}/DeleteUserProfile?id=USER_PROFILE_ID`
     const method = 'options'
 
-    const { headers } = await app.router.process({ url, method, path: '/DeleteUserProfile' })
+    const { headers } = await app.process({ url, method, path: '/DeleteUserProfile' })
     expect(headers).to.include.keys([
       'Access-Control-Allow-Headers',
       'Access-Control-Allow-Methods',
@@ -112,22 +132,20 @@ describe('.router', () => {
     const url    = `${host}/DeleteUserProfile?id=USER_PROFILE_ID`
     const method = 'get'
 
-    const { statusCode, body } = await app.router.process({ url, method, path: '/DeleteUserProfile' })
-    const object = JSON.parse(body)
+    const { statusCode, result } = await app.process({ url, method, path: '/DeleteUserProfile' })
 
     expect(statusCode).to.equal(404)
-    expect(object.error.code).to.equal('OperationNotFound')
+    expect(result.error.code).to.equal('OperationNotFound')
   })
 
   it('returns 404, OperationNotFound if wrong path', async() => {
     const url    = `${host}/ActivateUserProfile?id=USER_PROFILE_ID`
     const method = 'patch'
 
-    const { statusCode, body } = await app.router.process({ url, method, path: '/ActivateUserProfile' })
-    const object = JSON.parse(body)
+    const { statusCode, result } = await app.process({ url, method, path: '/ActivateUserProfile' })
 
     expect(statusCode).to.equal(404)
-    expect(object.error).to.include({
+    expect(result.error).to.include({
       code:       'OperationNotFound',
       status:     'Not Found',
       message:    'Operation not found, route: patch /ActivateUserProfile',
@@ -138,54 +156,51 @@ describe('.router', () => {
   it('returns 400, InvalidInputError when invalid input provided', async() => {
     const url    = `${host}/CreateUserProfile`
     const method = 'post'
-    const json   = JSON.stringify({
+    const body   = JSON.stringify({
       firstName: 'Stanislav'
     })
 
-    const { statusCode, body } = await app.router.process({ url, method, path: '/CreateUserProfile', body: json })
-    const object = JSON.parse(body)
+    const { statusCode, result } = await app.process({ url, method, path: '/CreateUserProfile', body })
 
     expect(statusCode).to.equal(400)
-    expect(object.error).to.include({
+    expect(result.error).to.include({
       code:       'InvalidInputError',
       status:     'Bad Request',
       message:    'Invalid operation input',
       statusCode: 400
     })
-    const [ validationError ] = object.error.validationErrors
+    const [ validationError ] = result.error.validationErrors
     expect(validationError).to.include.keys([ 'code', 'params', 'message', 'path' ])
   })
 
   it('returns 500, InvalidOutputError and logs error when invalid output returned by operation', async() => {
     const url = `${host}/ReadUserProfile?id=INVALID_OUTPUT`
 
-    const { statusCode, body } = await app.router.process({ url, method: 'get', path: '/ReadUserProfile' })
-    const object = JSON.parse(body)
+    const { statusCode, result } = await app.process({ url, method: 'get', path: '/ReadUserProfile' })
 
     expect(statusCode).to.equal(500)
-    expect(object.error).to.include({
+    expect(result.error).to.include({
       code:       'InvalidOutputError',
       status:     'Internal Server Error',
       message:    'Invalid operation output',
       statusCode: 500
     })
-    const [ validationError ] = object.error.validationErrors
+    const [ validationError ] = result.error.validationErrors
     expect(validationError).to.include.keys([ 'code', 'params', 'message', 'path' ])
   })
 
   it('returns 500, OperationError and logs error when unhandled exception thrown by operation', async() => {
     const url = `${host}/ReadUserProfile?id=EXCEPTION`
 
-    const { statusCode, body } = await app.router.process({ url, method: 'get', path: '/ReadUserProfile' })
-    const object = JSON.parse(body)
+    const { statusCode, result } = await app.process({ url, method: 'get', path: '/ReadUserProfile' })
 
     expect(statusCode).to.equal(500)
-    expect(object.error).to.include({
+    expect(result.error).to.include({
       code:       'OperationError',
       status:     'Internal Server Error',
       message:    'Simulated unhandled exception',
       statusCode: 500
     })
-    expect(object.error).to.have.property('originalError')
+    expect(result.error).to.have.property('originalError')
   })
 })

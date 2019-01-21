@@ -24,10 +24,6 @@ describe('App', () => {
   require('./lib/App.spec')
 })
 
-describe('Router', () => {
-  require('./lib/Router.spec')
-})
-
 describe('Security', () => {
   require('./lib/Security.spec')
 })

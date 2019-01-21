@@ -1,7 +1,6 @@
 'use strict'
 
 module.exports = {
-  Composer:   require('./lib/Composer'),
   App:        require('./lib/App'),
   Schema:     require('./lib/Schema'),
   Component:  require('./lib/Component'),
