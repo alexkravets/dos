@@ -95,10 +95,10 @@ describe('.process(req)', () => {
   it('responds to /UpdateUserProfile with updated data', async() => {
     const operationId           = 'UpdateUserProfile'
     const queryStringParameters = { id: 'USER_PROFILE_ID' }
-    const body = JSON.stringify({
+    const body = {
       firstName: 'Stanislav',
       lastName:  'Kravets'
-    })
+    }
 
     const { result } = await app.process({ operationId, queryStringParameters, body })
 
