@@ -1,6 +1,7 @@
 'use strict'
 
 const Composer    = require('lib/Composer')
+const Document    = require('lib/Document')
 const { expect }  = require('chai')
 const UserProfile = require('test/example/models/UserProfile')
 const OperationContext = require('lib/OperationContext')
@@ -57,6 +58,23 @@ describe('Document.bodySchema', () => {
   it('returns schema of the document body', () => {
     const propertyNames = Object.keys(UserProfile.bodySchema.source)
     expect(propertyNames).to.deep.equal([ 'firstName', 'lastName', 'age', 'gender' ])
+  })
+})
+
+describe('Document.createSchema(schemas)', () => {
+  it('returns new schema with common attributes if document schema is not defined', () => {
+    class Entity extends Document {}
+    const schema = Entity.createSchema([])
+
+    const propertyNames = Object.keys(schema.source)
+    expect(propertyNames).to.deep.equal([
+      'id',
+      'createdAt',
+      'updatedAt',
+      'createdBy',
+      'updatedBy'
+    ])
+
   })
 })
 
