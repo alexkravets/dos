@@ -37,3 +37,5 @@ rules:
   space-infix-ops: error
   space-unary-ops: error
   no-console: off
+  no-return-await: error
+  eqeqeq: error

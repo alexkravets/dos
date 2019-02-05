@@ -32,14 +32,14 @@ class UserProfile extends Document {
   }
 
   static _read(query) {
-    if (query.id == 'EXCEPTION') {
+    if (query.id === 'EXCEPTION') {
       const error = new Error('Simulated unhandled exception')
       error.originalError = { message: 'Original error message' }
 
       throw error
     }
 
-    if (query.id == 'INVALID_OUTPUT') {
+    if (query.id === 'INVALID_OUTPUT') {
       return {
         id:        'USER_PROFILE_ID',
         firstName: 'Alexander',

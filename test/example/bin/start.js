@@ -15,6 +15,11 @@ const host = config.get('spec.host')
 const port = Number(host.split(':')[1])
 
 const handler = async(req) => {
+  const isOptionsRequest = (req.method.toLowerCase() === 'options')
+  if (isOptionsRequest) {
+    return { statusCode: 204, headers: { ...CORS_HEADERS } }
+  }
+
   let { statusCode, headers, result } = await app.process(req)
 
   headers = { ...headers, ...CORS_HEADERS }

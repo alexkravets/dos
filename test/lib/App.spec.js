@@ -117,14 +117,6 @@ describe('.process(req)', () => {
     expect(statusCode).to.equal(204)
   })
 
-  it('returns 204 for OPTION requests', async() => {
-    const url    = `${host}/DeleteUserProfile?id=USER_PROFILE_ID`
-    const method = 'options'
-
-    const { statusCode } = await app.process({ url, method, path: '/DeleteUserProfile' })
-    expect(statusCode).to.equal(204)
-  })
-
   it('returns 404, OperationNotFound if wrong method', async() => {
     const url    = `${host}/DeleteUserProfile?id=USER_PROFILE_ID`
     const method = 'get'
