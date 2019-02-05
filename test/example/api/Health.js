@@ -4,6 +4,10 @@ const Operation       = require('lib/Operation')
 const HealthComponent = require('test/example/components/Health')
 
 class Health extends Operation {
+  static get tags() {
+    return [ 'Common' ]
+  }
+
   static get shouldValidateOutput() {
     return false
   }

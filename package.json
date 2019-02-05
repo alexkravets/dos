@@ -11,6 +11,7 @@
     "lib": "lib"
   },
   "scripts": {
+    "start": "NODE_PATH=./ NODE_CONFIG_DIR=./test/config node ./test/example/bin/start.js",
     "test": "eslint lib/ test/ && NODE_PATH=./ NODE_CONFIG_DIR=./test/config nyc --reporter text mocha --exit"
   },
   "author": "Alexander Kravets <alex@slatestudio.com>",
@@ -35,6 +36,7 @@
     "z-schema": "^3.24.2"
   },
   "devDependencies": {
+    "@slatestudio/common-http": "^0.1.1",
     "chai": "^4.1.2",
     "eslint": "^5.12.1",
     "mocha": "^5.2.0",
