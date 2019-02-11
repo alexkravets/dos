@@ -150,11 +150,12 @@ describe('Document.update(context, query, attributes)', () => {
   })
 
   it('updates document instance with callbacks', async() => {
+    const id      = 'USER_PROFILE_ID'
     const userId  = 'USER_ID'
     const context = new OperationContext('DocumentTest', composer)
     context.set({ userId })
 
-    const userProfile = await CustomUserProfile.update(context, { userId }, attributes)
+    const userProfile = await CustomUserProfile.update(context, { id }, attributes)
 
     expect(userProfile.json).to.include({
       id:           'USER_PROFILE_ID',

@@ -57,11 +57,11 @@ class UserProfile extends Document {
     }
   }
 
-  static _update(id, attributes) {
+  static _update(query, attributes) {
     const updatedAt = new Date().toJSON()
 
     return {
-      id,
+      ...query,
       updatedAt,
       firstName: 'Alexander',
       lastName:  'Kravets',
@@ -70,7 +70,7 @@ class UserProfile extends Document {
     }
   }
 
-  static _delete(id) { // eslint-disable-line no-unused-vars
+  static _delete(query) { // eslint-disable-line no-unused-vars
     return null
   }
 }
