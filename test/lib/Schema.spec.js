@@ -285,7 +285,13 @@ describe('.populateValueTypes(object, schemas = {})', () => {
       Profile: profileSchema.clone('Profile', {
         extend: {
           gender:      { $ref: 'Gender' },
-          preferences: { $ref: 'ProfilePreferences' }
+          preferences: { $ref: 'ProfilePreferences' },
+          preferencesHistory: {
+            type: 'array',
+            items: {
+              $ref: 'ProfilePreferences'
+            }
+          }
         }
       })
     }
@@ -296,14 +302,23 @@ describe('.populateValueTypes(object, schemas = {})', () => {
       gender: 'Male',
       preferences: {
         isEnabled: '0',
-        shoeSize: '40',
-        age:      'NaN'
-      }
+        shoeSize:  '40',
+        age:       'NaN'
+      },
+      preferencesHistory: [{
+        isEnabled: '0',
+        shoeSize:  '40',
+        age:       'NaN'
+      }]
+      // TODO: Add nested definitions for object and array
     }
 
     schemas.Profile.populateValueTypes(object, schemas)
+
     expect(object.preferences).to.include({ shoeSize: 40, age: 'NaN' })
     expect(object.preferences).to.include({ isEnabled: false })
+    expect(object.preferencesHistory[0]).to.include({ shoeSize: 40, age: 'NaN' })
+    expect(object.preferencesHistory[0]).to.include({ isEnabled: false })
 
     object.preferences.isEnabled = 'false'
     schemas.Profile.populateValueTypes(object, schemas)
@@ -335,7 +350,7 @@ describe('.populateValueTypes(object, schemas = {})', () => {
     })
 
     expect(() => schema.populateValueTypes({ gender: 'Male' }))
-      .to.throw('Schema MiniProfile is referensing missing schema Gender')
+      .to.throw('"MiniProfile.gender.$ref" is referensing missing schema "Gender"')
   })
 })
 
@@ -355,18 +370,71 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
       Profile: profileSchema.clone('Profile', {
         extend: {
           gender:      { $ref: 'Gender', default: 'Male' },
-          preferences: { $ref: 'ProfilePreferences' }
+          preferences: { $ref: 'ProfilePreferences' },
+          preferencesHistory: {
+            type: 'array',
+            items: {
+              $ref: 'ProfilePreferences'
+            }
+          },
+          meta: {
+            type:       'object',
+            properties: {
+              weight: {
+                type: 'integer'
+              },
+              kind: {
+                type:    'string',
+                default: 'default'
+              },
+              extra: {
+                type:    'object',
+                default: {}
+              }
+            }
+          },
+          tags: {
+            type:  'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string'
+                },
+                value: {
+                  type:    'string',
+                  default: 'none'
+                }
+              }
+            }
+          }
         }
       })
     }
 
-    let object = { preferences: {} }
+    let object = {
+      preferencesHistory: [{}],
+      preferences:        {},
+      meta:               { weight: 500 },
+      tags:               [{ name: 'tag1' }, { name: 'tag2' }]
+    }
+
     schemas.Profile.populateDefaultValues(object, schemas)
 
     expect(object.gender).to.equal('Male')
     expect(object.preferences.shoeSize).to.equal(42)
     expect(object.preferences.isEnabled).to.equal(false)
     expect(object.preferences.mobileNumber).to.equal('N/A')
+    expect(object.preferences.mobileNumber).to.equal('N/A')
+    expect(object.preferencesHistory[0].shoeSize).to.equal(42)
+    expect(object.preferencesHistory[0].isEnabled).to.equal(false)
+    expect(object.preferencesHistory[0].mobileNumber).to.equal('N/A')
+    expect(object.preferencesHistory[0].mobileNumber).to.equal('N/A')
+    expect(object.meta.weight).to.equal(500)
+    expect(object.meta.kind).to.equal('default')
+    expect(object.meta.extra).to.be.an('object').that.is.empty
+    expect(object.tags[0].value).to.equal('none')
+    expect(object.tags[1].value).to.equal('none')
 
     object = { gender: 'Male' }
     schemas.Profile.populateDefaultValues(object, schemas)
@@ -381,7 +449,26 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
     })
 
     expect(() => schema.populateDefaultValues({ preferences: {} }))
-      .to.throw('Schema Profile is referensing missing schema ProfilePreferences')
+      .to.throw('"Profile.preferences.$ref" is referensing missing schema' +
+        ' "ProfilePreferences"')
+  })
+
+  it('throws Error if referenced schema is missing inside of inline array definition', () => {
+    const schema = profileSchema.clone('Profile', {
+      only:   [ 'name' ],
+      extend: {
+        preferencesHistory: {
+          type: 'array',
+          items: {
+            $ref: 'ProfilePreferences'
+          }
+        }
+      }
+    })
+
+    expect(() => schema.populateDefaultValues({ preferencesHistory: [{}] }))
+      .to.throw('"Profile.preferencesHistory.items.$ref" is referensing' +
+        ' missing schema "ProfilePreferences"')
   })
 })
 
