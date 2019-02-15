@@ -99,11 +99,15 @@ describe('.clone(schemaId, { only })', () => {
 describe('.clone(schemaId, { skip })', () => {
   it('clones schema skipping specific fields', () => {
     const profileSchema = new Schema('Profile', profileSchemaSource)
-    const schema = profileSchema.clone('ClonedProfile', { skip: [ 'gender', 'preferences' ] })
+    const schema = profileSchema.clone('ClonedProfile', {
+      skip: [ 'gender', 'preferences.email' ]
+    })
 
-    expect(schema.jsonSchema.required).to.deep.equal([ 'name' ])
+    expect(schema.jsonSchema.required).to.deep.equal([ 'name', 'preferences' ])
     const propertyNames = Object.keys(schema.jsonSchema.properties)
-    expect(propertyNames).to.deep.equal([ 'name', 'tags' ])
+    expect(propertyNames).to.deep.equal([ 'name', 'preferences', 'tags' ])
+
+    expect(schema.jsonSchema.properties.preferences.properties.email).to.be.undefined
   })
 })
 
