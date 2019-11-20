@@ -35,3 +35,7 @@ describe('OperationError', () => {
 describe('OperationContext', () => {
   require('./lib/OperationContext.spec')
 })
+
+describe('helpers', () => {
+  require('./lib/helpers/jsonRequest.spec')
+})
