@@ -1,16 +1,9 @@
 'use strict'
 
-const Index       = require('lib/operations/Index')
 const UserProfile = require('../models/UserProfile')
+const createOperation = require('lib/helpers/createOperation')
 
-class IndexUserProfiles extends Index {
-  static get tags() {
-    return [ 'User Profile' ]
-  }
-
-  static get resource() {
-    return UserProfile
-  }
+class IndexUserProfiles extends createOperation('Index', UserProfile) {
 }
 
 module.exports = IndexUserProfiles

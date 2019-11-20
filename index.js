@@ -11,5 +11,6 @@ module.exports = {
   Index:      require('./lib/operations/Index'),
   Create:     require('./lib/operations/Create'),
   Update:     require('./lib/operations/Update'),
-  Delete:     require('./lib/operations/Delete')
+  Delete:     require('./lib/operations/Delete'),
+  createOperation: require('./lib/helpers/createOperation')
 }

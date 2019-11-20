@@ -1,19 +1,15 @@
 'use strict'
 
-const Operation       = require('lib/Operation')
 const HealthComponent = require('test/example/components/Health')
+const createOperation = require('lib/helpers/createOperation')
 
-class Health extends Operation {
-  static get tags() {
-    return [ 'Common' ]
-  }
-
+class Health extends createOperation('Health', HealthComponent,
+  'Returns service health status', {
+    tags: [ 'Common' ],
+    summary: 'Health'
+  }) {
   static get shouldValidateOutput() {
     return false
-  }
-
-  static get resource() {
-    return HealthComponent
   }
 
   async before() {
