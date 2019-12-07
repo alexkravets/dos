@@ -12,6 +12,12 @@ class UpdateUserProfile extends Authorization(Update) {
   static get resource() {
     return UserProfile
   }
+
+  static get mutation() {
+    return this.cloneMutationSchema(UserProfile, {
+      only: [ 'firstName', 'lastName' ]
+    })
+  }
 }
 
 module.exports = UpdateUserProfile
