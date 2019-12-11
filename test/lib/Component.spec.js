@@ -39,7 +39,7 @@ describe('Component.constructor(context = {}, attributes = {})', () => {
 })
 
 describe('.validate()', () => {
-  it('validates components JSON object', async() => {
+  it('validates components JSON object', () => {
     const attributes = {
       id:        'ID',
       firstName: 'Alexander',
@@ -47,6 +47,6 @@ describe('.validate()', () => {
     }
 
     const userProfile = new UserProfile({ composer }, attributes)
-    await userProfile.validate()
+    userProfile.validate()
   })
 })

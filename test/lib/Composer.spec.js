@@ -93,7 +93,7 @@ describe('Composer.constructor(path, { components, operations })', () => {
 })
 
 describe('.validate(schemaId, object)', () => {
-  it('validates object using schema', async() => {
+  it('validates object using schema', () => {
     const composer = new Composer(schemasPath, { components })
 
     const userProfile = {
@@ -103,13 +103,13 @@ describe('.validate(schemaId, object)', () => {
       createdAt: new Date().toJSON()
     }
 
-    await composer.validate('UserProfile', userProfile)
+    composer.validate('UserProfile', userProfile)
   })
 
-  it('throws Error if schema is not registered', async() => {
+  it('throws Error if schema is not registered', () => {
     const composer = new Composer(schemasPath, {})
     try {
-      await composer.validate('UserProperties', {})
+      composer.validate('UserProperties', {})
 
     } catch (error) {
       expect(error).to.have.property('message', 'UserProperties schema is not registered')
@@ -120,7 +120,7 @@ describe('.validate(schemaId, object)', () => {
     throw new Error('Validation exception has not been thrown')
   })
 
-  it('throws ValidationError if object is not valid', async() => {
+  it('throws ValidationError if object is not valid', () => {
     const composer = new Composer(schemasPath, { components })
 
     const userProfile = {
@@ -128,7 +128,7 @@ describe('.validate(schemaId, object)', () => {
     }
 
     try {
-      await composer.validate('UserProfile', userProfile)
+      composer.validate('UserProfile', userProfile)
 
     } catch (error) {
       expect(error.code).to.equal('ValidationError')
@@ -142,8 +142,8 @@ describe('.validate(schemaId, object)', () => {
   })
 })
 
-describe('.validateInput(schemaId, object)', async() => {
-  it('does cleanup, populates value types, populates default values, validates', async() => {
+describe('.validateInput(schemaId, object)', () => {
+  it('does cleanup, populates value types, populates default values, validates', () => {
     const input = {
       id: 'ID',
       mutation: {
@@ -154,7 +154,7 @@ describe('.validateInput(schemaId, object)', async() => {
       }
     }
 
-    await composer.validateInput('CreateUserProfileInput', input)
+    composer.validateInput('CreateUserProfileInput', input)
 
     expect(input.mutation).to.include({ age: 32, gender: 'Male' })
     expect(input.mutation).to.not.include.key('extra')
@@ -162,7 +162,7 @@ describe('.validateInput(schemaId, object)', async() => {
 })
 
 describe('.validateOutput(schemaId, object)', () => {
-  it('does cleanup, validates', async() => {
+  it('does cleanup, validates', () => {
     const output = {
       data: {
         id: 'ID',
@@ -176,39 +176,39 @@ describe('.validateOutput(schemaId, object)', () => {
       }
     }
 
-    await composer.validateOutput('CreateUserProfileOutput', output)
+    composer.validateOutput('CreateUserProfileOutput', output)
 
     expect(output.data).to.not.include.key('extra')
   })
 })
 
 describe('.spec', () => {
-  it('returns specification', async() => {
+  it('returns specification', () => {
     expect(composer.spec).to.be.not.undefined
-    await composer.validateSpec()
+    composer.validateSpec()
   })
 })
 
 describe('.validateSpec()', () => {
-  it('validates specification', async() => {
-    await composer.validateSpec()
+  it('validates specification', () => {
+    composer.validateSpec()
   })
 })
 
 describe('.config', () => {
-  it('returns config', async() => {
+  it('returns config', () => {
     expect(composer.config).to.be.not.undefined
   })
 })
 
 describe('.operations', () => {
-  it('returns operations', async() => {
+  it('returns operations', () => {
     expect(composer.operations).to.be.not.undefined
   })
 })
 
 describe('.components', () => {
-  it('returns components', async() => {
+  it('returns components', () => {
     expect(composer.components).to.be.not.undefined
   })
 })

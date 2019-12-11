@@ -479,10 +479,10 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
 describe('.validate(object, schemas = {})', () => {
   const profileSchema = new Schema('Profile', profileSchemaSource)
 
-  it('throws ValidationError if object is not valid', async() => {
+  it('throws ValidationError if object is not valid', () => {
     const object = {}
     try {
-      await profileSchema.validate(object)
+      profileSchema.validate(object)
 
     } catch (error) {
       expect(error.code).to.equal('ValidationError')
@@ -497,7 +497,7 @@ describe('.validate(object, schemas = {})', () => {
     throw new Error('Expected exception has not been thrown')
   })
 
-  it('returns nothing if object is valid', async() => {
+  it('returns nothing if object is valid', () => {
     const object = {
       name:        'Alexander Kravets',
       preferences: {
@@ -505,6 +505,6 @@ describe('.validate(object, schemas = {})', () => {
       }
     }
 
-    await profileSchema.validate(object)
+    profileSchema.validate(object)
   })
 })
