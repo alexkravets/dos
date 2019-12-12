@@ -79,7 +79,7 @@ describe('.jsonSchema', () => {
 describe('.clone(schemaId)', () => {
   it('clones schema source', () => {
     const genderSchema = new Schema('Gender', genderSchemaSource)
-    const schema = genderSchema.clone('ClonedGender')
+    const schema = genderSchema.clone({}, 'ClonedGender')
 
     expect(schema.source).to.deep.equal(genderSchema.source)
   })
@@ -88,7 +88,7 @@ describe('.clone(schemaId)', () => {
 describe('.clone(schemaId, { only })', () => {
   it('clones schema specific fields', () => {
     const profileSchema = new Schema('Profile', profileSchemaSource)
-    const schema = profileSchema.clone('ClonedProfile', { only: 'name' })
+    const schema = profileSchema.clone({ only: 'name' }, 'ClonedProfile')
 
     expect(schema.jsonSchema.required).to.deep.equal([ 'name' ])
     const propertyNames = Object.keys(schema.jsonSchema.properties)
@@ -99,9 +99,9 @@ describe('.clone(schemaId, { only })', () => {
 describe('.clone(schemaId, { skip })', () => {
   it('clones schema skipping specific fields', () => {
     const profileSchema = new Schema('Profile', profileSchemaSource)
-    const schema = profileSchema.clone('ClonedProfile', {
+    const schema = profileSchema.clone({
       skip: [ 'gender', 'preferences.email' ]
-    })
+    }, 'ClonedProfile')
 
     expect(schema.jsonSchema.required).to.deep.equal([ 'name', 'preferences' ])
     const propertyNames = Object.keys(schema.jsonSchema.properties)
@@ -114,7 +114,7 @@ describe('.clone(schemaId, { skip })', () => {
 describe('.clone(schemaId, { isUpdate })', () => {
   it('clones schema with no required flag and no default values', () => {
     const profileSchema = new Schema('Profile', profileSchemaSource)
-    const schema = profileSchema.clone('ClonedProfile', { isUpdate: true })
+    const schema = profileSchema.clone({ isUpdate: true }, 'ClonedProfile')
 
     expect(schema.jsonSchema.required).to.be.undefined
     expect(schema.source.gender.required).to.be.undefined
@@ -126,12 +126,12 @@ describe('.clone(schemaId, { isUpdate })', () => {
 describe('.clone(schemaId, { extend })', () => {
   it('clones schema and extends with properties', () => {
     const profileSchema = new Schema('Profile', profileSchemaSource)
-    const schema = profileSchema.clone('ClonedProfile', {
+    const schema = profileSchema.clone({
       only: [ 'name' ],
       extend: {
         avatarUrl: { type: 'string', required: true }
       }
-    })
+    }, 'ClonedProfile')
 
     expect(schema.jsonSchema.required).to.deep.equal([ 'name', 'avatarUrl' ])
     expect(schema.source).to.have.property('avatarUrl')
@@ -220,7 +220,7 @@ describe('.cleanup(object, schemas = {})', () => {
 
   it('cleanups schemas without referenced schemas', () => {
     const profileSchema = new Schema('Profile', profileSchemaSource)
-    const schema = profileSchema.clone('MiniProfile', { only: [ 'name', 'tags' ] })
+    const schema = profileSchema.clone({ only: [ 'name', 'tags' ] }, 'MiniProfile')
 
     const profile = {
       name:   'Alexander Kravets',
@@ -244,7 +244,7 @@ describe('.cleanup(object, schemas = {})', () => {
 
   it('throws Error if referenced schema is missing', () => {
     const profileSchema = new Schema('Profile', profileSchemaSource)
-    const schema = profileSchema.clone('MiniProfile', { only: [ 'name', 'gender' ] })
+    const schema = profileSchema.clone({ only: [ 'name', 'gender' ] }, 'MiniProfile')
 
     expect(() => schema.cleanup({ gender: 'Male' }))
       .to.throw('Schema MiniProfile is referensing missing schema Gender')
@@ -252,7 +252,7 @@ describe('.cleanup(object, schemas = {})', () => {
 
   it('throws Error if referenced schema is missing in for array item', () => {
     const profileSchema = new Schema('Profile', profileSchemaSource)
-    const schema = profileSchema.clone('MiniProfile', {
+    const schema = profileSchema.clone({
       only: [ 'name' ],
       extend: {
         arrayWithBrokenReference: {
@@ -262,7 +262,7 @@ describe('.cleanup(object, schemas = {})', () => {
           }
         }
       }
-    })
+    }, 'MiniProfile')
 
     expect(() => schema.cleanup({
       name: 'Alexander',
@@ -286,7 +286,7 @@ describe('.populateValueTypes(object, schemas = {})', () => {
     const schemas = {
       Gender:             new Schema('Gender', genderSchemaSource),
       ProfilePreferences: new Schema('ProfilePreferences', profilePreferencesSchemaSource),
-      Profile: profileSchema.clone('Profile', {
+      Profile: profileSchema.clone({
         extend: {
           gender:      { $ref: 'Gender' },
           preferences: { $ref: 'ProfilePreferences' },
@@ -297,7 +297,7 @@ describe('.populateValueTypes(object, schemas = {})', () => {
             }
           }
         }
-      })
+      }, 'Profile')
     }
 
     let object
@@ -346,12 +346,12 @@ describe('.populateValueTypes(object, schemas = {})', () => {
   })
 
   it('throws Error if referenced schema is missing', () => {
-    const schema = profileSchema.clone('MiniProfile', {
+    const schema = profileSchema.clone({
       only:   [ 'name', 'gender' ],
       extend: {
         gender: { $ref: 'Gender' }
       }
-    })
+    }, 'MiniProfile')
 
     expect(() => schema.populateValueTypes({ gender: 'Male' }))
       .to.throw('"MiniProfile.gender.$ref" is referensing missing schema "Gender"')
@@ -371,7 +371,7 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
     const schemas = {
       Gender:             new Schema('Gender', genderSchemaSource),
       ProfilePreferences: new Schema('ProfilePreferences', profilePreferencesSchemaSource),
-      Profile: profileSchema.clone('Profile', {
+      Profile: profileSchema.clone({
         extend: {
           gender:      { $ref: 'Gender', default: 'Male' },
           preferences: { $ref: 'ProfilePreferences' },
@@ -413,7 +413,7 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
             }
           }
         }
-      })
+      }, 'Profile')
     }
 
     let object = {
@@ -445,12 +445,12 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
   })
 
   it('throws Error if referenced schema is missing', () => {
-    const schema = profileSchema.clone('Profile', {
+    const schema = profileSchema.clone({
       only:   [ 'name', 'preferences' ],
       extend: {
         preferences: { $ref: 'ProfilePreferences' }
       }
-    })
+    }, 'Profile')
 
     expect(() => schema.populateDefaultValues({ preferences: {} }))
       .to.throw('"Profile.preferences.$ref" is referensing missing schema' +
@@ -458,7 +458,7 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
   })
 
   it('throws Error if referenced schema is missing inside of inline array definition', () => {
-    const schema = profileSchema.clone('Profile', {
+    const schema = profileSchema.clone({
       only:   [ 'name' ],
       extend: {
         preferencesHistory: {
@@ -468,7 +468,7 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
           }
         }
       }
-    })
+    }, 'Profile')
 
     expect(() => schema.populateDefaultValues({ preferencesHistory: [{}] }))
       .to.throw('"Profile.preferencesHistory.items.$ref" is referensing' +

@@ -28,14 +28,14 @@ describe('._path(req)', () => {
 })
 
 describe('._method(req)', () => {
-  it('support AWS Lambda interface', () => {
+  it('supports AWS Lambda interface', () => {
     const method = app._method({ httpMethod: 'get' })
     expect(method).to.equal('get')
   })
 })
 
 describe('.process(req)', () => {
-  it('support operation execution by req.operationId', async() => {
+  it('supports operation execution by req.operationId', async() => {
     const { statusCode } = await app.process({ operationId: 'Health' })
     expect(statusCode).to.equal(200)
   })

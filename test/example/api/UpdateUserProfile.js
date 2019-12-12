@@ -14,7 +14,7 @@ class UpdateUserProfile extends Authorization(Update) {
   }
 
   static get mutation() {
-    return this.cloneMutationSchema(UserProfile, {
+    return super.mutation.clone({
       only: [ 'firstName', 'lastName' ]
     })
   }
