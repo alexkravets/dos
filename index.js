@@ -1,6 +1,7 @@
 'use strict'
 
 module.exports = {
+  test:        require('./lib/test'),
   App:         require('./lib/App'),
   Schema:      require('./lib/Schema'),
   Component:   require('./lib/Component'),
@@ -14,5 +15,5 @@ module.exports = {
   Delete:      require('./lib/operations/Delete'),
   httpRequest: require('./lib/helpers/httpRequest'),
   jsonRequest: require('./lib/helpers/jsonRequest'),
-  createOperation: require('./lib/helpers/createOperation'),
+  createOperation: require('./lib/helpers/createOperation')
 }
