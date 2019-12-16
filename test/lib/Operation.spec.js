@@ -1,46 +1,73 @@
 'use strict'
 
-const Read   = require('lib/operations/Read')
-const Index  = require('lib/operations/Index')
-const Create = require('lib/operations/Create')
-const Update = require('lib/operations/Update')
-const Delete = require('lib/operations/Delete')
+const Read       = require('lib/operations/Read')
+const Index      = require('lib/operations/Index')
+const Create     = require('lib/operations/Create')
+const Update     = require('lib/operations/Update')
+const Delete     = require('lib/operations/Delete')
 const Composer   = require('lib/Composer')
 const Operation  = require('lib/Operation')
 const { expect } = require('chai')
 
-describe('Read.resource', () => {
-  it('throws Error if resource method is not overloaded', () => {
-    expect(() => Read.resource).to
-      .throw('Operation `Read` requires `resource` to be defined')
+class Component {}
+
+describe('Read(Component, componentAction)', () => {
+  it('throws Error if "Component" argument is not defined', () => {
+    expect(() => Read()).to
+      .throw('Argument "Component" is undefined for "Read" operation function')
+  })
+
+  it('throws Error if invalid "componentAction" argument value', () => {
+    expect(() => Read(Component, 'missingStaticMethod')).to
+      .throw('Component action method "Component.missingStaticMethod(context, query, options)" is not defined')
   })
 })
 
-describe('Index.resource', () => {
-  it('throws Error if resource method is not overloaded', () => {
-    expect(() => Index.resource).to
-      .throw('Operation `Index` requires `resource` to be defined')
+describe('Index(Component, componentAction)', () => {
+  it('throws Error if "Component" argument is not defined', () => {
+    expect(() => Index()).to
+      .throw('Argument "Component" is undefined for "Index" operation function')
+  })
+
+  it('throws Error if invalid "componentAction" argument value', () => {
+    expect(() => Index(Component, 'missingStaticMethod')).to
+      .throw('Component action method "Component.missingStaticMethod(context, query, options)" is not defined')
   })
 })
 
-describe('Create.resource', () => {
-  it('throws Error if resource method is not overloaded', () => {
-    expect(() => Create.resource).to
-      .throw('Operation `Create` requires `resource` to be defined')
+describe('Create(Component, componentAction)', () => {
+  it('throws Error if "Component" argument is not defined', () => {
+    expect(() => Create()).to
+      .throw('Argument "Component" is undefined for "Create" operation function')
+  })
+
+  it('throws Error if invalid "componentAction" argument value', () => {
+    expect(() => Create(Component, 'missingStaticMethod')).to
+      .throw('Component action method "Component.missingStaticMethod(context, query, attributes)" is not defined')
   })
 })
 
-describe('Update.resource', () => {
-  it('throws Error if resource method is not overloaded', () => {
-    expect(() => Update.resource).to
-      .throw('Operation `Update` requires `resource` to be defined')
+describe('Update(Component, componentAction)', () => {
+  it('throws Error if "Component" argument is not defined', () => {
+    expect(() => Update()).to
+      .throw('Argument "Component" is undefined for "Update" operation function')
+  })
+
+  it('throws Error if invalid "componentAction" argument value', () => {
+    expect(() => Update(Component, 'missingStaticMethod')).to
+      .throw('Component action method "Component.missingStaticMethod(context, query, attributes)" is not defined')
   })
 })
 
-describe('Delete.resource', () => {
-  it('throws Error if resource method is not overloaded', () => {
-    expect(() => Delete.resource).to
-      .throw('Operation `Delete` requires `resource` to be defined')
+describe('Delete(Component, componentAction)', () => {
+  it('throws Error if "Component" argument is not defined', () => {
+    expect(() => Delete()).to
+      .throw('Argument "Component" is undefined for "Delete" operation function')
+  })
+
+  it('throws Error if invalid "componentAction" argument value', () => {
+    expect(() => Delete(Component, 'missingStaticMethod')).to
+      .throw('Component action method "Component.missingStaticMethod(context, query)" is not defined')
   })
 })
 

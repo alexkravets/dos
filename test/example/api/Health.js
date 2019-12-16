@@ -1,13 +1,25 @@
 'use strict'
 
+const Operation       = require('lib/Operation')
 const HealthComponent = require('test/example/components/Health')
-const createOperation = require('lib/helpers/createOperation')
 
-class Health extends createOperation('Health', HealthComponent,
-  'Returns service health status', {
-    tags: [ 'Common' ],
-    summary: 'Health'
-  }) {
+class Health extends Operation {
+  static get Component() {
+    return HealthComponent
+  }
+
+  static get tags() {
+    return [ 'Common' ]
+  }
+
+  static get summary() {
+    return 'Service health'
+  }
+
+  static get description() {
+    return 'Returns service health status'
+  }
+
   static get shouldValidateOutput() {
     return false
   }

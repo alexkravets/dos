@@ -72,23 +72,24 @@ describe('Composer.constructor(path, { components, operations })', () => {
     expect(composer.schemas.UserProfile._source).to.have.property('createdAt')
   })
 
-  it('throws Error if declared resourceAction is missing', () => {
+  it('throws Error if declared "componentAction" is missing', () => {
     class NoResourceOperation extends Operation {
     }
 
     class DeactivateUserProfile extends Operation {
-      static get resource() {
+      static get Component() {
         return UserProfile
       }
 
-      static get resourceAction() {
+      static get componentAction() {
         return 'deactivate'
       }
     }
 
     const operations = [ NoResourceOperation, DeactivateUserProfile ]
     expect(() => new Composer(schemasPath, { components, operations })).to
-      .throw('Resource action `deactivate` is not defined for resource `UserProfile`')
+      .throw('Operation "DeactivateUserProfile" expects component action' +
+        ' method "UserProfile.deactivate(context, ...)" to be defined')
   })
 })
 

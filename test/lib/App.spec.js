@@ -53,6 +53,12 @@ describe('.process(req)', () => {
     expect(resultJson).to.equal(composerJson)
   })
 
+  it('responds to /Heartbeat with "No Content" status', async() => {
+    const { statusCode } = await app.process({ path: '/Heartbeat', method: 'get' })
+
+    expect(statusCode).to.equal(204)
+  })
+
   it('responds to /IndexUserProfiles with data array and meta object', async() => {
     const headers    = { Authorization: 'AUTHORIZATION' }
     const url        = `${host}/IndexUserProfiles?limit=10&sort=asc`
