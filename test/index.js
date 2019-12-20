@@ -39,3 +39,7 @@ describe('OperationContext', () => {
 describe('helpers', () => {
   require('./lib/helpers/jsonRequest.spec')
 })
+
+describe('errors', () => {
+  require('./lib/errors/InvalidOutputError.spec')
+})
