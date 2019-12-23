@@ -247,7 +247,10 @@ class Composer {
 
       const parameters = []
       for (const name in query) {
-        parameters.push({ in: 'query', name, ...query[name] })
+        const queryParameter = { in: 'query', name, ...query[name] }
+        delete queryParameter.example
+
+        parameters.push(queryParameter)
       }
 
       if (mutationSchema) {
