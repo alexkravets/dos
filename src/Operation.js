@@ -112,10 +112,6 @@ class Operation {
     return new Schema(`${id}Output`, schemaOrSource)
   }
 
-  static get shouldValidateOutput() {
-    return true
-  }
-
   static get query() {
     return {}
   }
@@ -268,6 +264,8 @@ class Operation {
   }
 
   async exec() {
+    let output
+
     try {
       await this._authorize()
 
@@ -283,21 +281,22 @@ class Operation {
 
       if (this.after) { await this.after() }
 
-      this.result = this._validateOutput()
+      output = this._validateOutput()
 
     } catch (error) {
       this._status = this._errorStatus(error)
-      this.result  = new OperationError(this.context, this._status, error).json
+
+      output = new OperationError(this.context, this._status, error).json
 
     }
 
     const response = { statusCode: this.statusCode }
-    if (this.result) { response.result = this.result }
+    if (output) { response.result = output }
 
     return response
   }
 
-  get _output() {
+  get _resultPlainObject() {
     const json = JSON.stringify(this.result)
     return JSON.parse(json)
   }
@@ -318,38 +317,36 @@ class Operation {
       input.mutation = { ...this.mutation }
     }
 
-    let result
+    let inputValid
     try {
-      result = this.composer.validateInput(inputSchema.id, input)
+      inputValid = this.composer.validateInput(inputSchema.id, input)
 
     } catch (validationError) {
       throw new InvalidInputError(validationError)
 
     }
 
-    const { mutation } = result
-    delete result.mutation
+    const { mutation } = inputValid
+    delete inputValid.mutation
 
-    return { query: result, mutation }
+    return { query: inputValid, mutation }
   }
 
   _validateOutput() {
-    const { shouldValidateOutput, outputSchema } = this.constructor
-
-    if (!shouldValidateOutput) { return this._output }
+    const { outputSchema } = this.constructor
 
     if (!outputSchema) { return }
 
-    let result
+    let output
     try {
-      result = this.composer.validateOutput(outputSchema.id, this._output)
+      output = this.composer.validateOutput(outputSchema.id, this._resultPlainObject)
 
     } catch (validationError) {
       throw new InvalidOutputError(validationError)
 
     }
 
-    return result
+    return output
   }
 
   _errorStatus(error) {

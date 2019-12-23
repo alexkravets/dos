@@ -1,8 +1,8 @@
 'use strict'
 
-const Composer   = require('lib/Composer')
+const Composer   = require('src/Composer')
 const { expect } = require('chai')
-const OperationContext = require('lib/OperationContext')
+const OperationContext = require('src/OperationContext')
 
 const composer = new Composer(null, { operations: [], config: {} })
 const context  = new OperationContext('TestContext', composer)

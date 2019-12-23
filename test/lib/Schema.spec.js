@@ -1,6 +1,6 @@
 'use strict'
 
-const Schema     = require('lib/Schema')
+const Schema     = require('src/Schema')
 const { expect } = require('chai')
 
 const profileSchemaSource = {
@@ -381,7 +381,7 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
               $ref: 'ProfilePreferences'
             }
           },
-          meta: {
+          pageInfo: {
             type:       'object',
             properties: {
               weight: {
@@ -419,7 +419,7 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
     let object = {
       preferencesHistory: [{}],
       preferences:        {},
-      meta:               { weight: 500 },
+      pageInfo:           { weight: 500 },
       tags:               [{ name: 'tag1' }, { name: 'tag2' }]
     }
 
@@ -434,9 +434,9 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
     expect(object.preferencesHistory[0].isEnabled).to.equal(false)
     expect(object.preferencesHistory[0].mobileNumber).to.equal('N/A')
     expect(object.preferencesHistory[0].mobileNumber).to.equal('N/A')
-    expect(object.meta.weight).to.equal(500)
-    expect(object.meta.kind).to.equal('default')
-    expect(object.meta.extra).to.be.an('object').that.is.empty
+    expect(object.pageInfo.weight).to.equal(500)
+    expect(object.pageInfo.kind).to.equal('default')
+    expect(object.pageInfo.extra).to.be.an('object').that.is.empty
     expect(object.tags[0].value).to.equal('none')
     expect(object.tags[1].value).to.equal('none')
 

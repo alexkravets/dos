@@ -1,8 +1,8 @@
 'use strict'
 
 const config      = require('config')
-const Composer    = require('lib/Composer')
-const Operation   = require('lib/Operation')
+const Composer    = require('src/Composer')
+const Operation   = require('src/Operation')
 const { expect }  = require('chai')
 const UserProfile = require('test/example/models/UserProfile')
 

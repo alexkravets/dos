@@ -1,6 +1,6 @@
 'use strict'
 
-const Operation       = require('lib/Operation')
+const Operation       = require('src/Operation')
 const HealthComponent = require('test/example/components/Health')
 
 class Health extends Operation {
@@ -18,10 +18,6 @@ class Health extends Operation {
 
   static get description() {
     return 'Returns service health status'
-  }
-
-  static get shouldValidateOutput() {
-    return false
   }
 
   async before() {

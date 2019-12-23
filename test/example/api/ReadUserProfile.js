@@ -1,6 +1,6 @@
 'use strict'
 
-const Read        = require('lib/operations/Read')
+const Read        = require('src/operations/Read')
 const UserProfile = require('../models/UserProfile')
 
 class ReadUserProfile extends Read(UserProfile) {

@@ -1,10 +1,10 @@
 'use strict'
 
-const Composer    = require('lib/Composer')
-const Document    = require('lib/Document')
+const Composer    = require('src/Composer')
+const Document    = require('src/Document')
 const { expect }  = require('chai')
 const UserProfile = require('test/example/models/UserProfile')
-const OperationContext = require('lib/OperationContext')
+const OperationContext = require('src/OperationContext')
 
 class CustomUserProfile extends UserProfile {
   static beforeCreate(context, attributes) {

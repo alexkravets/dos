@@ -1,6 +1,6 @@
 'use strict'
 
-const App         = require('lib/App')
+const App         = require('src/App')
 const config      = require('config')
 const operations  = require('test/example/api')
 const schemasPath = './test/example/schemas'

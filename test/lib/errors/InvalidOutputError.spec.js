@@ -1,8 +1,8 @@
 'use strict'
 
-const Schema     = require('lib/Schema')
+const Schema     = require('src/Schema')
 const { expect } = require('chai')
-const InvalidOutputError = require('lib/errors/InvalidOutputError')
+const InvalidOutputError = require('src/errors/InvalidOutputError')
 
 describe('InvalidOutputError', () => {
   describe('.toJSON()', () => {

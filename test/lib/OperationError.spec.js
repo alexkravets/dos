@@ -1,6 +1,6 @@
 'use strict'
 
-const OperationError = require('lib/OperationError')
+const OperationError = require('src/OperationError')
 const { expect } = require('chai')
 
 describe('.statusCode', () => {

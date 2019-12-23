@@ -1,7 +1,7 @@
 'use strict'
 
 const nock        = require('nock')
-const jsonRequest = require('lib/helpers/jsonRequest')
+const jsonRequest = require('src/helpers/jsonRequest')
 const { expect, assert } = require('chai')
 
 const HOST = 'http://json-request.local'
@@ -50,7 +50,7 @@ describe('jsonRequest', () => {
   it('throws error if server returns non-JSON response', async() => {
     nock('https://json-request.local')
       .get('/ReadEntity')
-      .reply(503, 'Service is no available.')
+      .reply(503, 'Service is not available')
 
     const options = {
       host:     'json-request.local',
@@ -68,7 +68,7 @@ describe('jsonRequest', () => {
 
     }
 
-    assert.fail('Expected error has not been thrown.')
+    assert.fail('Expected error has not been thrown')
   })
 
   it('throws error if network error after a number of retries, logs failed requests', async() => {
@@ -86,6 +86,6 @@ describe('jsonRequest', () => {
       return
     }
 
-    assert.fail('Expected error has not been thrown.')
+    assert.fail('Expected error has not been thrown')
   })
 })

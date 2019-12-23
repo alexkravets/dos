@@ -1,6 +1,6 @@
 'use strict'
 
-const Document  = require('lib/Document')
+const Document  = require('src/Document')
 const timestamp = new Date().toJSON()
 
 class UserProfile extends Document {

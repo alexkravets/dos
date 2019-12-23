@@ -1,6 +1,6 @@
 {
   "name": "@slatestudio/common-service",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "Common API service library",
   "main": "index.js",
   "repository": {
@@ -8,11 +8,11 @@
     "url": "http://github.com/slate-studio/common-service.git"
   },
   "directories": {
-    "lib": "lib"
+    "src": "src"
   },
   "scripts": {
     "start": "NODE_PATH=./ NODE_CONFIG_DIR=./test/config node ./test/example/bin/start.js",
-    "test": "eslint lib/ test/ && NODE_PATH=./ NODE_CONFIG_DIR=./test/config nyc --reporter text mocha --exit"
+    "test": "eslint src/ test/ && NODE_PATH=./ NODE_CONFIG_DIR=./test/config nyc mocha --exit"
   },
   "author": "Alexander Kravets <alex@slatestudio.com>",
   "license": "ISC",
@@ -23,10 +23,10 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.compact": "^3.0.1",
     "lodash.endswith": "^4.2.1",
+    "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
     "lodash.isstring": "^4.0.1",
     "lodash.isundefined": "^3.0.1",
-    "lodash.keyby": "^4.6.0",
     "lodash.omit": "^4.5.0",
     "lodash.pick": "^4.4.0",
     "lodash.startcase": "^4.4.0",

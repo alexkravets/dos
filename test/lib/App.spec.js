@@ -1,6 +1,6 @@
 'use strict'
 
-const App        = require('lib/App')
+const App        = require('src/App')
 const { expect } = require('chai')
 
 const host = 'http://localhost:3000'
@@ -59,14 +59,14 @@ describe('.process(req)', () => {
     expect(statusCode).to.equal(204)
   })
 
-  it('responds to /IndexUserProfiles with data array and meta object', async() => {
+  it('responds to /IndexUserProfiles with data array and page info object', async() => {
     const headers    = { Authorization: 'AUTHORIZATION' }
     const url        = `${host}/IndexUserProfiles?limit=10&sort=asc`
     const { result } = await app.process({ path: '/IndexUserProfiles', method: 'get', url, headers })
 
     expect(result).to.have.property('data')
     expect(result.data).to.have.lengthOf(1)
-    expect(result.meta.count).to.equal(1)
+    expect(result.pageInfo.count).to.equal(1)
   })
 
   it('responds to /ReadUserProfile with data', async() => {

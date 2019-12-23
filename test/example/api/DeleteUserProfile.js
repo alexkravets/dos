@@ -1,6 +1,6 @@
 'use strict'
 
-const Delete      = require('lib/operations/Delete')
+const Delete      = require('src/operations/Delete')
 const UserProfile = require('../models/UserProfile')
 const Authorization = require('../security/Authorization')
 

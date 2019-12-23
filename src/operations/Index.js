@@ -67,7 +67,7 @@ module.exports = (Component, componentAction = 'index') => {
           items:    { $ref: id },
           required: true
         },
-        meta: {
+        pageInfo: {
           type:       'object',
           required:   true,
           properties: {
@@ -112,7 +112,7 @@ module.exports = (Component, componentAction = 'index') => {
 
       return {
         data,
-        meta: { sort, count, limit, lastEvaluatedKey, exclusiveStartKey }
+        pageInfo: { sort, count, limit, lastEvaluatedKey, exclusiveStartKey }
       }
     }
   }

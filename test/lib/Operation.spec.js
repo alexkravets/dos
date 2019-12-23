@@ -1,12 +1,12 @@
 'use strict'
 
-const Read       = require('lib/operations/Read')
-const Index      = require('lib/operations/Index')
-const Create     = require('lib/operations/Create')
-const Update     = require('lib/operations/Update')
-const Delete     = require('lib/operations/Delete')
-const Composer   = require('lib/Composer')
-const Operation  = require('lib/Operation')
+const Read       = require('src/operations/Read')
+const Index      = require('src/operations/Index')
+const Create     = require('src/operations/Create')
+const Update     = require('src/operations/Update')
+const Delete     = require('src/operations/Delete')
+const Composer   = require('src/Composer')
+const Operation  = require('src/Operation')
 const { expect } = require('chai')
 
 // class Component {}

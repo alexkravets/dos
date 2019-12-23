@@ -1,7 +1,7 @@
 'use strict'
 
-const Composer   = require('lib/Composer')
-const Component  = require('lib/Component')
+const Composer   = require('src/Composer')
+const Component  = require('src/Component')
 const { expect } = require('chai')
 
 class UserProfile extends Component {

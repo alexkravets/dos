@@ -1,6 +1,6 @@
 'use strict'
 
-const Operation = require('lib/Operation')
+const Operation = require('src/Operation')
 
 class Heartbeat extends Operation {
 }

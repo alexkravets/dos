@@ -1,6 +1,6 @@
 'use strict'
 
-const Security = require('lib/Security')
+const Security = require('src/Security')
 
 class Authorization extends Security {
 }

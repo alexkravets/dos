@@ -1,6 +1,6 @@
 'use strict'
 
-const Update        = require('lib/operations/Update')
+const Update        = require('src/operations/Update')
 const UserProfile   = require('../models/UserProfile')
 const Authorization = require('../security/Authorization')
 
