@@ -5,7 +5,7 @@ const { expect } = require('chai')
 const OperationContext = require('src/OperationContext')
 
 const composer = new Composer(null, { operations: [], config: {} })
-const context  = new OperationContext('TestContext', composer)
+const context  = new OperationContext(composer, 'TestContext')
 
 context.set({ a: 'A', b: 'B' })
 

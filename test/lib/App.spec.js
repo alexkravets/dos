@@ -180,8 +180,6 @@ describe('.process(req)', () => {
       message:    'Invalid operation output',
       statusCode: 500
     })
-    const [ validationError ] = result.error.validationErrors
-    expect(validationError).to.include.keys([ 'code', 'params', 'message', 'path' ])
   })
 
   it('returns 500, OperationError and logs error when unhandled exception thrown by operation', async() => {
@@ -193,9 +191,8 @@ describe('.process(req)', () => {
     expect(result.error).to.include({
       code:       'OperationError',
       status:     'Internal Server Error',
-      message:    'Simulated unhandled exception',
+      message:    'Unexpected operation error',
       statusCode: 500
     })
-    expect(result.error).to.have.property('originalError')
   })
 })

@@ -35,7 +35,7 @@ class CustomUserProfile extends UserProfile {
 const schemasPath = './test/example/schemas'
 const components  = [ UserProfile ]
 const composer    = new Composer(schemasPath, { components })
-const context     = new OperationContext('DocumentTest', composer)
+const context     = new OperationContext(composer, 'DocumentTest')
 
 describe('Document.schema', () => {
   it('returns extended schema of the document', () => {
@@ -108,7 +108,7 @@ describe('Document.create(context, query, attributes)', () => {
 
   it('creates document instance with callbacks', async() => {
     const userId  = 'USER_ID'
-    const context = new OperationContext('DocumentTest', composer)
+    const context = new OperationContext(composer, 'DocumentTest')
     context.set({ userId })
 
     const userProfile = await CustomUserProfile.create(context, query, attributes)
@@ -152,7 +152,7 @@ describe('Document.update(context, query, attributes)', () => {
   it('updates document instance with callbacks', async() => {
     const id      = 'USER_PROFILE_ID'
     const userId  = 'USER_ID'
-    const context = new OperationContext('DocumentTest', composer)
+    const context = new OperationContext(composer, 'DocumentTest')
     context.set({ userId })
 
     const userProfile = await CustomUserProfile.update(context, { id }, attributes)
@@ -199,7 +199,7 @@ describe('.save(parameters = {})', () => {
 
   it('creates new document instance', async() => {
     const userId  = 'USER_ID'
-    const context = new OperationContext('DocumentTest', composer)
+    const context = new OperationContext(composer, 'DocumentTest')
     context.set({ userId })
 
     const userProfile = new UserProfile(context, {

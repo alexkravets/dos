@@ -25,11 +25,11 @@ class ValidationError extends Error {
 
   get validationErrors() {
     return this._validationErrors.map(error => pick(error, [
-      'code',
       'message',
-      'params',
+      'schemaId',
       'path',
-      'schemaId'
+      'code',
+      'params'
     ]))
   }
 }

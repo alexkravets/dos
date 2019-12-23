@@ -69,8 +69,8 @@ class Composer {
     return result
   }
 
-  static validate(validator, schemaId, object, jsonSchema) {
-    const isValid = validator.validate(object, jsonSchema)
+  static validate(validator, schemaId, jsonSchema, object) {
+    const isValid = validator.validate(object, { id: schemaId, ...jsonSchema })
 
     if (isValid) { return true }
 
@@ -173,7 +173,7 @@ class Composer {
     if (!schema) { throw new Error(`${schemaId} schema is not registered`) }
 
     const { jsonSchema } = schema
-    Composer.validate(this._validator, schemaId, object, jsonSchema)
+    Composer.validate(this._validator, schemaId, jsonSchema, object)
   }
 
   validateInput(schemaId, object) {
@@ -338,7 +338,7 @@ class Composer {
     const jsonSchema = require(schemaPath)
 
     const validator = new ZSchema({ ignoreUnknownFormats: true })
-    Composer.validate(validator, 'Spec', this.spec, jsonSchema)
+    Composer.validate(validator, 'Spec', jsonSchema, this.spec)
   }
 }
 

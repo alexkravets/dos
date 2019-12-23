@@ -1,8 +1,19 @@
 'use strict'
 
-const Schema    = require('./Schema')
-const statuses  = require('statuses')
-const Component = require('./Component')
+const pick        = require('lodash.pick')
+const Schema      = require('./Schema')
+const statuses    = require('statuses')
+const Component   = require('./Component')
+const maskSecrets = require('./helpers/maskSecrets')
+
+const OPERATION_CONTEXT_FIELDS = [
+  'requestReceivedAt',
+  'requestId',
+  'userId',
+  'operationId',
+  'query',
+  'mutation'
+]
 
 class OperationError extends Component {
   static createSchema() {
@@ -11,56 +22,57 @@ class OperationError extends Component {
         type:     'object',
         required: true,
         properties: {
-          code: {
-            description: 'Error code',
-            type:        'string',
-            required:    true
-          },
           message: {
             description: 'Error message',
             type:        'string',
             required:    true
           },
+          code: {
+            description: 'Error code',
+            type:        'string',
+            required:    true
+          },
+          context: {
+            description: 'Error context object',
+            type:        'object'
+          },
           status: {
-            description: 'Error status',
+            description: 'HTTP error status',
             type:        'string',
             required:    true
           },
           statusCode: {
-            description: 'Error status code',
+            description: 'HTTP error status code',
             type:        'integer',
             required:    true
           },
-          originalError: {
-            description: 'Orignal error that cause the exception',
-            type:        'object'
-          },
           validationErrors: {
-            description: 'List of validation errors',
+            description: 'Validation errors',
             type: 'array',
             items: {
               type: 'object',
               properties: {
-                code: {
-                  type: 'string'
-                },
                 message: {
                   type: 'string'
                 },
+                schemaId: {
+                  description: 'Schema ID',
+                  type: 'string'
+                },
+                path: {
+                  description: 'Path of invalid attribute',
+                  type: 'string'
+                },
+                code: {
+                  description: 'Code of z-schema validation error',
+                  type: 'string'
+                },
                 params: {
-                  description: 'Field names of invalid parameters',
+                  description: 'Invalid attribute values',
                   type: 'array',
                   items: {
                     type: 'string'
                   }
-                },
-                path: {
-                  description: 'Path of invalid parameters',
-                  type: 'string'
-                },
-                schemaId: {
-                  description: 'Invalid parameters schema',
-                  type: 'string'
                 }
               }
             }
@@ -70,36 +82,56 @@ class OperationError extends Component {
     })
   }
 
-  constructor(context, status, error) {
-    let { message, code, validationErrors, originalError } = error
+  constructor(operationContext, status, originalError) {
+    let { message, code, validationErrors, context = {} } = originalError
 
     code = code ? code : 'OperationError'
 
-    const statusCode       = statuses(status)
-    const isOperationError = statusCode === 500
+    const statusCode          = statuses(status)
+    const hasContext          = Object.keys(context).length > 0
+    const shouldLogError      = statusCode === 500
+    const isOperationError    = code === 'OperationError'
+    const isInvalidInputError = code === 'InvalidInputError'
 
-    super(context, {
-      error: {
-        code,
-        status,
-        message,
-        statusCode
-      }
-    })
-
-    if (originalError) {
-      this.attributes.error.originalError = originalError
+    const error = {
+      message,
+      code,
+      status,
+      statusCode
     }
 
-    if (validationErrors) {
-      this.attributes.error.validationErrors = validationErrors
+    if (hasContext) {
+      error.context = maskSecrets(context)
     }
 
     if (isOperationError) {
-      this.attributes.error.originalError  = error
-      const { operationId, query, userId } = context.all
+      error.message = 'Unexpected operation error'
+    }
 
-      console.error('OperationError', { operationId, query, userId }, error)
+    if (isInvalidInputError) {
+      error.validationErrors = validationErrors
+    }
+
+    super(operationContext, { error })
+
+    if (shouldLogError) {
+      const operationError = { ...error, message }
+
+      operationError.operationContext = maskSecrets(
+        pick(operationContext.all, OPERATION_CONTEXT_FIELDS)
+      )
+
+      const log = [ 'OperationError', operationError ]
+
+      if (originalError.toJSON) {
+        operationError.originalErrorJson = JSON.stringify(originalError, null, 2)
+
+      } else {
+        log.push(originalError)
+
+      }
+
+      console.error(...log)
     }
   }
 

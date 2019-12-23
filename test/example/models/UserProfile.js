@@ -34,7 +34,15 @@ class UserProfile extends Document {
   static _read(query) {
     if (query.id === 'EXCEPTION') {
       const error = new Error('Simulated unhandled exception')
-      error.originalError = { message: 'Original error message' }
+
+      error.context = {
+        type:     'Simulated error with masked secrets',
+        secrets:  [{ passcode: 'SECRET_PASSCODE' }],
+        password: 'SECRET_PASSWORD',
+        data: {
+          cookie: 'SECRET_COOKIE'
+        }
+      }
 
       throw error
     }

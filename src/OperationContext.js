@@ -1,16 +1,23 @@
 'use strict'
 
+const uuid        = require('uuid/v4')
 const isString    = require('lodash.isstring')
 const isUndefined = require('lodash.isundefined')
 
 class OperationContext {
-  constructor(operationId, composer) {
+  constructor(composer, operationId, context = {}) {
     if (!composer) {
       throw new Error('Composer is not defined while operation context' +
         ` initialization, operationId: ${operationId}`)
     }
 
-    this._context     = { operationId }
+    context = {
+      requestId:         uuid(),
+      requestReceivedAt: new Date().toISOString(),
+      ...context
+    }
+
+    this._context     = { operationId, ...context }
     this._composer    = composer
     this._operationId = operationId
   }

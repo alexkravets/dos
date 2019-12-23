@@ -184,7 +184,7 @@ class Operation {
     const { operationId } = this
 
     this._req     = req || { headers: {}, query: {} }
-    this._context = new OperationContext(operationId, composer)
+    this._context = new OperationContext(composer, operationId, this._req)
 
     const headers = {}
     for (const name in this.req.headers) {
