@@ -135,8 +135,9 @@ class App {
     }
 
     const error = new OperationError({}, 'Not Found', {
-      code:    'OperationNotFound',
-      message: `Operation not found, route: ${method} ${path}`
+      code:    'OperationNotFoundError',
+      message: 'Operation not found',
+      context: { operationId, method, path }
     })
 
     const result     = error.json

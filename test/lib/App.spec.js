@@ -123,17 +123,17 @@ describe('.process(req)', () => {
     expect(statusCode).to.equal(204)
   })
 
-  it('returns 404, OperationNotFound if wrong method', async() => {
+  it('returns 404, OperationNotFoundError if wrong method', async() => {
     const url    = `${host}/DeleteUserProfile?id=USER_PROFILE_ID`
     const method = 'get'
 
     const { statusCode, result } = await app.process({ url, method, path: '/DeleteUserProfile' })
 
     expect(statusCode).to.equal(404)
-    expect(result.error.code).to.equal('OperationNotFound')
+    expect(result.error.code).to.equal('OperationNotFoundError')
   })
 
-  it('returns 404, OperationNotFound if wrong path', async() => {
+  it('returns 404, OperationNotFoundError if wrong path', async() => {
     const url    = `${host}/ActivateUserProfile?id=USER_PROFILE_ID`
     const method = 'patch'
 
@@ -141,10 +141,14 @@ describe('.process(req)', () => {
 
     expect(statusCode).to.equal(404)
     expect(result.error).to.include({
-      code:       'OperationNotFound',
+      code:       'OperationNotFoundError',
       status:     'Not Found',
-      message:    'Operation not found, route: patch /ActivateUserProfile',
+      message:    'Operation not found',
       statusCode: 404
+    })
+    expect(result.error.context).to.include({
+      method: 'patch',
+      path:   '/ActivateUserProfile'
     })
   })
 
