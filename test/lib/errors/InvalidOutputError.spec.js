@@ -20,7 +20,7 @@ describe('InvalidOutputError', () => {
         profileSchema.validate(object)
 
       } catch (validationError) {
-        outputError = new InvalidOutputError(validationError)
+        outputError = new InvalidOutputError(object, validationError)
 
       }
 
