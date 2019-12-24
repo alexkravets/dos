@@ -342,7 +342,7 @@ class Operation {
       output = this.composer.validateOutput(outputSchema.id, this._resultPlainObject)
 
     } catch (validationError) {
-      throw new InvalidOutputError(validationError)
+      throw new InvalidOutputError(this._resultPlainObject, validationError)
 
     }
 

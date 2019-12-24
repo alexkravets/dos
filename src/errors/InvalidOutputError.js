@@ -1,8 +1,10 @@
 'use strict'
 
 class InvalidOutputError extends Error {
-  constructor(validationError) {
+  constructor(invalidObject, validationError) {
     super('Invalid operation output')
+
+    this._invalidObject   = invalidObject
     this._validationError = validationError
   }
 
@@ -16,8 +18,9 @@ class InvalidOutputError extends Error {
 
   toJSON() {
     return {
-      code:    this._validationError.code,
-      message: this._validationError.message,
+      code:             this._validationError.code,
+      message:          this._validationError.message,
+      invalidObject:    this._invalidObject,
       validationErrors: this.validationErrors
     }
   }
