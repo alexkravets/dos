@@ -16,6 +16,69 @@ const OPERATION_CONTEXT_FIELDS = [
 ]
 
 class OperationError extends Component {
+  constructor(operationContext, status, originalError) {
+    let { message, code, validationErrors, context = {} } = originalError
+
+    code = code ? code : 'OperationError'
+
+    const statusCode          = statuses(status)
+    const hasContext          = Object.keys(context).length > 0
+    const shouldLogError      = statusCode === 500
+    const isOperationError    = code === 'OperationError'
+    const isInvalidInputError = code === 'InvalidInputError'
+
+    const error = {
+      message,
+      code,
+      status,
+      statusCode
+    }
+
+    if (hasContext) {
+      error.context = maskSecrets(context)
+    }
+
+    if (isOperationError) {
+      error.message = 'Unexpected operation error'
+    }
+
+    if (isInvalidInputError) {
+      error.validationErrors = validationErrors
+    }
+
+    super(operationContext, { error })
+
+    if (shouldLogError) {
+      OperationError.logError(operationContext, { ...error, message }, originalError)
+    }
+  }
+
+  get statusCode() {
+    return this.attributes.error.statusCode
+  }
+
+  static getOperationContext(operationContext) {
+    return maskSecrets(
+      pick(operationContext.all, OPERATION_CONTEXT_FIELDS)
+    )
+  }
+
+  static logError(operationContext, errorPlainObject, originalError) {
+    errorPlainObject.operationContext = OperationError.getOperationContext(operationContext)
+
+    const log = [ 'OperationError', errorPlainObject ]
+
+    if (originalError.toJSON) {
+      errorPlainObject.originalErrorJson = JSON.stringify(originalError, null, 2)
+
+    } else {
+      log.push(originalError)
+
+    }
+
+    console.error(...log)
+  }
+
   static createSchema() {
     return new Schema(this.id, {
       error: {
@@ -80,63 +143,6 @@ class OperationError extends Component {
         }
       }
     })
-  }
-
-  constructor(operationContext, status, originalError) {
-    let { message, code, validationErrors, context = {} } = originalError
-
-    code = code ? code : 'OperationError'
-
-    const statusCode          = statuses(status)
-    const hasContext          = Object.keys(context).length > 0
-    const shouldLogError      = statusCode === 500
-    const isOperationError    = code === 'OperationError'
-    const isInvalidInputError = code === 'InvalidInputError'
-
-    const error = {
-      message,
-      code,
-      status,
-      statusCode
-    }
-
-    if (hasContext) {
-      error.context = maskSecrets(context)
-    }
-
-    if (isOperationError) {
-      error.message = 'Unexpected operation error'
-    }
-
-    if (isInvalidInputError) {
-      error.validationErrors = validationErrors
-    }
-
-    super(operationContext, { error })
-
-    if (shouldLogError) {
-      const operationError = { ...error, message }
-
-      operationError.operationContext = maskSecrets(
-        pick(operationContext.all, OPERATION_CONTEXT_FIELDS)
-      )
-
-      const log = [ 'OperationError', operationError ]
-
-      if (originalError.toJSON) {
-        operationError.originalErrorJson = JSON.stringify(originalError, null, 2)
-
-      } else {
-        log.push(originalError)
-
-      }
-
-      console.error(...log)
-    }
-  }
-
-  get statusCode() {
-    return this.attributes.error.statusCode
   }
 }
 
