@@ -37,6 +37,18 @@ const components  = [ UserProfile ]
 const composer    = new Composer(schemasPath, { components })
 const context     = new OperationContext(composer, 'DocumentTest')
 
+describe('Document.documentIdKey', () => {
+  it('returns default key for ID', () => {
+    expect(UserProfile.documentIdKey).eql('id')
+  })
+})
+
+describe('Document.defaultIndexSortKey', () => {
+  it('returns default sort key for index', () => {
+    expect(UserProfile.defaultIndexSortKey).eql('createdAt')
+  })
+})
+
 describe('Document.schema', () => {
   it('returns extended schema of the document', () => {
     const propertyNames = Object.keys(UserProfile.schema.source)

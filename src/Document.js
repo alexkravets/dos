@@ -8,6 +8,14 @@ const startCase  = require('lodash.startcase')
 const capitalize = require('lodash.capitalize')
 
 class Document extends Component {
+  static get documentIdKey() {
+    return 'id'
+  }
+
+  static get defaultIndexSortKey() {
+    return 'createdAt'
+  }
+
   static get bodySchema() {
     return this._bodySchema
   }
@@ -66,6 +74,10 @@ class Document extends Component {
       attributes.createdBy = userId
     }
 
+    const timestamp = new Date().toJSON()
+    attributes.createdAt = timestamp
+    attributes.updatedAt = timestamp
+
     if (this.beforeCreate) { await this.beforeCreate(context, attributes) }
 
     await this._create(attributes)
@@ -86,13 +98,16 @@ class Document extends Component {
   static async update(context, query, attributes) {
     attributes = omit(attributes, [ 'id', 'createdAt', 'createdBy' ])
 
-    if (this.beforeUpdate) { await this.beforeUpdate(context, query, attributes) }
-
     const { userId } = context.all
 
     if (userId) {
       attributes.updatedBy = userId
     }
+
+    const timestamp = new Date().toJSON()
+    attributes.updatedAt = timestamp
+
+    if (this.beforeUpdate) { await this.beforeUpdate(context, query, attributes) }
 
     const doc    = await this._update(query, attributes)
     const object = new this(context, doc)
