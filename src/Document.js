@@ -56,14 +56,6 @@ class Document extends Component {
     return this._schema
   }
 
-  static async index(context, query = {}, options = {}) {
-    let { docs, ...rest } = await this._index(query, options)
-
-    const objects = docs.map(doc => new this(context, doc))
-
-    return { objects, ...rest }
-  }
-
   static async create(context, query, attributes) {
     const { composer } = context
     this.bodySchema.populateDefaultValues(attributes, composer.schemas)
@@ -80,12 +72,20 @@ class Document extends Component {
 
     if (this.beforeCreate) { await this.beforeCreate(context, attributes) }
 
-    await this._create(attributes)
-    const object = new this(context, attributes)
+    const doc    = await this._create(attributes)
+    const object = new this(context, doc)
 
     if (this.afterCreate) { await this.afterCreate(context, object) }
 
     return object
+  }
+
+  static async index(context, query = {}, options = {}) {
+    let { docs, ...rest } = await this._index(query, options)
+
+    const objects = docs.map(doc => new this(context, doc))
+
+    return { objects, ...rest }
   }
 
   static async read(context, query, options) {
@@ -96,7 +96,7 @@ class Document extends Component {
   }
 
   static async update(context, query, attributes) {
-    attributes = omit(attributes, [ 'id', 'createdAt', 'createdBy' ])
+    attributes = omit(attributes, [ this.documentIdKey, 'createdAt', 'createdBy' ])
 
     const { userId } = context.all
 
