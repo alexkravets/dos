@@ -2,7 +2,6 @@
 
 const omit       = require('lodash.omit')
 const Schema     = require('./Schema')
-const cloneDeep  = require('lodash.clonedeep')
 const Component  = require('./Component')
 const startCase  = require('lodash.startcase')
 const capitalize = require('lodash.capitalize')
@@ -125,21 +124,27 @@ class Document extends Component {
     if (this.afterDelete) { await this.afterDelete(context, query) }
   }
 
-  async save(parameters = {}) {
-    const isCreated  = !!this.id
-    const attributes = Object.assign(cloneDeep(this.attributes), cloneDeep(parameters))
+  delete() {
+    return this.constructor.delete(this.context, this._getQuery)
+  }
 
-    let object
+  async update(attributes, shouldMutate = false) {
+    const updatedDoc = await this.constructor.update(this.context, this._getQuery, attributes)
 
-    if (isCreated) {
-      object = await this.constructor.update(this.context, { id: this.id }, attributes)
-
-    } else {
-      object = await this.constructor.create(this._context, {}, attributes)
-
+    if (shouldMutate) {
+      this._attributes = updatedDoc.attributes
     }
 
-    this._attributes = object.attributes
+    return updatedDoc
+  }
+
+  get _getQuery() {
+    const query = {}
+
+    const { documentIdKey } = this.constructor
+    query[documentIdKey] = this.attributes[documentIdKey]
+
+    return query
   }
 }
 

@@ -3,10 +3,11 @@
 const Document  = require('src/Document')
 const timestamp = new Date().toJSON()
 
+// TODO: It's better to simulate in memory storage adaptor for proper tests.
 class UserProfile extends Document {
-  static get tableName() {
-    return 'UserProfile'
-  }
+  // static get tableName() {
+  //   return 'UserProfile'
+  // }
 
   static _index(query, options) { // eslint-disable-line no-unused-vars
     const timestamp = new Date().toJSON()

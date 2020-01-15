@@ -187,7 +187,7 @@ describe('Document.delete(context, attributes)', () => {
   })
 
   it('deletes document instance with callbacks', async() => {
-    const query  = { id: 'USER_PROFILE_ID' }
+    const query = { id: 'USER_PROFILE_ID' }
     await CustomUserProfile.delete(context, query)
 
     expect(query).to.include({
@@ -197,30 +197,36 @@ describe('Document.delete(context, attributes)', () => {
   })
 })
 
-describe('.save(parameters = {})', () => {
-  it('updates existing document instance', async() => {
-    const userProfile = new UserProfile(context, {
-      id: 'USER_PROFILE_ID'
+describe('.update(attributes = {}, shouldMutate = false)', () => {
+  it('updates document, returns new document instance', async() => {
+    const userProfile = await UserProfile.create(context, {}, {
+      id: 'USER_PROFILE_ID_1'
     })
 
-    userProfile.attributes.firstName = 'Stanislav'
-    await userProfile.save()
+    const updatedDoc = await userProfile.update({ firstName: 'Stanislav' })
 
-    expect(userProfile.attributes).to.include({ firstName: 'Stanislav' })
+    expect(userProfile.attributes.firstName).to.not.exist
+    expect(updatedDoc.attributes).to.include({ firstName: 'Stanislav' })
   })
 
-  it('creates new document instance', async() => {
-    const userId  = 'USER_ID'
-    const context = new OperationContext(composer, 'DocumentTest')
-    context.set({ userId })
-
-    const userProfile = new UserProfile(context, {
-      firstName: 'Alexander'
+  it('updates document, mutates document instance attributes', async() => {
+    const userProfile = await UserProfile.create(context, {}, {
+      id: 'USER_PROFILE_ID_2'
     })
 
-    await userProfile.save()
+    const updatedDoc = await userProfile.update({ firstName: 'Stanislav' }, true)
 
-    expect(userProfile.attributes).to.include({ createdBy: userId })
-    expect(userProfile.attributes).to.include.keys([ 'id', 'createdAt' ])
+    expect(userProfile.attributes).to.include({ firstName: 'Stanislav' })
+    expect(updatedDoc.attributes).to.include({ firstName: 'Stanislav' })
+  })
+})
+
+describe('.delete()', () => {
+  it('deletes document', async() => {
+    const userProfile = await UserProfile.create(context, {}, {
+      id: 'USER_PROFILE_ID_3'
+    })
+
+    await userProfile.delete()
   })
 })
