@@ -15,5 +15,6 @@ module.exports = {
   Delete:         require('./src/operations/Delete'),
   httpRequest:    require('./src/helpers/httpRequest'),
   jsonRequest:    require('./src/helpers/jsonRequest'),
+  CommonError:    require('./src/helpers/CommonError'),
   OperationError: require('./src/OperationError')
 }
