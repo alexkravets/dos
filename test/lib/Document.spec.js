@@ -123,7 +123,7 @@ describe('Document.create(context, query, attributes)', () => {
     const context = new OperationContext(composer, 'DocumentTest')
     context.set({ userId })
 
-    const userProfile = await CustomUserProfile.create(context, query, attributes)
+    const userProfile = await CustomUserProfile.create(context, attributes)
 
     expect(userProfile.json).to.include({
       createdBy:    userId,

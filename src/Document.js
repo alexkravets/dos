@@ -56,6 +56,10 @@ class Document extends Component {
   }
 
   static async create(context, query, attributes) {
+    if (!attributes) {
+      attributes = query
+    }
+
     const { composer } = context
     this.bodySchema.populateDefaultValues(attributes, composer.schemas)
 
