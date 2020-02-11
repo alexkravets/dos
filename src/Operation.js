@@ -326,10 +326,9 @@ class Operation {
 
     }
 
-    const { mutation } = inputValid
-    delete inputValid.mutation
+    const { mutation, ...query } = inputValid
 
-    return { query: inputValid, mutation }
+    return { query, mutation }
   }
 
   _validateOutput() {

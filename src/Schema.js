@@ -303,6 +303,7 @@ class Schema {
           }
 
         } else if (isArray) {
+          const itemProperties  = items.properties
           const itemRefSchemaId = items.$ref
 
           let itemSchema
@@ -314,15 +315,16 @@ class Schema {
               throw new Error(`"${this.id}.${propertyKey}.items.$ref" is` +
                 ` referensing missing schema "${itemRefSchemaId}"`)
             }
-
-          } else {
-            const itemProperties  = items.properties
-            itemSchema = new Schema(`${this.id}.${propertyKey}.items.properties`, itemProperties)
-
           }
 
-          for (const valueItem of value) {
-            itemSchema._mapObject(valueItem, schemas, callback)
+          if (itemProperties) {
+            itemSchema = new Schema(`${this.id}.${propertyKey}.items.properties`, itemProperties)
+          }
+
+          if (itemSchema) {
+            for (const valueItem of value) {
+              itemSchema._mapObject(valueItem, schemas, callback)
+            }
           }
         }
       }
