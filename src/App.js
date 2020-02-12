@@ -176,7 +176,7 @@ class App {
 
         for (const key in renderContext) {
           const value = renderContext[key]
-          result = result.replace(`$${key}`, value)
+          result = result.split(`$${key}`).join(value)
         }
 
         const headers    = { 'Content-Type': 'text/html; charset=UTF-8' }
