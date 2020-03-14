@@ -87,8 +87,9 @@ describe('.process(req)', () => {
       lastName:  'Kravets'
     })
 
-    const { result } = await app.process({ operationId, body })
+    const { result, headers } = await app.process({ operationId, body })
 
+    expect(headers).to.exist
     expect(result).to.have.property('data')
     expect(result.data).to.include({
       id: 'USER_PROFILE_ID',

@@ -57,6 +57,7 @@ describe('Document.schema', () => {
       'lastName',
       'age',
       'gender',
+      'friends',
       'id',
       'createdAt',
       'updatedAt',
@@ -69,7 +70,13 @@ describe('Document.schema', () => {
 describe('Document.bodySchema', () => {
   it('returns schema of the document body', () => {
     const propertyNames = Object.keys(UserProfile.bodySchema.source)
-    expect(propertyNames).to.deep.equal([ 'firstName', 'lastName', 'age', 'gender' ])
+    expect(propertyNames).to.deep.equal([
+      'firstName',
+      'lastName',
+      'age',
+      'gender',
+      'friends'
+    ])
   })
 })
 

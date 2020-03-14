@@ -247,7 +247,7 @@ describe('.cleanup(object, schemas = {})', () => {
     const schema = profileSchema.clone({ only: [ 'name', 'gender' ] }, 'MiniProfile')
 
     expect(() => schema.cleanup({ gender: 'Male' }))
-      .to.throw('Schema MiniProfile is referensing missing schema Gender')
+      .to.throw('Schema MiniProfile is referencing missing schema Gender')
   })
 
   it('throws Error if referenced schema is missing in for array item', () => {
@@ -267,7 +267,7 @@ describe('.cleanup(object, schemas = {})', () => {
     expect(() => schema.cleanup({
       name: 'Alexander',
       arrayWithBrokenReference: [ 'Male' ]
-    })).to.throw('Schema MiniProfile.arrayWithBrokenReference is referensing missing schema Gender')
+    })).to.throw('Schema MiniProfile.arrayWithBrokenReference is referencing missing schema Gender')
   })
 })
 
@@ -354,7 +354,7 @@ describe('.populateValueTypes(object, schemas = {})', () => {
     }, 'MiniProfile')
 
     expect(() => schema.populateValueTypes({ gender: 'Male' }))
-      .to.throw('"MiniProfile.gender.$ref" is referensing missing schema "Gender"')
+      .to.throw('"MiniProfile.gender.$ref" is referencing missing schema "Gender"')
   })
 })
 
@@ -453,7 +453,7 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
     }, 'Profile')
 
     expect(() => schema.populateDefaultValues({ preferences: {} }))
-      .to.throw('"Profile.preferences.$ref" is referensing missing schema' +
+      .to.throw('"Profile.preferences.$ref" is referencing missing schema' +
         ' "ProfilePreferences"')
   })
 
@@ -471,7 +471,7 @@ describe('.populateDefaultValues(object, schemas = {})', () => {
     }, 'Profile')
 
     expect(() => schema.populateDefaultValues({ preferencesHistory: [{}] }))
-      .to.throw('"Profile.preferencesHistory.items.$ref" is referensing' +
+      .to.throw('"Profile.preferencesHistory.items.$ref" is referencing' +
         ' missing schema "ProfilePreferences"')
   })
 })

@@ -12,3 +12,9 @@ age:
 gender:
   $ref: Gender
   default: Male
+
+friends:
+  type: array
+  default: []
+  items:
+    type: string

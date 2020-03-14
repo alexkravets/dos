@@ -188,7 +188,7 @@ class Schema {
           const refSchema = schemas[refSchemaId]
 
           if (!refSchema) {
-            throw new Error(`Schema ${this.id} is referensing missing schema` +
+            throw new Error(`Schema ${this.id} is referencing missing schema` +
               ` ${refSchemaId}`)
           }
 
@@ -199,7 +199,9 @@ class Schema {
           nestedSchema.cleanup(object[fieldName], schemas)
 
         } else if (isArray) {
-          const { $ref: itemRefSchemaId, properties: itemProperties } = jsonSchema.properties[fieldName].items
+          const { items } = jsonSchema.properties[fieldName]
+          const { $ref: itemRefSchemaId, properties: itemProperties } = items
+
           const array = object[fieldName]
           const isItemObject    = !!itemProperties
           const isItemReference = !!itemRefSchemaId
@@ -209,7 +211,7 @@ class Schema {
             itemSchema = schemas[itemRefSchemaId]
 
             if (!itemSchema) {
-              throw new Error(`Schema ${this.id}.${fieldName} is referensing` +
+              throw new Error(`Schema ${this.id}.${fieldName} is referencing` +
                 ` missing schema ${itemRefSchemaId}`)
             }
 
@@ -258,7 +260,7 @@ class Schema {
     //     const refSchema = schemas[refSchemaId]
 
     //     if (!refSchema) {
-    //       throw new Error(`Schema ${this.id} is referensing missing schema` +
+    //       throw new Error(`Schema ${this.id} is referencing missing schema` +
     //         ` ${refSchemaId}`)
     //     }
 
@@ -291,7 +293,7 @@ class Schema {
 
           if (!refSchema) {
             throw new Error(`"${this.id}.${propertyKey}.$ref" is` +
-              ` referensing missing schema "${refSchemaId}"`)
+              ` referencing missing schema "${refSchemaId}"`)
           }
 
           refSchema._mapObject(value, schemas, callback)
@@ -313,7 +315,7 @@ class Schema {
 
             if (!itemSchema) {
               throw new Error(`"${this.id}.${propertyKey}.items.$ref" is` +
-                ` referensing missing schema "${itemRefSchemaId}"`)
+                ` referencing missing schema "${itemRefSchemaId}"`)
             }
           }
 

@@ -266,6 +266,8 @@ class Operation {
   async exec() {
     let output
 
+    this.headers = {}
+
     try {
       await this._authorize()
 
@@ -292,6 +294,9 @@ class Operation {
 
     const response = { statusCode: this.statusCode }
     if (output) { response.result = output }
+
+    const hasHeaders = Object.keys(this.headers).length > 0
+    if (hasHeaders) { response.headers = this.headers}
 
     return response
   }
