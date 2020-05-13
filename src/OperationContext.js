@@ -1,8 +1,8 @@
 'use strict'
 
-const uuid        = require('uuid/v4')
-const isString    = require('lodash.isstring')
-const isUndefined = require('lodash.isundefined')
+const isString     = require('lodash.isstring')
+const isUndefined  = require('lodash.isundefined')
+const { v4: uuid } = require('uuid')
 
 class OperationContext {
   constructor(composer, operationId, context = {}) {

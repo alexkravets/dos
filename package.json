@@ -1,6 +1,6 @@
 {
   "name": "@kravc/common-service",
-  "version": "3.8.3",
+  "version": "3.8.4",
   "description": "Common API service library",
   "main": "index.js",
   "repository": {
@@ -42,7 +42,7 @@
     "@kravc/common-http": "^0.2.1",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
-    "mocha": "^7.1.1",
+    "mocha": "^7.1.2",
     "nock": "^12.0.3",
     "nyc": "^15.0.1"
   }
