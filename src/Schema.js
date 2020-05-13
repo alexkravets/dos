@@ -170,6 +170,20 @@ class Schema {
     return new Schema(schemaId, source)
   }
 
+  wrap(propertyName, isRequired = true, schemaId = 'UNDEFINED_SCHEMA_ID') {
+    const properties = this._source
+
+    const source = {
+      [propertyName]: {
+        type:     'object',
+        required: isRequired,
+        properties
+      }
+    }
+
+    return new Schema(schemaId, source)
+  }
+
   cleanup(object, schemas = {}) {
     if (this.isEnum) { return }
 

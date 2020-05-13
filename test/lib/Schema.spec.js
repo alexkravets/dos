@@ -138,6 +138,24 @@ describe('.clone(schemaId, { extend })', () => {
   })
 })
 
+describe('.wrap(propertyName, isRequired = true)', () => {
+  it('wraps schema source into required object property, returns new schema', () => {
+    const profileSchema = new Schema('Profile', profileSchemaSource)
+    const schema = profileSchema.wrap('data')
+
+    expect(schema.jsonSchema.required).to.deep.equal([ 'data' ])
+    expect(schema.source).to.have.property('data')
+  })
+
+  it('wraps schema source into not required object property, returns new schema', () => {
+    const profileSchema = new Schema('Profile', profileSchemaSource)
+    const schema = profileSchema.wrap('data', false, 'ClonedProfileData')
+
+    expect(schema.jsonSchema.required).to.not.exist
+    expect(schema.source).to.have.property('data')
+  })
+})
+
 describe('.cleanup(object, schemas = {})', () => {
   const genderSchemaSource = {
     type: 'string',

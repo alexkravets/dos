@@ -1,6 +1,6 @@
 {
   "name": "@kravc/common-service",
-  "version": "3.8.2",
+  "version": "3.8.3",
   "description": "Common API service library",
   "main": "index.js",
   "repository": {

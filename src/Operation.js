@@ -258,7 +258,11 @@ class Operation {
     if (!Component) { return }
 
     const { componentActionMethod } = this.constructor
-    const data = await componentActionMethod(this.context, this.query, this.mutation)
+
+    const data = await (this.mutation ?
+      componentActionMethod(this.context, this.query, this.mutation) :
+      componentActionMethod(this.context, this.query)
+    )
 
     return { data }
   }
