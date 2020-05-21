@@ -1,14 +1,14 @@
 'use strict'
 
-const Schema             = require('./Schema')
 const isEmpty            = require('lodash.isempty')
 const statuses           = require('statuses')
-const Security           = require('./Security')
 const pluralize          = require('pluralize')
+const cloneDeep          = require('lodash.clonedeep')
 const startCase          = require('lodash.startcase')
+const { Schema }         = require('@kravc/schema')
 const capitalize         = require('lodash.capitalize')
-const OperationError     = require('./OperationError')
-const OperationContext   = require('./OperationContext')
+const { v4: uuid }       = require('uuid')
+const OperationError     = require('./errors/OperationError')
 const InvalidInputError  = require('./errors/InvalidInputError')
 const InvalidOutputError = require('./errors/InvalidOutputError')
 
@@ -20,60 +20,8 @@ const TYPES = {
 }
 
 class Operation {
-  static get types() {
-    return TYPES
-  }
-
-  static get type() {
-    return Operation.types.READ
-  }
-
-  static get path() {
-    return `/${this.id}`
-  }
-
-  static get method() {
-    switch (this.type) {
-      case TYPES.CREATE: return 'post'
-      case TYPES.DELETE: return 'delete'
-      case TYPES.UPDATE: return 'patch'
-      default:           return 'get'
-    }
-  }
-
-  static statusCode(status = 'undefined') {
-    try {
-      const code = statuses(status)
-      return code
-
-    } catch (error) {
-      throw new Error(`Invalid status \`${status}\` for operation \`${this.id}\``)
-
-    }
-  }
-
   static get id() {
     return this.name
-  }
-
-  static get Component() {
-    return null
-  }
-
-  static get componentAction() {
-    return this.type
-  }
-
-  static get componentActionMethod() {
-    const { Component, componentAction } = this
-    return Component[componentAction].bind(Component)
-  }
-
-  static get tags() {
-    if (!this.Component) { return [] }
-
-    const componentTitlePlural = pluralize(startCase(this.Component.name))
-    return [ componentTitlePlural ]
   }
 
   static get summary() {
@@ -89,8 +37,65 @@ class Operation {
     return ''
   }
 
+  static get tags() {
+    if (!this.Component) { return [] }
+
+    const componentTitlePlural = pluralize(startCase(this.Component.name))
+    return [ componentTitlePlural ]
+  }
+
   static get security() {
     return []
+  }
+
+  static get query() {
+    return {}
+  }
+
+  static get mutation() {
+    const { type, Component } = this
+
+    if (Component) {
+      const { bodySchema, schema } = Component
+      const mutationSchema = bodySchema || schema
+
+      if (type === Operation.types.UPDATE) {
+        return mutationSchema.pure()
+      }
+
+      if (type === Operation.types.CREATE) {
+        return mutationSchema.clone()
+      }
+    }
+
+    return null
+  }
+
+  static get mutationSchema() {
+    const { id, mutation: schemaOrSource } = this
+
+    if (!schemaOrSource) { return null }
+
+    return new Schema(schemaOrSource, `${id}InputMutation`)
+  }
+
+  static get inputSchema() {
+    const { id } = this
+    let source = { ...this.query }
+
+    if (this.mutationSchema) {
+      source = {
+        ...source,
+        mutation: {
+          $ref:     `${id}InputMutation`,
+          required: true
+        }
+      }
+    }
+
+    if (isEmpty(source)) { return null }
+
+    return new Schema(source, `${id}Input`)
   }
 
   static get output() {
@@ -109,62 +114,48 @@ class Operation {
 
     if (!schemaOrSource) { return null }
 
-    return new Schema(`${id}Output`, schemaOrSource)
+    return new Schema(schemaOrSource, `${id}Output`)
   }
 
-  static get query() {
-    return {}
+  static get path() {
+    return `/${this.id}`
   }
 
-  static get mutation() {
-    const { type, Component } = this
+  static get types() {
+    return TYPES
+  }
 
-    if (Component) {
-      const { bodySchema, schema } = Component
-      const mutationSchema = bodySchema || schema
+  static get type() {
+    return Operation.types.READ
+  }
 
-      if (type === Operation.types.UPDATE) {
-        return mutationSchema.clone({ isUpdate: true })
-      }
-
-      if (type === Operation.types.CREATE) {
-        return mutationSchema.clone()
-      }
+  static get method() {
+    switch (this.type) {
+      case TYPES.CREATE: return 'post'
+      case TYPES.DELETE: return 'delete'
+      case TYPES.UPDATE: return 'patch'
+      default:           return 'get'
     }
+  }
 
+  static get Component() {
     return null
   }
 
-  static get mutationSchema() {
-    const { id, mutation: schemaOrSource } = this
-
-    if (!schemaOrSource) { return null }
-
-    return new Schema(`${id}InputMutation`, schemaOrSource)
+  static get componentAction() {
+    return this.type
   }
 
-  static get inputSchema() {
-    const { id } = this
-    let source = { ...this.query }
+  // TODO: Check how this would work with composer:
+  static get componentActionMethod() {
+    const { Component, componentAction } = this
 
-    if (this.mutationSchema) {
-      source = {
-        ...source,
-        mutation: {
-          $ref:     `${id}InputMutation`,
-          required: true
-        }
-      }
-    }
+    if (!Component) { return null }
 
-    const isEmptySource = isEmpty(source)
-    if (isEmptySource) {
-      return null
-    }
-
-    return new Schema(`${id}Input`, source)
+    return Component[componentAction].bind(Component)
   }
 
+  // TODO: Resolve with better errors:
   static get errors() {
     const errors = {}
     const { inputSchema, outputSchema } = this
@@ -180,191 +171,149 @@ class Operation {
     return errors
   }
 
-  constructor({ composer, req }) {
-    const { operationId } = this
-
-    this._req     = req || { headers: {}, query: {} }
-    this._context = new OperationContext(composer, operationId, this._req)
+  constructor(validator, _headers = {}) {
+    const { id: operationId, type, outputSchema } = this.constructor
 
     const headers = {}
-    for (const name in this.req.headers) {
-      headers[name.toLowerCase()] = this.req.headers[name]
+    for (const name in _headers) {
+      headers[name.toLowerCase()] = _headers[name]
     }
 
-    this.req.headers = headers
+    this.context = { headers, operationId }
+
+    this._headers    = null
+    this._validator  = validator
+    this._statusCode = 200
+
+    if (!outputSchema) {
+      this._statusCode = 204
+    }
+
+    if (type === Operation.types.CREATE) {
+      this._statusCode = 201
+    }
   }
 
-  get operationId() {
-    return this.constructor.id
+  setHeader(name, value) {
+    this._headers = this._headers || {}
+    this._headers[name.toLowerCase()] = value
   }
 
-  get req() {
-    return this._req
-  }
-
-  get query() {
-    return this.req.query
-  }
-
-  set query(value) {
-    this.req.query = value
-  }
-
-  get mutation() {
-    return this.req.mutation
-  }
-
-  set mutation(value) {
-    this.req.mutation = value
-  }
-
-  get context() {
-    return this._context
-  }
-
-  set context(hash) {
-    this._context.set(hash)
-  }
-
-  get composer() {
-    return this._context.composer
-  }
-
-  get status() {
-    if (this._status) { return this._status }
-
-    const { type, outputSchema } = this.constructor
-
-    if (!outputSchema) { return 'No Content' }
-    if (type === Operation.types.CREATE) { return 'Created' }
-
-    return 'OK'
-  }
-
-  get statusCode() {
-    return Operation.statusCode(this.status)
-  }
-
-  get result() {
-    return this._result || null
-  }
-
-  set result(value) {
-    this._result = value
-  }
-
-  async action() {
-    const { Component } = this.constructor
-    if (!Component) { return }
-
-    const { componentActionMethod } = this.constructor
-
-    const data = await (this.mutation ?
-      componentActionMethod(this.context, this.query, this.mutation) :
-      componentActionMethod(this.context, this.query)
-    )
-
-    return { data }
-  }
-
-  async exec() {
-    let output
-
-    this.headers = {}
-
+  setStatus(status = 'UNDEFINED') {
     try {
-      await this._authorize()
-
-      const { query, mutation } = this._validateInput()
-
-      this.context  = { query }
-      this.query    = query
-      this.mutation = mutation
-
-      if (this.before) { await this.before() }
-
-      this.result = await this.action()
-
-      if (this.after) { await this.after() }
-
-      output = this._validateOutput()
+      this._statusCode = statuses(status)
 
     } catch (error) {
-      this._status = this._errorStatus(error)
-
-      output = new OperationError(this.context, this._status, error).json
+      throw new Error(`Operation "${this.id}" sets invalid status "${status}"`)
 
     }
+  }
 
-    const response = { statusCode: this.statusCode }
-    if (output) { response.result = output }
+  async exec(input) {
+    const { inputSchema, outputSchema, errors } = this.constructor
 
-    const hasHeaders = Object.keys(this.headers).length > 0
-    if (hasHeaders) { response.headers = this.headers}
+    this.context.requestId         = uuid()
+    this.context.requestReceivedAt = new Date().toISOString()
+
+    let result
+
+    try {
+      // TODO: Finish security implementation:
+      if (this.authorize) {
+        this.context.identity = await this.authorize(this.context.headers)
+      }
+
+      if (inputSchema) {
+        try {
+          input = this._validator.validate(input, inputSchema.id)
+
+        } catch (validationError) {
+          throw new InvalidInputError(validationError, this.context)
+
+        }
+
+      } else {
+        input = {}
+
+      }
+
+      const { mutation, ...query } = input
+      this.context.query = query
+
+      if (this.before) {
+        input = await this.before(cloneDeep({ ...query, mutation }))
+      }
+
+      if (this.action) {
+        result = await this.action(cloneDeep(input))
+
+      } else {
+        result = await this.componentAction(cloneDeep(input))
+
+      }
+
+      if (this.after) {
+        result = await this.after(input, result)
+      }
+
+      if (outputSchema) {
+        try {
+          result = this._validator.validate(result, outputSchema.id)
+
+        } catch (validationError) {
+          throw new InvalidOutputError(result, validationError)
+
+        }
+
+      } else {
+        result = null
+
+      }
+
+    } catch (error) {
+      let errorStatus
+
+      const { code } = error
+
+      if (!code || !errors[code]) {
+        errorStatus = 'Internal Server Error'
+
+      } else {
+        errorStatus = errors[code].status
+
+      }
+
+      this.setStatus(errorStatus)
+
+      result = new OperationError(this.context, errorStatus, error).json
+    }
+
+    const response = {
+      statusCode: this._statusCode
+    }
+
+    if (result) {
+      response.result = result
+    }
+
+    if (this._headers) {
+      response.headers = this._headers
+    }
 
     return response
   }
 
-  get _resultPlainObject() {
-    const json = JSON.stringify(this.result)
-    return JSON.parse(json)
-  }
+  async componentAction(input) {
+    const { componentActionMethod } = this.constructor
 
-  async _authorize() {
-    const { security } = this.constructor
-    const authorizationContext = await Security.authorize({ req: this.req, context: this.context }, security)
-    this.context.set(authorizationContext)
-  }
+    const { mutation, ...query } = input
 
-  _validateInput() {
-    const { inputSchema } = this.constructor
+    const data = await (mutation ?
+      componentActionMethod(this.context, query, mutation) :
+      componentActionMethod(this.context, query)
+    )
 
-    if (!inputSchema) { return { query: {}, mutation: null } }
-
-    const input = { ...this.query }
-    if (this.mutation) {
-      input.mutation = { ...this.mutation }
-    }
-
-    let inputValid
-    try {
-      inputValid = this.composer.validateInput(inputSchema.id, input)
-
-    } catch (validationError) {
-      throw new InvalidInputError(validationError)
-
-    }
-
-    const { mutation, ...query } = inputValid
-
-    return { query, mutation }
-  }
-
-  _validateOutput() {
-    const { outputSchema } = this.constructor
-
-    if (!outputSchema) { return }
-
-    let output
-    try {
-      output = this.composer.validateOutput(outputSchema.id, this._resultPlainObject)
-
-    } catch (validationError) {
-      throw new InvalidOutputError(this._resultPlainObject, validationError)
-
-    }
-
-    return output
-  }
-
-  _errorStatus(error) {
-    const { errors } = this.constructor
-    const { code }   = error
-
-    if (!code) { return 'Internal Server Error' }
-    if (!errors[code]) { return 'Internal Server Error' }
-
-    return errors[code].status
+    return { data }
   }
 }
 

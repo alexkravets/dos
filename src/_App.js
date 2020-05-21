@@ -1,7 +1,7 @@
 'use strict'
 
 const get              = require('lodash.get')
-const Composer         = require('./Composer')
+// const Composer         = require('./Composer')
 const isString         = require('lodash.isstring')
 const { parse }        = require('url')
 const { resolve }      = require('path')
@@ -9,8 +9,8 @@ const OperationError   = require('./OperationError')
 const { readFileSync } = require('fs')
 
 class App {
-  constructor(schemasPath, { components, operations, config }) {
-    this._composer = new Composer(schemasPath, { components, operations, config })
+  constructor(schemasPath, { config }) { // components, operations,
+    // this._composer = new Composer(schemasPath, { components, operations, config })
 
     this._routes = {}
     this._operationsMap = {}
@@ -24,9 +24,9 @@ class App {
     this._isProductionMode = config.isProductionMode
   }
 
-  get composer() {
-    return this._composer
-  }
+  // get composer() {
+  //   return this._composer
+  // }
 
   get spec() {
     return this.composer.spec

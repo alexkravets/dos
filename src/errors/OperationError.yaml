@@ -1,0 +1,43 @@
+error:
+  required: true
+
+  properties:
+    message:
+      description: 'Error message'
+      required:    true
+
+    code:
+      description: 'Error code'
+      required:    true
+
+    status:
+      description: 'HTTP error status'
+      required:    true
+
+    statusCode:
+      description: 'HTTP error status code'
+      type:        integer
+      required:    true
+
+    context:
+      description: 'Error context object'
+      type:        object
+
+    validationErrors:
+      description: 'Validation errors'
+      items:
+        properties:
+          message: {}
+
+          schemaId:
+            description: 'Schema ID'
+
+          path:
+            description: 'Path of invalid attribute'
+
+          code:
+            description: 'Code of z-schema validation error'
+
+          params:
+            description: 'Invalid attribute values'
+            type: array

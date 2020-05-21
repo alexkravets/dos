@@ -9,22 +9,32 @@ class Component {
     return this._schema
   }
 
-  static createSchema(schemas) {
-    this._schema = schemas[this.name]
-    return this._schema
+  static set schema(schema) {
+    this._schema = schema
+
+    return schema
   }
 
   constructor(context = {}, attributes = {}) {
     this._context    = context
+    this._validator  = context.validator
     this._attributes = attributes
+
+    if (!this._validator) {
+      throw new Error(`Validator is undefined for "${this.componentId}:${this.id}"`)
+    }
   }
 
-  get componentId() {
-    return this.constructor.id
+  get context() {
+    return this._context
   }
 
   get id() {
     return this.attributes.id || null
+  }
+
+  get componentId() {
+    return this.constructor.id
   }
 
   get attributes() {
@@ -32,28 +42,15 @@ class Component {
   }
 
   get json() {
-    return this.toJSON()
-  }
-
-  get context() {
-    return this._context
-  }
-
-  get composer() {
-    const { composer } = this.context
-    if (composer) { return composer }
-
-    const { componentId, id } = this
-    throw new Error(`${componentId}:${id}.context is missing 'composer'`)
-  }
-
-  validate() {
-    const { json, composer, componentId } = this
-    composer.validate(componentId, json)
+    return JSON.parse(JSON.stringify(this))
   }
 
   toJSON() {
-    return this.attributes
+    return this._attributes
+  }
+
+  validate() {
+    this._validator.validate(this.json, this.componentId)
   }
 }
 

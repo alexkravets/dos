@@ -4,7 +4,7 @@ const Operation  = require('../Operation')
 const startCase  = require('lodash.startcase')
 const capitalize = require('lodash.capitalize')
 
-module.exports = (Component, componentAction = 'read') => {
+const Read = (Component, componentAction = 'read') => {
   if (!Component) {
     throw new Error('Argument "Component" is undefined for "Read" operation' +
       ' function')
@@ -33,10 +33,11 @@ module.exports = (Component, componentAction = 'read') => {
       return {
         id: {
           description: `${componentTitle} ID`,
-          type:        'string',
-          required:    true
+          required: true
         }
       }
     }
   }
 }
+
+module.exports = Read

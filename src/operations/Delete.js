@@ -4,7 +4,7 @@ const Operation  = require('../Operation')
 const startCase  = require('lodash.startcase')
 const capitalize = require('lodash.capitalize')
 
-module.exports = (Component, componentAction = 'delete') => {
+const Delete = (Component, componentAction = 'delete') => {
   if (!Component) {
     throw new Error('Argument "Component" is undefined for "Delete" operation' +
       ' function')
@@ -37,7 +37,6 @@ module.exports = (Component, componentAction = 'delete') => {
       return {
         id: {
           description: `${componentTitle} ID`,
-          type:        'string',
           required:    true
         }
       }
@@ -48,3 +47,5 @@ module.exports = (Component, componentAction = 'delete') => {
     }
   }
 }
+
+module.exports = Delete

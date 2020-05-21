@@ -5,7 +5,7 @@ const pluralize  = require('pluralize')
 const startCase  = require('lodash.startcase')
 const capitalize = require('lodash.capitalize')
 
-module.exports = (Component, componentAction = 'index') => {
+const Index = (Component, componentAction = 'index') => {
   if (!Component) {
     throw new Error('Argument "Component" is undefined for "Index" operation' +
       ' function')
@@ -47,37 +47,29 @@ module.exports = (Component, componentAction = 'index') => {
         },
         sort: {
           description: 'Sort direction',
-          type:        'string',
           enum:        [ 'asc', 'desc' ],
           default:     defaultSort
         },
         exclusiveStartKey: {
-          description: `Return ${componentTitlePlural} starting from specific key`,
-          type:        'string'
+          description: `Return ${componentTitlePlural} starting from specific key`
         }
       }
     }
 
     static get output() {
-      const { Component: { schema: { id } } } = this
-
       return {
         data: {
-          type:     'array',
-          items:    { $ref: id },
+          items: { $ref: this.Component.schema.id },
           required: true
         },
         pageInfo: {
-          type:       'object',
-          required:   true,
+          required: true,
           properties: {
             exclusiveStartKey: {
-              description: 'Exclusive start key specified in the request',
-              type:        'string'
+              description: 'Exclusive start key specified in the request'
             },
             lastEvaluatedKey: {
-              description: 'Last evaluated key to get next portion of results',
-              type:        'string'
+              description: 'Last evaluated key to get next portion of results'
             },
             limit: {
               description: 'Limit value specified in the request',
@@ -89,7 +81,6 @@ module.exports = (Component, componentAction = 'index') => {
             },
             sort: {
               description: 'Sort direction',
-              type:        'string',
               enum:        [ 'asc', 'desc' ]
             }
           }
@@ -97,23 +88,21 @@ module.exports = (Component, componentAction = 'index') => {
       }
     }
 
-    async action() {
-      const { componentActionMethod } = this.constructor
-      const { exclusiveStartKey, limit, sort } = this.query
-
-      delete this.query.sort
-      delete this.query.limit
-      delete this.query.exclusiveStartKey
-
+    async action(input) {
+      const { exclusiveStartKey, limit, sort, ...query } = input
       const options = { exclusiveStartKey, limit, sort }
-      const result = await componentActionMethod(this.context, this.query, options)
+
+      const { componentActionMethod } = this.constructor
+      const result = await componentActionMethod(this.context, query, options)
 
       const { objects: data, count, lastEvaluatedKey } = result
 
       return {
-        data,
-        pageInfo: { sort, count, limit, lastEvaluatedKey, exclusiveStartKey }
+        pageInfo: { sort, count, limit, lastEvaluatedKey, exclusiveStartKey },
+        data
       }
     }
   }
 }
+
+module.exports = Index

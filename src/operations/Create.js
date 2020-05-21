@@ -2,7 +2,7 @@
 
 const Operation = require('../Operation')
 
-module.exports = (Component, componentAction = 'create') => {
+const Create = (Component, componentAction = 'create') => {
   if (!Component) {
     throw new Error('Argument "Component" is undefined for "Create" operation' +
       ' function')
@@ -29,3 +29,5 @@ module.exports = (Component, componentAction = 'create') => {
     }
   }
 }
+
+module.exports = Create
