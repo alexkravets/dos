@@ -1,27 +1,50 @@
 'use strict'
 
-const isEmpty            = require('lodash.isempty')
-const statuses           = require('statuses')
-const pluralize          = require('pluralize')
-const cloneDeep          = require('lodash.clonedeep')
-const startCase          = require('lodash.startcase')
-const { Schema }         = require('@kravc/schema')
-const capitalize         = require('lodash.capitalize')
-const { v4: uuid }       = require('uuid')
-const OperationError     = require('./errors/OperationError')
-const InvalidInputError  = require('./errors/InvalidInputError')
-const InvalidOutputError = require('./errors/InvalidOutputError')
+const isEmpty    = require('lodash.isempty')
+const pluralize  = require('pluralize')
+const cloneDeep  = require('lodash.clonedeep')
+const startCase  = require('lodash.startcase')
+const { Schema } = require('@kravc/schema')
+const capitalize = require('lodash.capitalize')
 
 const TYPES = {
-  CREATE: 'create',
   READ:   'read',
+  CREATE: 'create',
   UPDATE: 'update',
   DELETE: 'delete'
 }
 
 class Operation {
+  static get types() {
+    return TYPES
+  }
+
   static get id() {
     return this.name
+  }
+
+  static get path() {
+    return `/${this.id}`
+  }
+
+  static get type() {
+    return Operation.types.READ
+  }
+
+  static get method() {
+    switch (this.type) {
+      case TYPES.CREATE: return 'post'
+      case TYPES.DELETE: return 'delete'
+      case TYPES.UPDATE: return 'patch'
+      default:           return 'get'
+    }
+  }
+
+  static get tags() {
+    if (!this.Component) { return [] }
+
+    const componentTitlePlural = pluralize(startCase(this.Component.name))
+    return [ componentTitlePlural ]
   }
 
   static get summary() {
@@ -37,15 +60,12 @@ class Operation {
     return ''
   }
 
-  static get tags() {
-    if (!this.Component) { return [] }
-
-    const componentTitlePlural = pluralize(startCase(this.Component.name))
-    return [ componentTitlePlural ]
-  }
-
   static get security() {
     return []
+  }
+
+  static async authorize() {
+    return null
   }
 
   static get query() {
@@ -117,27 +137,6 @@ class Operation {
     return new Schema(schemaOrSource, `${id}Output`)
   }
 
-  static get path() {
-    return `/${this.id}`
-  }
-
-  static get types() {
-    return TYPES
-  }
-
-  static get type() {
-    return Operation.types.READ
-  }
-
-  static get method() {
-    switch (this.type) {
-      case TYPES.CREATE: return 'post'
-      case TYPES.DELETE: return 'delete'
-      case TYPES.UPDATE: return 'patch'
-      default:           return 'get'
-    }
-  }
-
   static get Component() {
     return null
   }
@@ -156,42 +155,25 @@ class Operation {
   }
 
   // TODO: Resolve with better errors:
+
+  // TODO: Move these default errors to composer as well:
   static get errors() {
     const errors = {}
     const { inputSchema, outputSchema } = this
 
     if (inputSchema) {
-      errors.InvalidInputError = { status: 'Bad Request' }
+      errors.InvalidInputError = { statusCode: 403 }
     }
 
     if (outputSchema) {
-      errors.InvalidOutputError = { status: 'Internal Server Error' }
+      errors.InvalidOutputError = { statusCode: 500 }
     }
 
     return errors
   }
 
-  constructor(validator, _headers = {}) {
-    const { id: operationId, type, outputSchema } = this.constructor
-
-    const headers = {}
-    for (const name in _headers) {
-      headers[name.toLowerCase()] = _headers[name]
-    }
-
-    this.context = { headers, operationId }
-
-    this._headers    = null
-    this._validator  = validator
-    this._statusCode = 200
-
-    if (!outputSchema) {
-      this._statusCode = 204
-    }
-
-    if (type === Operation.types.CREATE) {
-      this._statusCode = 201
-    }
+  constructor(context) {
+    this._context = context
   }
 
   setHeader(name, value) {
@@ -199,114 +181,37 @@ class Operation {
     this._headers[name.toLowerCase()] = value
   }
 
-  setStatus(status = 'UNDEFINED') {
-    try {
-      this._statusCode = statuses(status)
-
-    } catch (error) {
-      throw new Error(`Operation "${this.id}" sets invalid status "${status}"`)
-
-    }
+  get context() {
+    return this._context
   }
 
-  async exec(input) {
-    const { inputSchema, outputSchema, errors } = this.constructor
-
-    this.context.requestId         = uuid()
-    this.context.requestReceivedAt = new Date().toISOString()
-
+  async exec(_parameters) {
+    let parameters = cloneDeep(_parameters)
     let result
 
-    try {
-      // TODO: Finish security implementation:
-      if (this.authorize) {
-        this.context.identity = await this.authorize(this.context.headers)
-      }
-
-      if (inputSchema) {
-        try {
-          input = this._validator.validate(input, inputSchema.id)
-
-        } catch (validationError) {
-          throw new InvalidInputError(validationError, this.context)
-
-        }
-
-      } else {
-        input = {}
-
-      }
-
-      const { mutation, ...query } = input
-      this.context.query = query
-
-      if (this.before) {
-        input = await this.before(cloneDeep({ ...query, mutation }))
-      }
-
-      if (this.action) {
-        result = await this.action(cloneDeep(input))
-
-      } else {
-        result = await this.componentAction(cloneDeep(input))
-
-      }
-
-      if (this.after) {
-        result = await this.after(input, result)
-      }
-
-      if (outputSchema) {
-        try {
-          result = this._validator.validate(result, outputSchema.id)
-
-        } catch (validationError) {
-          throw new InvalidOutputError(result, validationError)
-
-        }
-
-      } else {
-        result = null
-
-      }
-
-    } catch (error) {
-      let errorStatus
-
-      const { code } = error
-
-      if (!code || !errors[code]) {
-        errorStatus = 'Internal Server Error'
-
-      } else {
-        errorStatus = errors[code].status
-
-      }
-
-      this.setStatus(errorStatus)
-
-      result = new OperationError(this.context, errorStatus, error).json
+    if (this.before) {
+      parameters = await this.before(parameters)
     }
 
-    const response = {
-      statusCode: this._statusCode
+    if (this.action) {
+      result = await this.action(parameters)
+
+    } else {
+      result = await this._componentAction(parameters)
+
     }
 
-    if (result) {
-      response.result = result
+    if (this.after) {
+      result = await this.after(parameters, result)
     }
 
-    if (this._headers) {
-      response.headers = this._headers
-    }
-
-    return response
+    return { result, headers: this._headers }
   }
 
-  async componentAction(input) {
+  async _componentAction(parameters) {
     const { componentActionMethod } = this.constructor
 
-    const { mutation, ...query } = input
+    const { mutation, ...query } = parameters
 
     const data = await (mutation ?
       componentActionMethod(this.context, query, mutation) :

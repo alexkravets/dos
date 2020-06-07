@@ -15,12 +15,12 @@ class OperationError extends Component {
     return operationErrorSchema
   }
 
-  constructor(operationContext, status, originalError) {
+  constructor(operationContext, statusCode, originalError) {
     let { message, code, validationErrors, context = {} } = originalError
 
     code = code ? code : 'OperationError'
 
-    const statusCode          = statuses(status)
+    const status              = statuses[statusCode]
     const hasContext          = Object.keys(context).length > 0
     const shouldLogError      = statusCode === 500
     const isOperationError    = code === 'OperationError'
