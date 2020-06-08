@@ -35,8 +35,6 @@ rules:
     - 1
     - anonymous: always
       named: never
-    # - error
-    # - never
   space-infix-ops: error
   space-unary-ops: error
   no-console: off

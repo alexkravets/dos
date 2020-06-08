@@ -1,11 +1,10 @@
 'use strict'
 
-const isEmpty    = require('lodash.isempty')
-const pluralize  = require('pluralize')
-const cloneDeep  = require('lodash.clonedeep')
-const startCase  = require('lodash.startcase')
-const { Schema } = require('@kravc/schema')
-const capitalize = require('lodash.capitalize')
+const isEmpty        = require('lodash.isempty')
+const cloneDeep      = require('lodash.clonedeep')
+const { Schema }     = require('@kravc/schema')
+const defaultTags    = require('./helpers/defaultTags')
+const defaultSummary = require('./helpers/defaultSummary')
 
 const TYPES = {
   READ:   'read',
@@ -15,20 +14,9 @@ const TYPES = {
 }
 
 class Operation {
-  static get types() {
-    return TYPES
-  }
-
-  static get id() {
-    return this.name
-  }
-
+  // TODO: Move method and path to spec / Service:
   static get path() {
     return `/${this.id}`
-  }
-
-  static get type() {
-    return Operation.types.READ
   }
 
   static get method() {
@@ -39,21 +27,26 @@ class Operation {
       default:           return 'get'
     }
   }
+  // ---
+
+  static get types() {
+    return TYPES
+  }
+
+  static get type() {
+    return Operation.types.READ
+  }
+
+  static get id() {
+    return this.name
+  }
 
   static get tags() {
-    if (!this.Component) { return [] }
-
-    const componentTitlePlural = pluralize(startCase(this.Component.name))
-    return [ componentTitlePlural ]
+    return defaultTags(this.Component)
   }
 
   static get summary() {
-    if (!this.Component) { return '' }
-
-    const { Component: { name }, componentAction } = this
-    const componentTitle = startCase(name).toLowerCase()
-
-    return capitalize(`${componentAction} ${componentTitle}`)
+    return defaultSummary(this.Component, this.componentAction)
   }
 
   static get description() {
@@ -137,6 +130,23 @@ class Operation {
     return new Schema(schemaOrSource, `${id}Output`)
   }
 
+  // TODO: Resolve with better errors:
+  // TODO: Move these default errors to composer as well:
+  static get errors() {
+    const errors = {}
+    const { inputSchema, outputSchema } = this
+
+    if (inputSchema) {
+      errors.InvalidInputError = { statusCode: 401 }
+    }
+
+    if (outputSchema) {
+      errors.InvalidOutputError = { statusCode: 500 }
+    }
+
+    return errors
+  }
+
   static get Component() {
     return null
   }
@@ -152,24 +162,6 @@ class Operation {
     if (!Component) { return null }
 
     return Component[componentAction].bind(Component)
-  }
-
-  // TODO: Resolve with better errors:
-
-  // TODO: Move these default errors to composer as well:
-  static get errors() {
-    const errors = {}
-    const { inputSchema, outputSchema } = this
-
-    if (inputSchema) {
-      errors.InvalidInputError = { statusCode: 403 }
-    }
-
-    if (outputSchema) {
-      errors.InvalidOutputError = { statusCode: 500 }
-    }
-
-    return errors
   }
 
   constructor(context) {

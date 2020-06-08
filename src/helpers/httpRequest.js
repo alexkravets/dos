@@ -48,7 +48,7 @@ const httpRequest = options => {
 }
 
 // TODO: Add follow redirects option.
-module.exports = async(logger, options) => {
+module.exports = async (logger, options) => {
   const { retryDelay = DEFAULT_RETRY_DELAY_MS } = options
 
   let { maxAttempts: attemptsLeft = DEFAULT_MAX_ATTEMPTS } = options
