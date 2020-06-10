@@ -9,12 +9,27 @@ const InvalidInputError  = require('./errors/InvalidInputError')
 const InvalidOutputError = require('./errors/InvalidOutputError')
 const OperationNotFoundError = require('./errors/OperationNotFoundError')
 
-class Service {
-  constructor(modules) {
-    const components = modules
-    const operations = modules
+// // TODO: Move method and path to spec / Service:
+// static get path() {
+//   return `/${this.id}`
+// }
 
-    const schemasMap = createSchemasMap(components, operations)
+// static get method() {
+//   switch (this.type) {
+//     case TYPES.CREATE: return 'post'
+//     case TYPES.DELETE: return 'delete'
+//     case TYPES.UPDATE: return 'patch'
+//     default:           return 'get'
+//   }
+// }
+// // ---
+
+class Service {
+  constructor(modules, path = '/src') {
+    const components = modules.filter(Component => !Component.types)
+    const operations = modules.filter(Component => !!Component.types)
+
+    const schemasMap = createSchemasMap(path, operations, [ ...components, OperationError ])
     const schemas    = Object.values(schemasMap)
     const validator  = new Validator(schemas)
 

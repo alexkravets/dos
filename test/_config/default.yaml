@@ -1,8 +1,0 @@
-spec:
-  info:
-    title:   Common Service
-    version: '1.0'
-  basePath: /
-  host: localhost:3000
-  schemes:
-    - http

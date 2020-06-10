@@ -1,8 +1,12 @@
 'use strict'
 
-const Profile       = require('./components/Profile')
 const { expect }    = require('chai')
+const { Schema }    = require('@kravc/schema')
+const { Component } = require('src')
 const { Validator } = require('@kravc/schema')
+
+class Profile extends Component {}
+Profile.schema = Schema.loadSync('test/schemas/Profile.yaml')
 
 describe('Component', () => {
   const validator = new Validator([ Profile.schema ])

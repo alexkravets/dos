@@ -1,23 +1,46 @@
 'use strict'
 
-const path            = require('path')
-const uniq            = require('lodash.uniq')
-const keyBy           = require('lodash.keyby')
-const compact         = require('lodash.compact')
-const OperationError  = require('../errors/OperationError')
-const loadSchemasSync = require('./loadSchemasSync')
+const path       = require('path')
+const uniq       = require('lodash.uniq')
+const keyBy      = require('lodash.keyby')
+const compact    = require('lodash.compact')
+const endsWith   = require('lodash.endswith')
+const { Schema } = require('@kravc/schema')
+const { readdirSync, statSync } = require('fs')
 
-const DEFAULT_SCHEMAS_PATH = path.resolve(__dirname) + '/schemas'
+const ROOT_PATH = process.cwd()
 
-const createSchemasMap = (components, operations) => {
-  const yamlSchemas = loadSchemasSync(DEFAULT_SCHEMAS_PATH)
+const listFilesSync = dir =>
+  readdirSync(dir)
+    .reduce((files, file) =>
+      statSync(path.join(dir, file)).isDirectory() ?
+        files.concat(listFilesSync(path.join(dir, file))) :
+        files.concat(path.join(dir, file))
+    , [])
+
+const readSchemasSync = path =>
+  listFilesSync(ROOT_PATH + path)
+    .filter(fileName => endsWith(fileName, '.yaml'))
+    .map(schemaPath => Schema.loadSync(schemaPath))
+
+const createSchemasMap = (path, operations, components) => {
+  const yamlSchemas = readSchemasSync(path)
   const schemasMap  = keyBy(yamlSchemas, 'id')
 
   const operationComponents = compact(operations.map(({ Component }) => Component))
   components = uniq([ ...components, ...operationComponents ])
 
   for (const component of components) {
-    component.schema = schemasMap[component.id]
+    if (!component.schema) {
+      const schema = schemasMap[component.id]
+
+      if (!schema) {
+        throw new Error(`Schema for component "${component.id}" not found`)
+      }
+
+      component.schema = schema
+    }
+
     schemasMap[component.id] = component.schema
   }
 
@@ -36,8 +59,6 @@ const createSchemasMap = (components, operations) => {
       schemasMap[outputSchema.id] = outputSchema
     }
   }
-
-  schemasMap[OperationError.id] = OperationError.schema
 
   return schemasMap
 }

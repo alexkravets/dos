@@ -2,35 +2,19 @@
 
 const isEmpty        = require('lodash.isempty')
 const cloneDeep      = require('lodash.clonedeep')
+const defaultId      = require('./helpers/defaultId')
 const { Schema }     = require('@kravc/schema')
 const defaultTags    = require('./helpers/defaultTags')
 const defaultSummary = require('./helpers/defaultSummary')
 
-const TYPES = {
-  READ:   'read',
-  CREATE: 'create',
-  UPDATE: 'update',
-  DELETE: 'delete'
-}
-
 class Operation {
-  // TODO: Move method and path to spec / Service:
-  static get path() {
-    return `/${this.id}`
-  }
-
-  static get method() {
-    switch (this.type) {
-      case TYPES.CREATE: return 'post'
-      case TYPES.DELETE: return 'delete'
-      case TYPES.UPDATE: return 'patch'
-      default:           return 'get'
-    }
-  }
-  // ---
-
   static get types() {
-    return TYPES
+    return {
+      READ:   'read',
+      CREATE: 'create',
+      UPDATE: 'update',
+      DELETE: 'delete'
+    }
   }
 
   static get type() {
@@ -38,7 +22,7 @@ class Operation {
   }
 
   static get id() {
-    return this.name
+    return defaultId(this)
   }
 
   static get tags() {

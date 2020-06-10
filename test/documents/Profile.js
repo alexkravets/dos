@@ -1,11 +1,9 @@
 'use strict'
 
-const Memory       = require('../storage/Memory')
-const { Schema }   = require('@kravc/schema')
+const Memory       = require('test/storage/Memory')
 const { Document } = require('src')
 
-class Profile extends Memory(Document) {}
-
-Profile.schema = Schema.loadSync('test/schemas/Profile.yaml')
+class Profile extends Memory(Document) {
+}
 
 module.exports = Profile

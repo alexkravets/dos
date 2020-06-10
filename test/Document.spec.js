@@ -1,8 +1,13 @@
 'use strict'
 
-const Profile       = require('./documents/Profile')
+const Memory        = require('test/storage/Memory')
+const { Schema }    = require('@kravc/schema')
 const { expect }    = require('chai')
+const { Document }  = require('src')
 const { Validator } = require('@kravc/schema')
+
+class Profile extends Memory(Document) {}
+Profile.schema = Schema.loadSync('test/schemas/Profile.yaml')
 
 describe('Document', () => {
   const validator = new Validator([ Profile.schema ])
@@ -12,7 +17,7 @@ describe('Document', () => {
   let id
 
   describe('Document.create(context, query, mutation)', () => {
-    it('creates document', async() => {
+    it('creates document', async () => {
       const profile = await Profile.create(context, { name: 'Oleksandr' })
 
       expect(profile.id).to.exist
@@ -23,7 +28,7 @@ describe('Document', () => {
       id = profile.id
     })
 
-    it('creates document via mutation', async() => {
+    it('creates document via mutation', async () => {
       const profile = await Profile.create(context, {}, { name: 'Olga' })
 
       expect(profile.id).to.exist
@@ -32,7 +37,7 @@ describe('Document', () => {
       expect(profile.attributes.createdBy).to.exist
     })
 
-    it('creates document without identity in context', async() => {
+    it('creates document without identity in context', async () => {
       const profile = await Profile.create({ validator }, { name: 'Oleg' })
 
       expect(profile.id).to.exist
@@ -43,7 +48,7 @@ describe('Document', () => {
   })
 
   describe('Document.read(context, query)', () => {
-    it('returns document', async() => {
+    it('returns document', async () => {
       const profile = await Profile.read(context, { id })
 
       expect(profile).to.exist
@@ -51,7 +56,7 @@ describe('Document', () => {
   })
 
   describe('Document.update(context, query, mutation)', () => {
-    it('updates document', async() => {
+    it('updates document', async () => {
       await Profile.update(context, { id }, { name: 'Margarita' })
 
       const profile = await Profile.read(context, { id })
@@ -61,7 +66,7 @@ describe('Document', () => {
       expect(profile.attributes.updatedBy).to.exist
     })
 
-    it('updates document without identity in context', async() => {
+    it('updates document without identity in context', async () => {
       const { id } = await Profile.create({ validator }, { mutation: { name: 'Gustav' } })
 
       const profile = await Profile.update({ validator }, { id, mutation: { name: 'Jack' } })
@@ -72,7 +77,7 @@ describe('Document', () => {
   })
 
   describe('Document.delete(context, query)', () => {
-    it('deletes document', async() => {
+    it('deletes document', async () => {
       await Profile.delete(context, { id })
 
       try {
@@ -90,7 +95,7 @@ describe('Document', () => {
   })
 
   describe('Document.index(context, query)', () => {
-    it('returns documents', async() => {
+    it('returns documents', async () => {
       await Profile.create(context, { name: 'Oleksandr' })
       await Profile.create(context, { name: 'Margarita' })
       await Profile.create(context, { name: 'Veronica' })
@@ -103,13 +108,13 @@ describe('Document', () => {
   })
 
   describe('Document.bodySchema', () => {
-    it('returns document body schema', async() => {
+    it('returns document body schema', async () => {
       expect(Profile.bodySchema).to.exist
     })
   })
 
   describe('.delete()', () => {
-    it('deletes document', async() => {
+    it('deletes document', async () => {
       const profile = await Profile.create(context, { name: 'Oleksandr' })
       const { id }  = profile
 
@@ -130,7 +135,7 @@ describe('Document', () => {
   })
 
   describe('.update(mutation, shouldMutate = false)', () => {
-    it('updates document', async() => {
+    it('updates document', async () => {
       const profile = await Profile.create(context, { name: 'Oleksandr' })
 
       const updatedProfile = await profile.update({ name: 'Anton' })
@@ -139,7 +144,7 @@ describe('Document', () => {
       expect(updatedProfile.attributes.name).to.eql('Anton')
     })
 
-    it('updates and mutates document', async() => {
+    it('updates and mutates document', async () => {
       const profile = await Profile.create(context, { name: 'Oleksandr' })
 
       await profile.update({ name: 'Anton' }, true)
@@ -149,7 +154,7 @@ describe('Document', () => {
   })
 
   describe('before*, after* callbacks', () => {
-    it('executes callbacks for create, update and delete mutations', async() => {
+    it('executes callbacks for create, update and delete mutations', async () => {
       const callbacks = {}
 
       class CustomProfile extends Profile {
