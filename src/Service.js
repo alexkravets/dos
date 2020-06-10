@@ -102,7 +102,7 @@ class Service {
     if (!inputSchema) { return {} }
 
     const { query, mutation } = context
-    const input = { ...query, mutation}
+    const input = { ...query, mutation }
 
     let result
 

@@ -121,7 +121,7 @@ class Operation {
     const { inputSchema, outputSchema } = this
 
     if (inputSchema) {
-      errors.InvalidInputError = { statusCode: 401 }
+      errors.InvalidInputError = { statusCode: 400 }
     }
 
     if (outputSchema) {

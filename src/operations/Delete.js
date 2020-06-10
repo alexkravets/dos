@@ -26,7 +26,7 @@ const Delete = (Component, componentAction = 'delete') => {
     static get errors() {
       return {
         ...super.errors,
-        ResourceNotFoundError: { status: 'Not Found' }
+        ResourceNotFoundError: { statusCode: 404 }
       }
     }
 

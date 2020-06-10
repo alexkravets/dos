@@ -92,9 +92,9 @@ class Document extends Component {
   static async index(context, query = {}, options = {}) {
     let { items, ...rest } = await this._index(query, options)
 
-    const documents = items.map(item => new this(context, item))
+    const objects = items.map(item => new this(context, item))
 
-    return { documents, ...rest }
+    return { objects, ...rest }
   }
 
   static async update(context, query, mutation) {

@@ -100,10 +100,10 @@ describe('Document', () => {
       await Profile.create(context, { name: 'Margarita' })
       await Profile.create(context, { name: 'Veronica' })
 
-      const { documents, pageInfo } = await Profile.index(context)
+      const { objects, count } = await Profile.index(context)
 
-      expect(documents.length).to.eql(6)
-      expect(pageInfo).to.exist
+      expect(objects.length).to.eql(6)
+      expect(count).to.eql(6)
     })
   })
 

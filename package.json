@@ -1,17 +1,17 @@
 {
-  "name": "@kravc/common-service",
+  "name": "@kravc/dos",
   "version": "4.0.0",
-  "description": "Common API service library",
-  "main": "index.js",
+  "description": "Convention based, easy to use library for building API-driven node.js services",
+  "main": "src/index.js",
   "repository": {
     "type": "git",
-    "url": "http://github.com/alexkravets/common-service.git"
+    "url": "http://github.com/alexkravets/dos.git"
   },
   "directories": {
-    "src": "src"
+    "src": "src",
+    "test": "test"
   },
   "scripts": {
-    "start": "NODE_PATH=./ NODE_CONFIG_DIR=./test/config node ./test/example/bin/start.js",
     "test": "eslint src/ test/ && NODE_PATH=./ NODE_CONFIG_DIR=./test/config nyc mocha --exit"
   },
   "author": "Alexander Kravets <a@kra.vc>",
@@ -19,7 +19,7 @@
   "dependencies": {
     "@kravc/schema": "^1.1.0",
     "config": "^3.3.1",
-    "js-yaml": "^3.13.1",
+    "js-yaml": "^3.14.0",
     "lodash.capitalize": "^4.2.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.compact": "^3.0.1",
@@ -40,11 +40,10 @@
     "uuid": "^7.0.3"
   },
   "devDependencies": {
-    "@kravc/common-http": "^0.2.1",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
-    "mocha": "^7.1.2",
+    "mocha": "^7.2.0",
     "nock": "^12.0.3",
-    "nyc": "^15.0.1"
+    "nyc": "^15.1.0"
   }
 }

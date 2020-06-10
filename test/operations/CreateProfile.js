@@ -1,7 +1,7 @@
 'use strict'
 
 const Create  = require('src/operations/Create')
-const Profile = require('../documents/Profile')
+const Profile = require('test/documents/Profile')
 // const Authorization = require('../security/Authorization')
 
 class CreateProfile extends Create(Profile) {

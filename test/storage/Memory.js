@@ -43,7 +43,11 @@ const Memory = Document => class extends Document {
   static _index() {
     const items = Object.values(this._storage)
 
-    return { items, pageInfo: { total: items.length } }
+    return { items, count: items.length }
+  }
+
+  static reset() {
+    globalMemoryStorage[this.id] = {}
   }
 }
 

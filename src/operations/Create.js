@@ -24,7 +24,7 @@ const Create = (Component, componentAction = 'create') => {
     static get errors() {
       return {
         ...super.errors,
-        ResourceExistsError: { status: 'Unprocessable Entity' }
+        ResourceExistsError: { statusCode: 422 }
       }
     }
   }
