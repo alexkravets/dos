@@ -59,6 +59,14 @@ describe('Operation', () => {
         const DeleteProfile = Delete(Profile)
 
         expect(DeleteProfile.id).eql('DeleteProfile')
+        console.log(
+          DeleteProfile.Component,
+          DeleteProfile.componentAction,
+          DeleteProfile.type,
+          DeleteProfile.errors,
+          DeleteProfile.query,
+          DeleteProfile.output,
+        )
       })
     })
   })
