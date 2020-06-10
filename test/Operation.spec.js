@@ -3,22 +3,16 @@
 const Memory                = require('test/storage/Memory')
 const { expect }            = require('chai')
 const { Schema, Validator } = require('@kravc/schema')
-const { Operation, Document, Create, Read, Update, Index, Delete } = require('src')
+const { Operation, Document, Component, Create, Read, Update, Index, Delete } = require('src')
 
 class Profile extends Memory(Document) {}
 Profile.schema = Schema.loadSync('test/schemas/Profile.yaml')
 
+const validator = new Validator([ Profile.schema ])
+const identity  = { accountId: 'ACCOUNT_ID' }
+const DEFAULT_CONTEXT = { validator, identity }
+
 describe('Operation', () => {
-  describe('Operation.constructor(context)', () => {
-  })
-
-  describe('Operation.id', () => {
-    it('throws error if operation ID is undefined', () => {
-      const InvalidOperation = () => class extends Operation {}
-      expect(() => InvalidOperation().id).to.throw('Operation ID is undefined')
-    })
-  })
-
   describe('Helpers', () => {
     describe('Create(Component, componentAction = \'create\')', () => {
       it('returns "Create" operation class', () => {
@@ -268,21 +262,17 @@ describe('Operation', () => {
       })
 
       describe('.exec(_parameters)', () => {
-        const validator = new Validator([ Profile.schema ])
-        const identity  = { accountId: 'ACCOUNT_ID' }
-        const context   = { validator, identity }
-
         it('returns operation execution result', async () => {
           Profile.reset()
 
           const CreateProfile = Create(Profile)
           const IndexProfiles = Index(Profile)
 
-          await (new CreateProfile(context)).exec({ mutation: { name: 'Margarita' } })
-          await (new CreateProfile(context)).exec({ mutation: { name: 'Veronica' } })
-          await (new CreateProfile(context)).exec({ mutation: { name: 'Dasha' } })
+          await (new CreateProfile(DEFAULT_CONTEXT)).exec({ mutation: { name: 'Margarita' } })
+          await (new CreateProfile(DEFAULT_CONTEXT)).exec({ mutation: { name: 'Veronica' } })
+          await (new CreateProfile(DEFAULT_CONTEXT)).exec({ mutation: { name: 'Dasha' } })
 
-          const operation  = new IndexProfiles(context)
+          const operation  = new IndexProfiles(DEFAULT_CONTEXT)
           const { result } = await operation.exec({ sort: 'asc', limit: 20 })
 
           expect(result.data).to.have.lengthOf(3)
@@ -291,6 +281,142 @@ describe('Operation', () => {
           expect(result.pageInfo.limit).to.eql(20)
         })
       })
+    })
+  })
+
+  describe('Operation.id', () => {
+    it('throws error if operation ID is undefined', () => {
+      const InvalidOperation = () => class extends Operation {}
+      expect(() => InvalidOperation().id).to.throw('Operation ID is undefined')
+    })
+  })
+
+  describe('Operation.security', () => {
+    it('has no security definitions by default', () => {
+      const CreateProfile = Create(Profile)
+      expect(CreateProfile.security).to.be.empty
+    })
+  })
+
+  describe('Operation.authorize', () => {
+    it('returns empty identity object by default', async () => {
+      const CreateProfile = Create(Profile)
+      const context = {}
+
+      const { identity } = await CreateProfile.authorize(context)
+      expect(identity).to.be.empty
+    })
+  })
+
+  describe('Operation.inputSchema', () => {
+    it('returns null for operations without query and mutation', () => {
+      const Test = class extends Operation {}
+      expect(Test.inputSchema).to.be.null
+    })
+  })
+
+  describe('Operation.errors', () => {
+    it('does not include "InvalidInputError" for operation without input schema', () => {
+      const Test = class extends Operation {}
+      expect(Test.errors.InvalidInputError).to.not.exist
+    })
+  })
+
+  describe('Operation.mutation', () => {
+    it('uses "schema" for components without "bodySchema"', () => {
+      class RemoteProfile extends Component {}
+      RemoteProfile.schema = Schema.loadSync('test/schemas/Profile.yaml')
+
+      const CreateRemoteProfile = Create(RemoteProfile)
+      expect(CreateRemoteProfile.mutation).to.exist
+    })
+  })
+
+  describe('Operation.output', () => {
+    it('returns null for operations without component', () => {
+      const Test = class extends Operation {}
+      expect(Test.output).to.be.null
+    })
+  })
+
+  describe('.setHeader(name, value)', () => {
+    it('adds header to the operation response', async () => {
+      const CreateProfile = class extends Create(Profile) {
+        after() {
+          this.setHeader('x-response-time', 100)
+        }
+      }
+
+      const { headers, result: { data: profile } } = await (
+        new CreateProfile(DEFAULT_CONTEXT)
+      ).exec({ mutation: { name: 'Oleksandr' } })
+
+      expect(headers).to.include({ 'x-response-time': 100 })
+      expect(profile.attributes.name).to.eql('Oleksandr')
+    })
+  })
+
+  describe('.before(parameters)', () => {
+    it('allows to modify parameters before action', async () => {
+      const CreateProfile = class extends Create(Profile) {
+        before(parameters) {
+          parameters.mutation.lastName = 'Kravets'
+          return parameters
+        }
+      }
+
+      const { result: { data: profile } } = await (
+        new CreateProfile(DEFAULT_CONTEXT)
+      ).exec({ mutation: { name: 'Oleksandr' } })
+
+      expect(profile.attributes.lastName).to.eql('Kravets')
+    })
+
+    it('supports passthrough execution, when parameters are not changed', async () => {
+      const CreateProfile = class extends Create(Profile) {
+        before() {
+          this.setHeader('x-before-time', Date.now)
+        }
+      }
+
+      const { headers, result: { data: profile } } = await (
+        new CreateProfile(DEFAULT_CONTEXT)
+      ).exec({ mutation: { name: 'Oleksandr' } })
+
+      expect(headers['x-before-time']).to.exist
+      expect(profile.attributes.name).to.eql('Oleksandr')
+    })
+  })
+
+  describe('.after(parameters, result)', () => {
+    it('allows to modify after action response', async () => {
+      const CreateProfile = class extends Create(Profile) {
+        after(parameters, profile) {
+          profile.attributes.lastName = 'Kravets'
+          return profile
+        }
+      }
+
+      const { result: { data: profile } } = await (
+        new CreateProfile(DEFAULT_CONTEXT)
+      ).exec({ mutation: { name: 'Oleksandr' } })
+
+      expect(profile.attributes.lastName).to.eql('Kravets')
+    })
+
+    it('supports non-data attribute in result', async () => {
+      const Health = class extends Operation {
+        action() {
+          return { status: 'OK' }
+        }
+
+        after(parameters, result) {
+          return { ...result, service: 'Test' }
+        }
+      }
+
+      const { result } = await (new Health(DEFAULT_CONTEXT)).exec()
+      expect(result).to.deep.eql({ status: 'OK', service: 'Test' })
     })
   })
 })

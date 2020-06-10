@@ -42,7 +42,7 @@ class Operation {
   }
 
   static async authorize() {
-    return null
+    return { identity: {} }
   }
 
   static get query() {
@@ -166,7 +166,8 @@ class Operation {
     let result
 
     if (this.before) {
-      parameters = await this.before(parameters)
+      const _ = await this.before(parameters)
+      parameters = _ ? _ : parameters
     }
 
     if (this.action) {
@@ -178,7 +179,8 @@ class Operation {
     }
 
     if (this.after) {
-      result = await this.after(parameters, result)
+      const _ = await this.after(parameters, result.data || result)
+      result = _ ? ( result.data ? { data: _ } : _ ) : result
     }
 
     return { result, headers: this._headers }
