@@ -102,6 +102,24 @@ describe('Operation', () => {
       it('throws error if "Component" argument is undefined', () => {
         expect(() => Read()).to.throw('Argument "Component" is undefined')
       })
+
+      describe('.exec(_parameters)', () => {
+        it('triggers "componentActionMethod" without mutation parameter', async () => {
+          Profile.reset()
+
+          const CreateProfile = Create(Profile)
+          const ReadProfiles  = Read(Profile)
+
+          const { result: { data: { id } } } = await (
+            new CreateProfile(DEFAULT_CONTEXT)).exec({ mutation: { name: 'Taras' } }
+          )
+
+          const operation  = new ReadProfiles(DEFAULT_CONTEXT)
+          const { result } = await operation.exec({ id })
+
+          expect(result.data).to.exist
+        })
+      })
     })
 
     describe('Update(Component, componentAction = \'update\')', () => {
@@ -336,6 +354,29 @@ describe('Operation', () => {
     it('returns null for operations without component', () => {
       const Test = class extends Operation {}
       expect(Test.output).to.be.null
+    })
+  })
+
+  describe('Operation.componentActionMethod', () => {
+    it('throws error if component is undefined', () => {
+      class TestOperation extends Operation {}
+      expect(() => TestOperation.componentActionMethod)
+        .to.throw('Operation "TestOperation" expects')
+    })
+
+    it('throws error if component action is undefined', () => {
+      class TestOperation extends Operation {
+        static get Component() {
+          return Profile
+        }
+
+        static get componentAction() {
+          return 'destroy'
+        }
+      }
+      expect(() => TestOperation.componentActionMethod)
+        .to.throw('Operation "TestOperation" expects component action method' +
+          ' "Profile.destroy(context, ...)" to be defined')
     })
   })
 

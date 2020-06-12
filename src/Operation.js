@@ -139,13 +139,22 @@ class Operation {
     return this.type
   }
 
-  // TODO: Check how this would work with composer:
   static get componentActionMethod() {
     const { Component, componentAction } = this
 
-    if (!Component) { return null }
+    if (!Component) {
+      throw new Error(`Operation "${this.id}" expects component to be defined`)
+    }
 
-    return Component[componentAction].bind(Component)
+    const componentActionMethod = Component[componentAction]
+
+    if (!componentActionMethod) {
+      throw new Error(`Operation "${this.id}" expects component action` +
+        ` method "${Component.name}.${componentAction}(context, ...)" to be` +
+        ' defined')
+    }
+
+    return componentActionMethod.bind(Component)
   }
 
   constructor(context) {
@@ -161,32 +170,7 @@ class Operation {
     return this._context
   }
 
-  async exec(_parameters) {
-    let parameters = cloneDeep(_parameters)
-    let result
-
-    if (this.before) {
-      const _ = await this.before(parameters)
-      parameters = _ ? _ : parameters
-    }
-
-    if (this.action) {
-      result = await this.action(parameters)
-
-    } else {
-      result = await this._componentAction(parameters)
-
-    }
-
-    if (this.after) {
-      const _ = await this.after(parameters, result.data || result)
-      result = _ ? ( result.data ? { data: _ } : _ ) : result
-    }
-
-    return { result, headers: this._headers }
-  }
-
-  async _componentAction(parameters) {
+  async action(parameters) {
     const { componentActionMethod } = this.constructor
 
     const { mutation, ...query } = parameters
@@ -197,6 +181,25 @@ class Operation {
     )
 
     return { data }
+  }
+
+  async exec(_parameters) {
+    let parameters = cloneDeep(_parameters)
+    let result
+
+    if (this.before) {
+      const _ = await this.before(parameters)
+      parameters = _ ? _ : parameters
+    }
+
+    result = await this.action(parameters)
+
+    if (this.after) {
+      const _ = await this.after(parameters, result.data || result)
+      result = _ ? ( result.data ? { data: _ } : _ ) : result
+    }
+
+    return { result, headers: this._headers }
   }
 }
 

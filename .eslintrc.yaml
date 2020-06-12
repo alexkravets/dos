@@ -40,4 +40,3 @@ rules:
   no-console: off
   no-return-await: error
   eqeqeq: error
-  # space-before-function-paren:
