@@ -1,8 +1,6 @@
 'use strict'
 
-const endsWith      = require('lodash.endswith')
 const { parse }     = require('url')
-// const cloneDeep     = require('lodash.clonedeep')
 // const { resolve }   = require('path')
 const getHttpMethod = require('./getHttpMethod')
 const getSuccessStatusCode = require('./getSuccessStatusCode')
@@ -42,7 +40,7 @@ const createSpec = (operations, schemasMap, url = 'http://localhost:3000/') => {
   }
 
   for (const schemaId in schemasMap) {
-    const isNotInputSchema = !endsWith(schemaId, 'Input')
+    const isNotInputSchema = !schemaId.endsWith('Input')
 
     if (isNotInputSchema) {
       const schema = schemasMap[schemaId]
@@ -60,7 +58,7 @@ const createSpec = (operations, schemasMap, url = 'http://localhost:3000/') => {
       query,
       errors,
       summary,
-      // security,
+      security,
       description,
       outputSchema,
       mutationSchema
@@ -132,22 +130,24 @@ const createSpec = (operations, schemasMap, url = 'http://localhost:3000/') => {
 
     operationSpec.responses = responses
 
-    // if (security.length > 0) {
-    //   const _security = cloneDeep(security)
-    //   for (const requirements of _security) {
-    //     for (const name in requirements) {
-    //       const { definition } = requirements[name].klass
-    //       spec.securityDefinitions = {
-    //         ...spec.securityDefinitions,
-    //         ...definition
-    //       }
+    const hasSecurityRequirements = security.length > 0
 
-    //       requirements[name] = []
-    //     }
-    //   }
+    if (hasSecurityRequirements) {
+      operationSpec.security = []
 
-    //   spec.paths[path][method].security = _security
-    // }
+      for (const requirements of security) {
+
+        const config = {}
+        for (const name in requirements) {
+          const { definition } = requirements[name]
+          spec.securityDefinitions[name] = definition
+
+          config[name] = []
+        }
+
+        operationSpec.security.push(config)
+      }
+    }
 
     spec.paths[httpMethod] = { [httpPath]: operationSpec }
   }

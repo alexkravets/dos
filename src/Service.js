@@ -3,6 +3,7 @@
 const uniq               = require('lodash.uniq')
 const compact            = require('lodash.compact')
 const isString           = require('lodash.isstring')
+const authorize          = require('../helpers/authorize')
 const createSpec         = require('./helpers/createSpec')
 const { Validator }      = require('@kravc/schema')
 const createContext      = require('./helpers/createContext')
@@ -108,7 +109,7 @@ class Service {
       const { httpMethod, httpPath } = context
       if (!Operation) { throw new OperationNotFoundError({ operationId, httpMethod, httpPath }) }
 
-      context.identity = await Operation.authorize(context)
+      context.identity = await authorize(Operation, context)
       const parameters = this._getParameters(Operation.inputSchema, context)
 
       const operation = new Operation(context)
