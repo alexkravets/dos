@@ -29,12 +29,12 @@ class Component {
     return this._context
   }
 
-  get id() {
-    return this.attributes.id || null
-  }
-
   get componentId() {
     return this.constructor.id
+  }
+
+  get id() {
+    return this.attributes.id || null
   }
 
   get attributes() {

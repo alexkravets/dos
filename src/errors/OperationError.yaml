@@ -36,7 +36,7 @@ error:
             description: 'Path of invalid attribute'
 
           code:
-            description: 'Code of z-schema validation error'
+            description: 'Validator error code'
 
           params:
             description: 'Invalid attribute values'

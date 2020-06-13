@@ -53,8 +53,6 @@ describe('Operation', () => {
           }
         })
 
-        expect(CreateProfile.errors.InvalidInputError.statusCode).eql(400)
-        expect(CreateProfile.errors.InvalidOutputError.statusCode).eql(500)
         expect(CreateProfile.errors.ResourceExistsError.statusCode).eql(422)
       })
 
@@ -94,8 +92,6 @@ describe('Operation', () => {
 
         expect(ReadProfile.mutationSchema).to.eql(null)
 
-        expect(ReadProfile.errors.InvalidInputError.statusCode).eql(400)
-        expect(ReadProfile.errors.InvalidOutputError.statusCode).eql(500)
         expect(ReadProfile.errors.ResourceNotFoundError.statusCode).eql(404)
       })
 
@@ -165,8 +161,6 @@ describe('Operation', () => {
           }
         })
 
-        expect(UpdateProfile.errors.InvalidInputError.statusCode).eql(400)
-        expect(UpdateProfile.errors.InvalidOutputError.statusCode).eql(500)
         expect(UpdateProfile.errors.ResourceNotFoundError.statusCode).eql(404)
       })
 
@@ -191,7 +185,6 @@ describe('Operation', () => {
         expect(DeleteProfile.outputSchema).eql(null)
         expect(DeleteProfile.mutationSchema).eql(null)
 
-        expect(DeleteProfile.errors.InvalidInputError.statusCode).eql(400)
         expect(DeleteProfile.errors.ResourceNotFoundError.statusCode).eql(404)
       })
 
@@ -270,9 +263,6 @@ describe('Operation', () => {
         })
 
         expect(IndexProfiles.mutationSchema).to.eql(null)
-
-        expect(IndexProfiles.errors.InvalidInputError.statusCode).eql(400)
-        expect(IndexProfiles.errors.InvalidOutputError.statusCode).eql(500)
       })
 
       it('throws error if "Component" argument is undefined', () => {

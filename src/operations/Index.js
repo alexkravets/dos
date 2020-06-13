@@ -1,9 +1,8 @@
 'use strict'
 
-const Operation  = require('../Operation')
-const pluralize  = require('pluralize')
-const startCase  = require('lodash.startcase')
-const capitalize = require('lodash.capitalize')
+const Operation       = require('../Operation')
+const capitalize      = require('lodash.capitalize')
+const getResourceName = require('../helpers/getResourceName')
 
 const Index = (Component, componentAction = 'index') => {
   if (!Component) {
@@ -17,10 +16,10 @@ const Index = (Component, componentAction = 'index') => {
     }
 
     static get summary() {
-      const { Component: { name }, componentAction } = this
-      const componentTitlePlural = pluralize(startCase(name)).toLowerCase()
+      const { Component, componentAction } = this
+      const resourceName = getResourceName(Component, false, true)
 
-      return capitalize(`${componentAction} ${componentTitlePlural}`)
+      return capitalize(`${componentAction} ${resourceName}`)
     }
 
     static get componentAction() {
@@ -36,12 +35,12 @@ const Index = (Component, componentAction = 'index') => {
     }
 
     static get query() {
-      const { Component: { name }, defaultSort, defaultLimit } = this
-      const componentTitlePlural = pluralize(startCase(name)).toLowerCase()
+      const { Component, defaultSort, defaultLimit } = this
+      const resourceName = getResourceName(Component, false, true)
 
       return {
         limit: {
-          description: `Limit number of ${componentTitlePlural} to be returned`,
+          description: `Limit number of ${resourceName} to be returned`,
           type:        'integer',
           default:     defaultLimit
         },
@@ -51,7 +50,7 @@ const Index = (Component, componentAction = 'index') => {
           default:     defaultSort
         },
         exclusiveStartKey: {
-          description: `Return ${componentTitlePlural} starting from specific key`
+          description: `Return ${resourceName} starting from specific key`
         }
       }
     }

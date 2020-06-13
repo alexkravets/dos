@@ -114,21 +114,8 @@ class Operation {
     return new Schema(schemaOrSource, `${id}Output`)
   }
 
-  // TODO: Resolve with better errors:
-  // TODO: Move these default errors to composer as well:
   static get errors() {
-    const errors = {}
-    const { inputSchema, outputSchema } = this
-
-    if (inputSchema) {
-      errors.InvalidInputError = { statusCode: 400 }
-    }
-
-    if (outputSchema) {
-      errors.InvalidOutputError = { statusCode: 500 }
-    }
-
-    return errors
+    return {}
   }
 
   static get Component() {

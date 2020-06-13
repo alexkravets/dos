@@ -1,8 +1,7 @@
 'use strict'
 
-const Operation  = require('../Operation')
-const startCase  = require('lodash.startcase')
-const capitalize = require('lodash.capitalize')
+const Operation       = require('../Operation')
+const getResourceName = require('../helpers/getResourceName')
 
 const Delete = (Component, componentAction = 'delete') => {
   if (!Component) {
@@ -24,19 +23,23 @@ const Delete = (Component, componentAction = 'delete') => {
     }
 
     static get errors() {
+      const resourceName = getResourceName(this.Component)
+
       return {
         ...super.errors,
-        ResourceNotFoundError: { statusCode: 404 }
+        ResourceNotFoundError: {
+          statusCode:  404,
+          description: `${resourceName} is not found`
+        }
       }
     }
 
     static get query() {
-      const { Component: { name } } = this
-      const componentTitle = capitalize(startCase(name))
+      const resourceName = getResourceName(this.Component)
 
       return {
         id: {
-          description: `${componentTitle} ID`,
+          description: `${resourceName} ID`,
           required:    true
         }
       }

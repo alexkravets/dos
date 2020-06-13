@@ -1,6 +1,9 @@
 'use strict'
 
+const uniq               = require('lodash.uniq')
+const compact            = require('lodash.compact')
 const isString           = require('lodash.isstring')
+const createSpec         = require('./helpers/createSpec')
 const { Validator }      = require('@kravc/schema')
 const createContext      = require('./helpers/createContext')
 const OperationError     = require('./errors/OperationError')
@@ -9,33 +12,78 @@ const InvalidInputError  = require('./errors/InvalidInputError')
 const InvalidOutputError = require('./errors/InvalidOutputError')
 const OperationNotFoundError = require('./errors/OperationNotFoundError')
 
-// // TODO: Move method and path to spec / Service:
-// static get path() {
-//   return `/${this.id}`
-// }
-
-// static get method() {
-//   switch (this.type) {
-//     case TYPES.CREATE: return 'post'
-//     case TYPES.DELETE: return 'delete'
-//     case TYPES.UPDATE: return 'patch'
-//     default:           return 'get'
-//   }
-// }
-// // ---
-
 class Service {
-  constructor(modules, path = '/src') {
-    const components = modules.filter(Component => !Component.types)
-    const operations = modules.filter(Component => !!Component.types)
+  constructor(modules, url, path = '/src') {
+    const schemasMap = createSchemasMap(path)
 
-    const schemasMap = createSchemasMap(path, operations, [ ...components, OperationError ])
-    const schemas    = Object.values(schemasMap)
-    const validator  = new Validator(schemas)
+    let components = modules.filter(Component => !Component.types)
+    let operations = modules.filter(Component => !!Component.types)
 
+    const operationComponents = compact(operations.map(({ Component }) => Component))
+    components = uniq([ ...components, ...operationComponents ])
+
+    for (const component of components) {
+      if (!component.schema) {
+        const schema = schemasMap[component.id]
+
+        if (!schema) {
+          throw new Error(`Schema for component "${component.id}" not found`)
+        }
+
+        component.schema = schema
+      }
+
+      schemasMap[component.id] = component.schema
+    }
+
+    // const routesMap = {}
+    const operationsMap = {}
+
+    for (const operationClass of operations) {
+      const { mutationSchema, inputSchema, outputSchema } = operationClass
+
+      if (mutationSchema) {
+        schemasMap[mutationSchema.id] = mutationSchema
+      }
+
+      if (inputSchema) {
+        schemasMap[inputSchema.id] = inputSchema
+        operationClass.errors.InvalidInputError = {
+          statusCode:  400,
+          description: 'Invalid operation input, make sure operation parameters' +
+            ' do match specification'
+        }
+      }
+
+      if (outputSchema) {
+        schemasMap[outputSchema.id] = outputSchema
+        operationClass.errors.InvalidOutputError = {
+          statusCode:  500,
+          description: 'Invalid output returned by the operation, this issue' +
+            ' to be addressed by service developer'
+        }
+      }
+
+      // operationClass.errors.OperationError = { statusCode: 500 }
+
+      // const httpPath   = `/${operationClass.id}`
+      // const httpMethod = getHttpMethod(operationClass)
+
+      operationsMap[operationClass.id] = operationClass
+      // routesMap[`${httpMethod}:${httpPath}`] = operationClass.id
+    }
+
+    schemasMap[OperationError.id] = OperationError.schema
+
+    const spec      = createSpec(operations, schemasMap, url)
+    const schemas   = Object.values(schemasMap)
+    const validator = new Validator(schemas)
+
+    // this._routesMap     = routesMap
+    this._spec          = spec
     this._validator     = validator
     this._schemasMap    = schemasMap
-    this._operationsMap = {}
+    this._operationsMap = operationsMap
   }
 
   get validator() {
@@ -47,7 +95,7 @@ class Service {
   }
 
   getOperationId(httpMethod, httpPath) {
-    return this._httpRoutes[`${httpMethod}:${httpPath}`]
+    this._routesMap[`${httpMethod}:${httpPath}`]
   }
 
   async process(context) {
@@ -75,7 +123,7 @@ class Service {
       const { code } = error
 
       if (Operation && Operation.errors[code]) {
-        errorStatusCode = Operation.errors[code].statusCode
+        errorStatusCode = Operation.errors[code].statusCode || 500
 
       } else {
         errorStatusCode = 500

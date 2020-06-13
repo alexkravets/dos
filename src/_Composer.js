@@ -1,12 +1,12 @@
 'use strict'
 
-const path            = require('path')
+// const path            = require('path')
 // const uniq            = require('lodash.uniq')
 // const Schema          = require('./Schema')
-const ZSchema         = require('z-schema')
+// const ZSchema         = require('z-schema')
 // const compact         = require('lodash.compact')
-const endsWith        = require('lodash.endswith')
-const cloneDeep       = require('lodash.clonedeep')
+// const endsWith        = require('lodash.endswith')
+// const cloneDeep       = require('lodash.clonedeep')
 // const { safeLoad }    = require('js-yaml')
 // const OperationError  = require('./OperationError')
 // const ValidationError = require('./errors/ValidationError')
@@ -198,151 +198,153 @@ class Composer {
   //   return object
   // }
 
-  get spec() {
-    if (this._spec) { return this._spec }
+  // get spec() {
+  //   if (this._spec) { return this._spec }
 
-    const spec = {
-      swagger: '2.0',
-      ...this._config.spec,
-      consumes: [ 'application/json' ],
-      produces: [ 'application/json' ],
-      tags: [],
-      securityDefinitions: {},
-      paths: {},
-      definitions: {}
-    }
+  //   const spec = {
+  //     swagger: '2.0',
+  //     ...this._config.spec,
+  //     consumes: [ 'application/json' ],
+  //     produces: [ 'application/json' ],
+  //     tags: [],
+  //     securityDefinitions: {},
+  //     paths: {},
+  //     definitions: {}
+  //   }
 
-    for (const schemaId in this.schemas) {
-      const isNotInputSchema = !endsWith(schemaId, 'Input')
+  //   for (const schemaId in this.schemas) {
+  //     const isNotInputSchema = !endsWith(schemaId, 'Input')
 
-      if (isNotInputSchema) {
-        const schema = this.schemas[schemaId]
-        spec.definitions[schemaId] = schema.jsonSchema
-      }
-    }
+  //     if (isNotInputSchema) {
+  //       const schema = this.schemas[schemaId]
+  //       spec.definitions[schemaId] = schema.jsonSchema
+  //     }
+  //   }
 
-    for (const Operation of this._operations) {
-      const {
-        id,
-        path,
-        tags,
-        type,
-        query,
-        method,
-        summary,
-        description,
-        outputSchema,
-        mutationSchema,
-        errors,
-        security
-      } = Operation
+  //   for (const Operation of this._operations) {
+  //     const {
+  //       id,
+  //       path,
+  //       tags,
+  //       type,
+  //       query,
+  //       method,
+  //       summary,
+  //       description,
+  //       outputSchema,
+  //       mutationSchema,
+  //       errors,
+  //       security
+  //     } = Operation
 
-      spec.paths[path] = {}
-      spec.paths[path][method] = {
-        operationId: id,
-        summary,
-        description,
-        tags
-      }
+  //     spec.paths[path] = {}
+  //     spec.paths[path][method] = {
+  //       operationId: id,
+  //       summary,
+  //       description,
+  //       tags
+  //     }
 
-      const parameters = []
-      for (const name in query) {
-        const queryParameter = { in: 'query', name, ...query[name] }
-        delete queryParameter.example
+  //     const parameters = []
+  //     for (const name in query) {
+  //       const queryParameter = { in: 'query', name, ...query[name] }
+  //       delete queryParameter.example
 
-        parameters.push(queryParameter)
-      }
+  //       parameters.push(queryParameter)
+  //     }
 
-      if (mutationSchema) {
-        parameters.push({
-          in:       'body',
-          name:     'mutation',
-          schema:   { $ref: mutationSchema.id },
-          required: true
-        })
-      }
+  //     if (mutationSchema) {
+  //       parameters.push({
+  //         in:       'body',
+  //         name:     'mutation',
+  //         schema:   { $ref: mutationSchema.id },
+  //         required: true
+  //       })
+  //     }
 
-      if (parameters.length > 0) {
-        spec.paths[path][method].parameters = parameters
-      }
+  //     if (parameters.length > 0) {
+  //       spec.paths[path][method].parameters = parameters
+  //     }
 
-      const successStatusCode = (() => {
-        if (!outputSchema) { return '204' }
-        if (type === 'create') { return '201' }
-        return '200'
-      })()
+  //     const successStatusCode = (() => {
+  //       if (!outputSchema) { return '204' }
+  //       if (type === 'create') { return '201' }
+  //       return '200'
+  //     })()
 
-      const success = { description: 'Success' }
-      if (outputSchema) {
-        success.schema = { $ref: outputSchema.id }
-      }
+  //     const success = { description: 'Success' }
+  //     if (outputSchema) {
+  //       success.schema = { $ref: outputSchema.id }
+  //     }
 
-      const error = {
-        description: 'Error',
-        schema: { $ref: 'OperationError' }
-      }
+  //     const error = {
+  //       description: 'Error',
+  //       schema: { $ref: 'OperationError' }
+  //     }
 
-      const responses = {}
-      responses[successStatusCode] = success
-      responses['default'] = error
+  //     const responses = {}
+  //     responses[successStatusCode] = success
+  //     responses['default'] = error
 
-      const errorsMap = {}
-      for (const errorCode in errors) {
-        const { status } = errors[errorCode]
-        const statusCode = Operation.statusCode(status)
+  //     const errorsMap = {}
+  //     for (const errorCode in errors) {
+  //       const { status } = errors[errorCode]
+  //       const statusCode = Operation.statusCode(status)
 
-        errorsMap[statusCode] = errorsMap[statusCode] || []
-        errorsMap[statusCode].push(errorCode)
-      }
+  //       errorsMap[statusCode] = errorsMap[statusCode] || []
+  //       errorsMap[statusCode].push(errorCode)
+  //     }
 
-      for (const statusCode in errorsMap) {
-        const errorCodes  = errorsMap[statusCode]
-        const description = errorCodes.join(', ')
+  //     for (const statusCode in errorsMap) {
+  //       const errorCodes  = errorsMap[statusCode]
+  //       const description = errorCodes.join(', ')
 
-        if (statusCode !== '500') {
-          responses[`${statusCode}`] = {
-            description,
-            schema: { $ref: 'OperationError' }
-          }
-        }
-      }
+  //       if (statusCode !== '500') {
+  //         responses[`${statusCode}`] = {
+  //           description,
+  //           schema: { $ref: 'OperationError' }
+  //         }
+  //       }
+  //     }
 
-      spec.paths[path][method].responses = responses
+  //     spec.paths[path][method].responses = responses
 
-      if (security.length > 0) {
-        const _security = cloneDeep(security)
-        for (const requirements of _security) {
-          for (const name in requirements) {
-            const { definition } = requirements[name].klass
-            spec.securityDefinitions = {
-              ...spec.securityDefinitions,
-              ...definition
-            }
+  //     if (security.length > 0) {
+  //       const _security = cloneDeep(security)
+  //       for (const requirements of _security) {
+  //         for (const name in requirements) {
+  //           const { definition } = requirements[name].klass
+  //           spec.securityDefinitions = {
+  //             ...spec.securityDefinitions,
+  //             ...definition
+  //           }
 
-            requirements[name] = []
-          }
-        }
+  //           requirements[name] = []
+  //         }
+  //       }
 
-        spec.paths[path][method].security = _security
-      }
-    }
+  //       spec.paths[path][method].security = _security
+  //     }
+  //   }
 
-    const json = JSON
-      .stringify(spec, null, 2)
-      .replace(/"\$ref": "/g, '"$ref": "#/definitions/')
+  //   const json = JSON
+  //     .stringify(spec, null, 2)
+  //     .replace(/"\$ref": "/g, '"$ref": "#/definitions/')
 
-    this._spec = JSON.parse(json)
+  //   this._spec = JSON.parse(json)
 
-    return this._spec
-  }
+  //   return this._spec
+  // }
 
-  validateSpec() {
-    const schemaPath = path.resolve(__dirname, '../assets/schemas/v2.0/schema.json')
-    const jsonSchema = require(schemaPath)
+  // validateSpec() {
+  //   const schemaPath = path.resolve(__dirname, '../assets/schemas/v2.0/schema.json')
+  //   const jsonSchema = require(schemaPath)
 
-    const validator = new ZSchema({ ignoreUnknownFormats: true })
-    Composer.validate(validator, 'Spec', jsonSchema, this.spec)
-  }
+  //   const validator = new ZSchema({ ignoreUnknownFormats: true })
+  //   const isValid = validator.validate(spec, { id: 'Spec', ...jsonSchema })
+
+  //   Composer.validate(validator, 'Spec', jsonSchema, this.spec)
+  // }
 }
 
 module.exports = Composer
