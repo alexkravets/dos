@@ -4,10 +4,7 @@ const CommonError = require('./CommonError')
 
 class InvalidInputError extends CommonError {
   constructor(validationError, context) {
-    super(
-      'InvalidInputError',
-      'Invalid operation input',
-      context)
+    super('InvalidInputError', 'Invalid operation input', context)
 
     this._validationError = validationError
   }
