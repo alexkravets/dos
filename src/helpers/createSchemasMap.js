@@ -2,7 +2,6 @@
 
 const path       = require('path')
 const keyBy      = require('lodash.keyby')
-const endsWith   = require('lodash.endswith')
 const { Schema } = require('@kravc/schema')
 const { readdirSync, statSync } = require('fs')
 
@@ -18,7 +17,7 @@ const listFilesSync = dir =>
 
 const readSchemasSync = path =>
   listFilesSync(ROOT_PATH + path)
-    .filter(fileName => endsWith(fileName, '.yaml'))
+    .filter(fileName => fileName.endsWith('.yaml'))
     .map(schemaPath => Schema.loadSync(schemaPath))
 
 const createSchemasMap = path => {

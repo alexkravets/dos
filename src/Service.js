@@ -3,7 +3,7 @@
 const uniq               = require('lodash.uniq')
 const compact            = require('lodash.compact')
 const isString           = require('lodash.isstring')
-const authorize          = require('../helpers/authorize')
+const authorize          = require('./helpers/authorize')
 const createSpec         = require('./helpers/createSpec')
 const { Validator }      = require('@kravc/schema')
 const createContext      = require('./helpers/createContext')
@@ -14,7 +14,7 @@ const InvalidOutputError = require('./errors/InvalidOutputError')
 const OperationNotFoundError = require('./errors/OperationNotFoundError')
 
 class Service {
-  constructor(modules, url, path = '/src') {
+  constructor(modules, url = 'http://localhost:3000/', path = '/src') {
     const schemasMap = createSchemasMap(path)
 
     let components = modules.filter(Component => !Component.types)
@@ -37,7 +37,6 @@ class Service {
       schemasMap[component.id] = component.schema
     }
 
-    // const routesMap = {}
     const operationsMap = {}
 
     for (const operationClass of operations) {
@@ -65,13 +64,7 @@ class Service {
         }
       }
 
-      // operationClass.errors.OperationError = { statusCode: 500 }
-
-      // const httpPath   = `/${operationClass.id}`
-      // const httpMethod = getHttpMethod(operationClass)
-
       operationsMap[operationClass.id] = operationClass
-      // routesMap[`${httpMethod}:${httpPath}`] = operationClass.id
     }
 
     schemasMap[OperationError.id] = OperationError.schema
@@ -80,7 +73,6 @@ class Service {
     const schemas   = Object.values(schemasMap)
     const validator = new Validator(schemas)
 
-    // this._routesMap     = routesMap
     this._spec          = spec
     this._validator     = validator
     this._schemasMap    = schemasMap
@@ -92,11 +84,11 @@ class Service {
   }
 
   get basePath() {
-    return ''
+    return this._spec.basePath
   }
 
   getOperationId(httpMethod, httpPath) {
-    this._routesMap[`${httpMethod}:${httpPath}`]
+    this._spec.paths[httpPath][httpMethod].operationId
   }
 
   async process(context) {

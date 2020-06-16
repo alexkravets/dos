@@ -299,20 +299,22 @@ describe('Operation', () => {
     })
   })
 
-  describe('Operation.security', () => {
-    it('has no security definitions by default', () => {
-      const CreateProfile = Create(Profile)
-      expect(CreateProfile.security).to.be.empty
+  describe('Operation.tags', () => {
+    it('returns empty list by default', () => {
+      expect(Operation.tags).to.be.empty
     })
   })
 
-  describe('Operation.authorize', () => {
-    it('returns empty identity object by default', async () => {
-      const CreateProfile = Create(Profile)
-      const context = {}
+  describe('Operation.summary', () => {
+    it('returns empty string by default', () => {
+      expect(Operation.summary).to.be.empty
+    })
+  })
 
-      const { identity } = await CreateProfile.authorize(context)
-      expect(identity).to.be.empty
+  describe('Operation.security', () => {
+    it('returns no requirements by default', () => {
+      const CreateProfile = Create(Profile)
+      expect(CreateProfile.security).to.be.empty
     })
   })
 

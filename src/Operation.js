@@ -41,10 +41,6 @@ class Operation {
     return []
   }
 
-  static async authorize() {
-    return { identity: {} }
-  }
-
   static get query() {
     return {}
   }

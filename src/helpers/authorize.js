@@ -1,7 +1,7 @@
 'use strict'
 
 const authorize = async (Operation, context) => {
-  // headers = {}, requirements = []
+  const { security: requirements } = Operation
 
   const isPublic = requirements.length === 0
 
@@ -18,10 +18,8 @@ const authorize = async (Operation, context) => {
       const andRequirement = orRequirement[andRequirementKey]
       const SecurityClass  = andRequirement.klass
 
-      const security    = new SecurityClass(context)
-      const { options } = andRequirement
-
-      const { isAuthorized, error, ...rest } = await security.isAuthorized(options)
+      const security = new SecurityClass(andRequirement)
+      const { isAuthorized, error, ...rest } = await security.verify(context)
 
       if (isAuthorized) {
         authorizationContext = { ...authorizationContext, ...rest }

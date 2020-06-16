@@ -1,7 +1,9 @@
 'use strict'
 
+const omit          = require('lodash.omit')
+const ZSchema       = require('z-schema')
 const { parse }     = require('url')
-// const { resolve }   = require('path')
+const jsonSchema    = require('../../assets/schemas/oas2.json')
 const getHttpMethod = require('./getHttpMethod')
 const getSuccessStatusCode = require('./getSuccessStatusCode')
 
@@ -18,7 +20,7 @@ const formatErrorResponseDescription = errors => {
     .join('\n')
 }
 
-const createSpec = (operations, schemasMap, url = 'http://localhost:3000/') => {
+const createSpec = (operations, schemasMap, url) => {
   const { protocol: _protocol, host, path: basePath } = parse(url)
   const protocol = _protocol.replace(':', '')
 
@@ -44,7 +46,7 @@ const createSpec = (operations, schemasMap, url = 'http://localhost:3000/') => {
 
     if (isNotInputSchema) {
       const schema = schemasMap[schemaId]
-      spec.definitions[schemaId] = schema.jsonSchema
+      spec.definitions[schemaId] = omit(schema.jsonSchema, [ 'id' ])
     }
   }
 
@@ -74,7 +76,7 @@ const createSpec = (operations, schemasMap, url = 'http://localhost:3000/') => {
     const parameters = []
 
     for (const name in query) {
-      const queryParameter = { in: 'query', name, ...query[name] }
+      const queryParameter = { in: 'query', name, type: 'string', ...query[name] }
       delete queryParameter.example
 
       parameters.push(queryParameter)
@@ -149,7 +151,7 @@ const createSpec = (operations, schemasMap, url = 'http://localhost:3000/') => {
       }
     }
 
-    spec.paths[httpMethod] = { [httpPath]: operationSpec }
+    spec.paths[httpPath] = { [httpMethod]: operationSpec }
   }
 
   const json = JSON
@@ -158,13 +160,15 @@ const createSpec = (operations, schemasMap, url = 'http://localhost:3000/') => {
 
   const result = JSON.parse(json)
 
-  // const schemaPath = resolve(__dirname, '../assets/schemas/oas2/schema.json')
-  // const jsonSchema = require(schemaPath)
+  const validator = new ZSchema({ ignoreUnknownFormats: true })
+  const isValid = validator.validate(result, { id: 'Spec', ...jsonSchema })
 
-  // const validator = new ZSchema({ ignoreUnknownFormats: true })
-  // const isValid = validator.validate(result, { id: 'Spec', ...jsonSchema })
+  if (!isValid) {
+    const validationErrors = validator.getLastErrors()
 
-  console.dir(result, { depth: 10 })
+    const json = JSON.stringify(validationErrors, null, 2)
+    throw new Error(`Service spec validation failed: ${json}`)
+  }
 
   return result
 }

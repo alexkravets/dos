@@ -6,7 +6,16 @@ const UnauthorizedError  = require('../errors/UnauthorizedError')
 const { verify, decode } = require('jsonwebtoken')
 
 class JwtAuthorization {
-  static createRequirement(options = []) {
+  static createRequirement(
+    publicKey,
+    algorithm = 'RS256',
+    verificationMethod = () => {}
+  ) {
+    if (!publicKey) {
+      throw new Error('JwtAuthorization security requirement requires' +
+        ' "publicKey" to be defined')
+    }
+
     const { name } = this
 
     return {
@@ -17,7 +26,9 @@ class JwtAuthorization {
           name
         },
         klass: this,
-        options
+        publicKey,
+        algorithm,
+        verificationMethod
       }
     }
   }
@@ -29,36 +40,25 @@ class JwtAuthorization {
     }
   }
 
-  // static get algorithm() {
-  //   return 'RS256'
-  // }
-
-  // constructor(headers) {
-  //   this._headers = headers
-  // }
-
-  /* istanbul ignore next */
-  // get publicKey() {
-  //   throw new Error(`Public key is undefined for "${this.constructor.name}"`)
-  // }
-
-  authorize(options, payload) {
-    const { group } = payload
-    return options.includes(group)
+  constructor({ publicKey, algorithm, verificationMethod }) {
+    this._publicKey = publicKey
+    this._algorithm = algorithm
+    this._verificationMethod = verificationMethod
   }
 
-  async isAuthorized(context, options) {
+  async verify(context) {
     let token
+    const { headers } = context
 
-    const hasCookie = this._headers['cookie']
+    const hasCookie = headers['cookie']
 
     if (hasCookie) {
-      const cookies = cookie.parse(this._headers['cookie'])
+      const cookies = cookie.parse(headers['cookie'])
       token = cookies.authorization
     }
 
     if (!token) {
-      token = this._headers.authorization
+      token = headers.authorization
     }
 
     if (!token) {
@@ -73,10 +73,8 @@ class JwtAuthorization {
       return { isAuthorized: false, error }
     }
 
-    const { publicKey } = this
-
     try {
-      verify(token, publicKey, { algorithms: [ this.constructor.algorithm ] })
+      verify(token, this._publicKey, { algorithms: [ this._algorithm ] })
 
     } catch (originalError) {
       const error = new UnauthorizedError()
@@ -85,7 +83,7 @@ class JwtAuthorization {
     }
 
     const { payload }  = object
-    const isAuthorized = this.authorize(options, payload)
+    const isAuthorized = this._verificationMethod(payload)
 
     if (!isAuthorized) {
       const error = new AccessDeniedError()
