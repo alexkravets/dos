@@ -48,20 +48,10 @@ class Service {
 
       if (inputSchema) {
         schemasMap[inputSchema.id] = inputSchema
-        operationClass.errors.InvalidInputError = {
-          statusCode:  400,
-          description: 'Invalid operation input, make sure operation parameters' +
-            ' do match specification'
-        }
       }
 
       if (outputSchema) {
         schemasMap[outputSchema.id] = outputSchema
-        operationClass.errors.InvalidOutputError = {
-          statusCode:  500,
-          description: 'Invalid output returned by the operation, this issue' +
-            ' to be addressed by service developer'
-        }
       }
 
       operationsMap[operationClass.id] = operationClass
@@ -95,7 +85,7 @@ class Service {
     const { operationId } = context
     const Operation = this._operationsMap[operationId]
 
-    let response
+    let response = {}
 
     try {
       const { httpMethod, httpPath } = context

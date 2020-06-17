@@ -55,6 +55,8 @@ const createContext = (service, request) => {
 
     }
   }
+
+  return context
 }
 
 module.exports = createContext

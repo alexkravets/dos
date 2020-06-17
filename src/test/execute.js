@@ -1,20 +1,21 @@
 'use strict'
 
-// TODO: Update this:
-const execute = app => {
-  const { _composer: composer } = app
+const execute = service => {
+  const exec = service.constructor.handler(service)
 
-  return (operationId, input = {}, headers = {}) => {
-    const Operation = app.operationsMap[operationId]
-    const req = { query: input, headers }
+  return async (operationId, input = {}, headers = {}) => {
+    const { mutation: body, ...queryStringParameters } = input
 
-    if (req.query.mutation) {
-      req.mutation = req.query.mutation
-      delete req.query.mutation
+    const request = {
+      body,
+      headers,
+      operationId,
+      queryStringParameters
     }
 
-    const handler = new Operation({ req, composer })
-    return handler.exec()
+    const response = await exec(request)
+
+    return response
   }
 }
 

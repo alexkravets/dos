@@ -41,6 +41,36 @@ class Operation {
     return []
   }
 
+  static get errors() {
+    let errors = {}
+
+    for (const orRequirement of this.security) {
+      const andRequirements = Object.values(orRequirement)
+
+      for (const andRequirement of andRequirements) {
+        errors = { ...andRequirement.klass.errors, ...errors }
+      }
+    }
+
+    if (this.inputSchema) {
+      errors.InvalidInputError = {
+        statusCode:  400,
+        description: 'Invalid operation input, make sure operation parameters' +
+          ' do match specification'
+      }
+    }
+
+    if (this.outputSchema) {
+      errors.InvalidOutputError = {
+        statusCode:  500,
+        description: 'Invalid output returned by the operation, this issue' +
+          ' to be addressed by service developer'
+      }
+    }
+
+    return errors
+  }
+
   static get query() {
     return {}
   }
@@ -108,10 +138,6 @@ class Operation {
     if (!schemaOrSource) { return null }
 
     return new Schema(schemaOrSource, `${id}Output`)
-  }
-
-  static get errors() {
-    return {}
   }
 
   static get Component() {
