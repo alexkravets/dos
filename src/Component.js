@@ -50,7 +50,7 @@ class Component {
   }
 
   validate() {
-    this._validator.validate(this.json, this.componentId)
+    return this._validator.validate(this.json, this.componentId)
   }
 }
 

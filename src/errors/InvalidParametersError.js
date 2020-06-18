@@ -3,8 +3,8 @@
 const CommonError = require('./CommonError')
 
 class InvalidParametersError extends CommonError {
-  constructor(message = 'Invalid parameters', context) {
-    super('InvalidParametersError', message, context)
+  constructor(message = 'Invalid parameters') {
+    super('InvalidParametersError', message)
   }
 }
 

@@ -2,42 +2,35 @@ error:
   required: true
 
   properties:
-    message:
-      description: 'Error message'
-      required:    true
-
     code:
-      description: 'Error code'
+      description: Error code
       required:    true
 
-    status:
-      description: 'HTTP error status'
+    message:
+      description: Error message
       required:    true
 
     statusCode:
-      description: 'HTTP error status code'
+      description: HTTP error status code
       type:        integer
       required:    true
 
-    context:
-      description: 'Error context object'
-      type:        object
-
     validationErrors:
-      description: 'Validation errors'
+      description: Validation errors
       items:
         properties:
-          message: {}
+          code:
+            description: Validation error code
+
+          message:
+            description: Validation error message
 
           schemaId:
-            description: 'Schema ID'
+            description: Schema ID
 
           path:
-            description: 'Path of invalid attribute'
-
-          code:
-            description: 'Validator error code'
+            description: Path of invalid attribute
 
           params:
-            description: 'Invalid attribute values'
+            description: Invalid attribute values
             type: array

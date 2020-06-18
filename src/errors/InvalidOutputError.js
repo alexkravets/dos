@@ -12,10 +12,8 @@ class InvalidOutputError extends CommonError {
 
   toJSON() {
     return {
-      code:             this._validationError.code,
-      message:          this._validationError.message,
-      invalidObject:    this._invalidObject,
-      validationErrors: this._validationError.validationErrors
+      ...this._validationError.toJSON(),
+      object: this._invalidObject
     }
   }
 }

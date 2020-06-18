@@ -12,15 +12,15 @@ const OPERATION_CONTEXT_FIELDS = [
   'requestReceivedAt'
 ]
 
-const logError = (operationContext, errorPlainObject, originalError) => {
-  errorPlainObject.operationContext = maskSecrets(
-    pick(operationContext, OPERATION_CONTEXT_FIELDS)
+const logError = (context, errorResponse, originalError) => {
+  errorResponse.context = maskSecrets(
+    pick(context, OPERATION_CONTEXT_FIELDS)
   )
 
-  const log = [ 'OperationError', errorPlainObject ]
+  const log = [ 'OperationError', errorResponse ]
 
   if (originalError.toJSON) {
-    errorPlainObject.originalErrorJson = JSON.stringify(originalError, null, 2)
+    errorResponse.originalErrorJson = JSON.stringify(originalError, null, 2)
 
   } else {
     log.push(originalError)

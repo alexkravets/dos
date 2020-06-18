@@ -84,7 +84,6 @@ describe('Document', () => {
         await Profile.read(context, { id })
 
       } catch (error) {
-        expect(error.context).to.exist
         expect(error.code).to.eql('ResourceNotFoundError')
 
         return
@@ -124,7 +123,6 @@ describe('Document', () => {
         await Profile.read(context, { id })
 
       } catch (error) {
-        expect(error.context).to.exist
         expect(error.code).to.eql('ResourceNotFoundError')
 
         return

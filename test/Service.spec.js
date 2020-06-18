@@ -5,7 +5,8 @@ const CreateProfile = require('test/operations/CreateProfile')
 const UpdateProfile = require('test/operations/UpdateProfile')
 const DeleteProfile = require('test/operations/DeleteProfile')
 const IndexProfiles = require('test/operations/IndexProfiles')
-const { Service, Operation } = require('src')
+const { Service, Operation }     = require('src')
+const { InvalidParametersError } = require('src/errors')
 const { wait, execute, createAccessToken } = require('src/test')
 
 const modules = [ CreateProfile, UpdateProfile, DeleteProfile, IndexProfiles ]
@@ -92,6 +93,25 @@ describe('Service', () => {
       expect(response.body).to.include('InvalidInputError')
     })
 
+    it('returns "InvalidParametersError / 422" if invalid parameters', async () => {
+      class InvalidIndexProfiles extends IndexProfiles {
+        static get errors() {
+          return { ...super.errors, InvalidParametersError: { statusCode: 422 } }
+        }
+
+        action() {
+          throw new InvalidParametersError()
+        }
+      }
+
+      const modules  = [ InvalidIndexProfiles ]
+      const service  = new Service(modules)
+      const response = await execute(service)('InvalidIndexProfiles')
+
+      expect(response.statusCode).to.eql(422)
+      expect(response.body).to.include('InvalidParametersError')
+    })
+
     it('returns "InvalidOutputError / 500" if invalid output, logs an error', async () => {
       class InvalidIndexProfiles extends IndexProfiles {
         action() {
@@ -118,6 +138,15 @@ describe('Service', () => {
 
       expect(response.statusCode).to.eql(500)
       expect(response.body).to.include('OperationError')
+    })
+
+    it('executes operation', async () => {
+      const response = await exec('CreateProfile', {
+        mutation: { name: 'Hello, world!' }
+      }, { authorization })
+
+      // expect(response.statusCode).to.eql(201)
+      console.log(response.body)
     })
   })
 })

@@ -1,19 +1,14 @@
 'use strict'
 
 class CommonError extends Error {
-  constructor(code, message, context) {
+  constructor(code, message) {
     super(message)
 
-    this._code    = code
-    this._context = context
+    this._code = code
   }
 
   get code() {
     return this._code
-  }
-
-  get context() {
-    return this._context
   }
 }
 

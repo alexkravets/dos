@@ -113,7 +113,7 @@ class Service {
 
       }
 
-      response.output     = new OperationError(context, errorStatusCode, error).json
+      response.output     = new OperationError(context, errorStatusCode, error).validate()
       response.statusCode = errorStatusCode
 
     }

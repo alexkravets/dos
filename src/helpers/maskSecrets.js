@@ -38,6 +38,8 @@ const maskSecrets = object => {
 // TODO: Refactor to use transformPlainObject helper:
 module.exports = input => {
   const object = cloneDeep(input)
+
   maskSecrets(object)
+
   return object
 }
