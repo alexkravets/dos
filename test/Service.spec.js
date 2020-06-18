@@ -5,10 +5,8 @@ const CreateProfile = require('test/operations/CreateProfile')
 const UpdateProfile = require('test/operations/UpdateProfile')
 const DeleteProfile = require('test/operations/DeleteProfile')
 const IndexProfiles = require('test/operations/IndexProfiles')
-const createAccessToken = require('test/helpers/createAccessToken')
-const { Service, Operation, test } = require('src')
-
-const { execute } = test
+const { Service, Operation } = require('src')
+const { wait, execute, createAccessToken } = require('src/test')
 
 const modules = [ CreateProfile, UpdateProfile, DeleteProfile, IndexProfiles ]
 
@@ -56,7 +54,17 @@ describe('Service', () => {
     })
 
     it('returns "UnauthorizedError / 401" if invalid authorization header', async () => {
-      const authorization = ''
+      const cookie   = 'authorization=INVALID_TOKEN; path=/; HttpOnly'
+      const response = await exec('CreateProfile', {}, { cookie })
+
+      expect(response.statusCode).to.eql(401)
+      expect(response.body).to.include('UnauthorizedError')
+    })
+
+    it('returns "UnauthorizedError / 401" if token expired', async () => {
+      const authorization = createAccessToken({ expiresIn: '1 second' })
+      await wait(1200)
+
       const response = await exec('CreateProfile', {}, { authorization })
 
       expect(response.statusCode).to.eql(401)

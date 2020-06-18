@@ -1,8 +1,15 @@
-'use strict'
 
-const JWT = require('jsonwebtoken')
-
-const privateKey =  `-----BEGIN RSA PRIVATE KEY-----
+module.exports = {
+  publicKey: `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwwkLCD+fmGDsGMhX93An
+m9cJHMXq+3qOyZj1+LUcnC114hMLQSE85VAZEJMNQ7zv2P8EwvYcmXN78vAKZgP8
+sbLWc3pS1xZ7w60AfVTOsXvp497X/IjUOUkeJ51G8uIjMNR8mUyi1RJofkvzesHH
+vtwdbD7Nz4hZQDDwHsFXbRR0PdlxrtXRMxMBkWdpKanfYfZz28ZcVxBXOo+hFLAr
+2f5YzmMlWAMsfKsCwvBuLqZFp/w/iVUN+MHlq3xpRACNzAWjtPPfUgp0f/1eg9nM
+q//6RjrJnhxq00rjkTb/28jz6SZWY+Zosmxc2++WheGVJpGaSJK+RJUx5frgmjm0
+hwIDAQAB
+-----END PUBLIC KEY-----`,
+  privateKey: `-----BEGIN RSA PRIVATE KEY-----
 MIIEpQIBAAKCAQEAwwkLCD+fmGDsGMhX93Anm9cJHMXq+3qOyZj1+LUcnC114hML
 QSE85VAZEJMNQ7zv2P8EwvYcmXN78vAKZgP8sbLWc3pS1xZ7w60AfVTOsXvp497X
 /IjUOUkeJ51G8uIjMNR8mUyi1RJofkvzesHHvtwdbD7Nz4hZQDDwHsFXbRR0Pdlx
@@ -29,19 +36,4 @@ MRD/7XsJAoGAP+tgXmKJ4hbI4iHk1H/p3a1R0ZJU4HIW3c1yS6sTMbpeZeSzlOqK
 hRROMKeg4Kdn4pEffvSHGI58SfuxuFl07tqRkmYhaZjhs7yXqxenVEItTLj/LPzn
 BxrOnXk5wkJMymV5Zqd8zZtMVnIeeiyShXInW57+kN66ILGYDpBmTi0=
 -----END RSA PRIVATE KEY-----`
-
-const algorithm = 'RS256'
-
-const createAccessToken = (options, attributes) => {
-  const payload = {
-    sub:    'SESSION_ID',
-    userId: 'USER_ID',
-    ...attributes
-  }
-
-  const token = JWT.sign(payload, privateKey, { algorithm, ...options })
-
-  return token
 }
-
-module.exports = createAccessToken

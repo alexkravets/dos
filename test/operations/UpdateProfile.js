@@ -1,6 +1,14 @@
 'use strict'
 
-const Update  = require('src/operations/Update')
-const Profile = require('test/documents/Profile')
+const Update           = require('src/operations/Update')
+const Profile          = require('test/documents/Profile')
+const { publicKey }    = require('src/test/keys')
+const JwtAuthorization = require('src/security/JwtAuthorization')
 
-module.exports = Update(Profile)
+class UpdateProfile extends Update(Profile) {
+  static get security() {
+    return [ JwtAuthorization.createRequirement(publicKey) ]
+  }
+}
+
+module.exports = UpdateProfile

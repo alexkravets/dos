@@ -11,8 +11,9 @@ class JwtAuthorization {
     algorithm = 'RS256',
     verificationMethod = () => {}
   ) {
+    /* istanbul ignore next */
     if (!publicKey) {
-      throw new Error('JwtAuthorization security requirement requires' +
+      throw new Error('"JwtAuthorization.createRequirement" requires' +
         ' "publicKey" to be defined')
     }
 
