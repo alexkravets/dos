@@ -34,7 +34,6 @@
     "lodash.startcase": "^4.4.0",
     "lodash.uniq": "^4.5.0",
     "pluralize": "^8.0.0",
-    "statuses": "^2.0.0",
     "uuid": "^7.0.3",
     "z-schema": "^4.2.3"
   },

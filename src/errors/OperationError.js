@@ -2,17 +2,16 @@
 
 const path        = require('path')
 const logError    = require('../helpers/logError')
-const statuses    = require('statuses')
 const Component   = require('../Component')
 const { Schema }  = require('@kravc/schema')
 const maskSecrets = require('../helpers/maskSecrets')
 
-const schemaPath = path.resolve(__dirname) + '/OperationError.yaml'
-const operationErrorSchema = Schema.loadSync(schemaPath)
+const SCHEMA_PATH = path.resolve(__dirname) + '/OperationError.yaml'
+const OPERATION_ERROR_SCHEMA = Schema.loadSync(SCHEMA_PATH)
 
 class OperationError extends Component {
   static get schema() {
-    return operationErrorSchema
+    return OPERATION_ERROR_SCHEMA
   }
 
   constructor(operationContext, statusCode, originalError) {
@@ -20,16 +19,14 @@ class OperationError extends Component {
 
     code = code ? code : 'OperationError'
 
-    const status              = statuses[statusCode]
     const hasContext          = Object.keys(context).length > 0
     const shouldLogError      = statusCode === 500
     const isOperationError    = code === 'OperationError'
     const isInvalidInputError = code === 'InvalidInputError'
 
     const error = {
-      message,
       code,
-      status,
+      message,
       statusCode
     }
 
@@ -50,10 +47,6 @@ class OperationError extends Component {
     if (shouldLogError) {
       logError(operationContext, { ...error, message }, originalError)
     }
-  }
-
-  get statusCode() {
-    return this.attributes.error.statusCode
   }
 }
 

@@ -11,6 +11,11 @@ const { wait, execute, createAccessToken } = require('src/test')
 const modules = [ CreateProfile, UpdateProfile, DeleteProfile, IndexProfiles ]
 
 describe('Service', () => {
+  before(() => {
+    const { Component: Profile } = CreateProfile
+    Profile.reset()
+  })
+
   describe('Service.constructor(modules, url, path = \'/src\')', () => {
     it('initializes service', () => {
       const service = new Service(modules, 'https://example.com/api', '/test')
@@ -85,6 +90,34 @@ describe('Service', () => {
 
       expect(response.statusCode).to.eql(400)
       expect(response.body).to.include('InvalidInputError')
+    })
+
+    it('returns "InvalidOutputError / 500" if invalid output, logs an error', async () => {
+      class InvalidIndexProfiles extends IndexProfiles {
+        action() {
+          return { invalid: 'RESPONSE' }
+        }
+      }
+      const modules  = [ InvalidIndexProfiles ]
+      const service  = new Service(modules)
+      const response = await execute(service)('InvalidIndexProfiles')
+
+      expect(response.statusCode).to.eql(500)
+      expect(response.body).to.include('InvalidOutputError')
+    })
+
+    it('returns "OperationError / 500" if unexpected operation error, logs an error', async () => {
+      class InvalidIndexProfiles extends IndexProfiles {
+        action() {
+          throw new Error('Boom!')
+        }
+      }
+      const modules  = [ InvalidIndexProfiles ]
+      const service  = new Service(modules)
+      const response = await execute(service)('InvalidIndexProfiles')
+
+      expect(response.statusCode).to.eql(500)
+      expect(response.body).to.include('OperationError')
     })
   })
 })
