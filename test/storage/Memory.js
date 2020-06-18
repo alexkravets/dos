@@ -13,7 +13,7 @@ const Memory = Document => class extends Document {
   static _create(attributes) {
     globalMemoryStorage[this.id] = globalMemoryStorage[this.id] || {}
 
-    attributes.id = uuid()
+    attributes.id = attributes.id || uuid()
 
     this._storage[attributes.id] = attributes
 

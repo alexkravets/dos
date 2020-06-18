@@ -9,7 +9,7 @@ class JwtAuthorization {
   static createRequirement(
     publicKey,
     algorithm = 'RS256',
-    verificationMethod = () => {}
+    verificationMethod = () => true
   ) {
     /* istanbul ignore next */
     if (!publicKey) {

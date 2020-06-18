@@ -49,14 +49,13 @@ describe('Service', () => {
   describe('Service.handler(service, _createContext = createContext)', () => {
     const service = new Service(modules, 'https://example.com/api', '/test')
     const exec = execute(service)
-
     const authorization = createAccessToken({}, { group: 'Administrators' })
 
     it('returns "UnauthorizedError / 401" if missing authorization header', async () => {
       const response = await exec('CreateProfile')
 
       expect(response.statusCode).to.eql(401)
-      expect(response.body).to.include('UnauthorizedError')
+      expect(response.result.error.code).to.eql('UnauthorizedError')
     })
 
     it('returns "UnauthorizedError / 401" if invalid authorization header', async () => {
@@ -64,7 +63,7 @@ describe('Service', () => {
       const response = await exec('CreateProfile', {}, { cookie })
 
       expect(response.statusCode).to.eql(401)
-      expect(response.body).to.include('UnauthorizedError')
+      expect(response.result.error.code).to.eql('UnauthorizedError')
     })
 
     it('returns "UnauthorizedError / 401" if token expired', async () => {
@@ -74,7 +73,7 @@ describe('Service', () => {
       const response = await exec('CreateProfile', {}, { authorization })
 
       expect(response.statusCode).to.eql(401)
-      expect(response.body).to.include('UnauthorizedError')
+      expect(response.result.error.code).to.eql('UnauthorizedError')
     })
 
     it('returns "AccessDeniedError / 403" if operation access denied', async () => {
@@ -83,14 +82,14 @@ describe('Service', () => {
       const response = await exec('CreateProfile', {}, { authorization })
 
       expect(response.statusCode).to.eql(403)
-      expect(response.body).to.include('AccessDeniedError')
+      expect(response.result.error.code).to.eql('AccessDeniedError')
     })
 
     it('returns "InvalidInputError / 400" if invalid input', async () => {
       const response = await exec('CreateProfile', {}, { authorization })
 
       expect(response.statusCode).to.eql(400)
-      expect(response.body).to.include('InvalidInputError')
+      expect(response.result.error.code).to.eql('InvalidInputError')
     })
 
     it('returns "InvalidParametersError / 422" if invalid parameters', async () => {
@@ -109,7 +108,7 @@ describe('Service', () => {
       const response = await execute(service)('InvalidIndexProfiles')
 
       expect(response.statusCode).to.eql(422)
-      expect(response.body).to.include('InvalidParametersError')
+      expect(response.result.error.code).to.eql('InvalidParametersError')
     })
 
     it('returns "InvalidOutputError / 500" if invalid output, logs an error', async () => {
@@ -123,7 +122,7 @@ describe('Service', () => {
       const response = await execute(service)('InvalidIndexProfiles')
 
       expect(response.statusCode).to.eql(500)
-      expect(response.body).to.include('InvalidOutputError')
+      expect(response.result.error.code).to.eql('InvalidOutputError')
     })
 
     it('returns "OperationError / 500" if unexpected operation error, logs an error', async () => {
@@ -137,16 +136,34 @@ describe('Service', () => {
       const response = await execute(service)('InvalidIndexProfiles')
 
       expect(response.statusCode).to.eql(500)
-      expect(response.body).to.include('OperationError')
+      expect(response.result.error.code).to.eql('OperationError')
     })
 
-    it('executes operation', async () => {
-      const response = await exec('CreateProfile', {
-        mutation: { name: 'Hello, world!' }
+    it('executes operations', async () => {
+      const id = 'HELLO_WORLD'
+      let response
+
+      response = await exec('CreateProfile', {
+        mutation: { id, name: 'Hello, world!' }
       }, { authorization })
 
-      // expect(response.statusCode).to.eql(201)
-      console.log(response.body)
+      expect(response.statusCode).to.eql(201)
+      expect(response.result.data).to.include({ id, name: 'Hello, world!' })
+
+      response = await exec('UpdateProfile', {
+        id, mutation: { name: 'Test update!' }
+      }, { authorization })
+
+      expect(response.statusCode).to.eql(200)
+      expect(response.result.data).to.include({ name: 'Test update!' })
+
+      response = await exec('IndexProfiles')
+      expect(response.statusCode).to.eql(200)
+      expect(response.result.data).to.be.not.empty
+
+      response = await exec('DeleteProfile', { id })
+      expect(response.statusCode).to.eql(204)
+      expect(response.result).to.not.exist
     })
   })
 })

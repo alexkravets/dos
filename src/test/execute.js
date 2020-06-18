@@ -15,7 +15,13 @@ const execute = service => {
 
     const response = await exec(request)
 
-    return response
+    let result
+
+    if (response.body) {
+      result = JSON.parse(response.body)
+    }
+
+    return { ...response, result }
   }
 }
 
