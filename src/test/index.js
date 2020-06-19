@@ -1,7 +1,11 @@
 'use strict'
 
-const execute = require('./execute')
+const wait              = require('./wait')
+const execute           = require('./execute')
+const createAccessToken = require('./createAccessToken')
 
 module.exports = {
-  execute
+  wait,
+  execute,
+  createAccessToken
 }

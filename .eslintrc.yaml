@@ -32,8 +32,9 @@ rules:
   prefer-arrow-callback: error
   space-before-blocks: error
   space-before-function-paren:
-    - error
-    - never
+    - 1
+    - anonymous: always
+      named: never
   space-infix-ops: error
   space-unary-ops: error
   no-console: off

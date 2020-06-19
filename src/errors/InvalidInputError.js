@@ -1,17 +1,18 @@
 'use strict'
 
-class InvalidInputError extends Error {
-  constructor(validationError) {
-    super('Invalid operation input')
-    this._validationError = validationError
-  }
+const CommonError = require('./CommonError')
 
-  get code() {
-    return this.constructor.name
+class InvalidInputError extends CommonError {
+  constructor(validationError) {
+    super('InvalidInputError', 'Invalid operation input')
+
+    const { validationErrors } = validationError.toJSON()
+
+    this._validationErrors = validationErrors
   }
 
   get validationErrors() {
-    return this._validationError.validationErrors
+    return this._validationErrors
   }
 }
 

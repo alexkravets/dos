@@ -1,8 +1,9 @@
 'use strict'
 
-const Operation = require('../Operation')
+const Operation       = require('../Operation')
+const getResourceName = require('../helpers/getResourceName')
 
-module.exports = (Component, componentAction = 'create') => {
+const Create = (Component, componentAction = 'create') => {
   if (!Component) {
     throw new Error('Argument "Component" is undefined for "Create" operation' +
       ' function')
@@ -22,10 +23,17 @@ module.exports = (Component, componentAction = 'create') => {
     }
 
     static get errors() {
+      const resourceName = getResourceName(this.Component)
+
       return {
         ...super.errors,
-        ResourceExistsError: { status: 'Unprocessable Entity' }
+        ResourceExistsError: {
+          statusCode:  422,
+          description: `${resourceName} could not be created, it already exists`
+        }
       }
     }
   }
 }
+
+module.exports = Create

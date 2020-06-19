@@ -1,10 +1,9 @@
 'use strict'
 
-const Operation  = require('../Operation')
-const startCase  = require('lodash.startcase')
-const capitalize = require('lodash.capitalize')
+const Operation       = require('../Operation')
+const getResourceName = require('../helpers/getResourceName')
 
-module.exports = (Component, componentAction = 'delete') => {
+const Delete = (Component, componentAction = 'delete') => {
   if (!Component) {
     throw new Error('Argument "Component" is undefined for "Delete" operation' +
       ' function')
@@ -24,20 +23,23 @@ module.exports = (Component, componentAction = 'delete') => {
     }
 
     static get errors() {
+      const resourceName = getResourceName(this.Component)
+
       return {
         ...super.errors,
-        ResourceNotFoundError: { status: 'Not Found' }
+        ResourceNotFoundError: {
+          statusCode:  404,
+          description: `${resourceName} is not found`
+        }
       }
     }
 
     static get query() {
-      const { Component: { name } } = this
-      const componentTitle = capitalize(startCase(name))
+      const resourceName = getResourceName(this.Component)
 
       return {
         id: {
-          description: `${componentTitle} ID`,
-          type:        'string',
+          description: `${resourceName} ID`,
           required:    true
         }
       }
@@ -48,3 +50,5 @@ module.exports = (Component, componentAction = 'delete') => {
     }
   }
 }
+
+module.exports = Delete

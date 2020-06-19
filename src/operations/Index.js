@@ -1,11 +1,10 @@
 'use strict'
 
-const Operation  = require('../Operation')
-const pluralize  = require('pluralize')
-const startCase  = require('lodash.startcase')
-const capitalize = require('lodash.capitalize')
+const Operation       = require('../Operation')
+const capitalize      = require('lodash.capitalize')
+const getResourceName = require('../helpers/getResourceName')
 
-module.exports = (Component, componentAction = 'index') => {
+const Index = (Component, componentAction = 'index') => {
   if (!Component) {
     throw new Error('Argument "Component" is undefined for "Index" operation' +
       ' function')
@@ -17,10 +16,10 @@ module.exports = (Component, componentAction = 'index') => {
     }
 
     static get summary() {
-      const { Component: { name }, componentAction } = this
-      const componentTitlePlural = pluralize(startCase(name)).toLowerCase()
+      const { Component, componentAction } = this
+      const resourceName = getResourceName(Component, false, true)
 
-      return capitalize(`${componentAction} ${componentTitlePlural}`)
+      return capitalize(`${componentAction} ${resourceName}`)
     }
 
     static get componentAction() {
@@ -36,48 +35,40 @@ module.exports = (Component, componentAction = 'index') => {
     }
 
     static get query() {
-      const { Component: { name }, defaultSort, defaultLimit } = this
-      const componentTitlePlural = pluralize(startCase(name)).toLowerCase()
+      const { Component, defaultSort, defaultLimit } = this
+      const resourceName = getResourceName(Component, false, true)
 
       return {
         limit: {
-          description: `Limit number of ${componentTitlePlural} to be returned`,
+          description: `Limit number of ${resourceName} to be returned`,
           type:        'integer',
           default:     defaultLimit
         },
         sort: {
           description: 'Sort direction',
-          type:        'string',
           enum:        [ 'asc', 'desc' ],
           default:     defaultSort
         },
         exclusiveStartKey: {
-          description: `Return ${componentTitlePlural} starting from specific key`,
-          type:        'string'
+          description: `Return ${resourceName} starting from specific key`
         }
       }
     }
 
     static get output() {
-      const { Component: { schema: { id } } } = this
-
       return {
         data: {
-          type:     'array',
-          items:    { $ref: id },
+          items: { $ref: this.Component.schema.id },
           required: true
         },
         pageInfo: {
-          type:       'object',
-          required:   true,
+          required: true,
           properties: {
             exclusiveStartKey: {
-              description: 'Exclusive start key specified in the request',
-              type:        'string'
+              description: 'Exclusive start key specified in the request'
             },
             lastEvaluatedKey: {
-              description: 'Last evaluated key to get next portion of results',
-              type:        'string'
+              description: 'Last evaluated key to get next portion of results'
             },
             limit: {
               description: 'Limit value specified in the request',
@@ -89,7 +80,6 @@ module.exports = (Component, componentAction = 'index') => {
             },
             sort: {
               description: 'Sort direction',
-              type:        'string',
               enum:        [ 'asc', 'desc' ]
             }
           }
@@ -97,23 +87,21 @@ module.exports = (Component, componentAction = 'index') => {
       }
     }
 
-    async action() {
-      const { componentActionMethod } = this.constructor
-      const { exclusiveStartKey, limit, sort } = this.query
-
-      delete this.query.sort
-      delete this.query.limit
-      delete this.query.exclusiveStartKey
-
+    async action(parameters) {
+      const { exclusiveStartKey, limit, sort, ...query } = parameters
       const options = { exclusiveStartKey, limit, sort }
-      const result = await componentActionMethod(this.context, this.query, options)
+
+      const { componentActionMethod } = this.constructor
+      const result = await componentActionMethod(this.context, query, options)
 
       const { objects: data, count, lastEvaluatedKey } = result
 
       return {
-        data,
-        pageInfo: { sort, count, limit, lastEvaluatedKey, exclusiveStartKey }
+        pageInfo: { sort, count, limit, lastEvaluatedKey, exclusiveStartKey },
+        data
       }
     }
   }
 }
+
+module.exports = Index

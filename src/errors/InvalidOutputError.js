@@ -1,27 +1,19 @@
 'use strict'
 
-class InvalidOutputError extends Error {
+const CommonError = require('./CommonError')
+
+class InvalidOutputError extends CommonError {
   constructor(invalidObject, validationError) {
-    super('Invalid operation output')
+    super('InvalidOutputError', 'Invalid operation output')
 
-    this._invalidObject   = invalidObject
+    this._invalidObject   = JSON.parse(JSON.stringify(invalidObject))
     this._validationError = validationError
-  }
-
-  get code() {
-    return this.constructor.name
-  }
-
-  get validationErrors() {
-    return this._validationError.validationErrors
   }
 
   toJSON() {
     return {
-      code:             this._validationError.code,
-      message:          this._validationError.message,
-      invalidObject:    this._invalidObject,
-      validationErrors: this.validationErrors
+      ...this._validationError.toJSON(),
+      object: this._invalidObject
     }
   }
 }

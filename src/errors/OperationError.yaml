@@ -1,0 +1,36 @@
+error:
+  required: true
+
+  properties:
+    code:
+      description: Error code
+      required:    true
+
+    message:
+      description: Error message
+      required:    true
+
+    statusCode:
+      description: HTTP error status code
+      type:        integer
+      required:    true
+
+    validationErrors:
+      description: Validation errors
+      items:
+        properties:
+          code:
+            description: Validation error code
+
+          message:
+            description: Validation error message
+
+          schemaId:
+            description: Schema ID
+
+          path:
+            description: Path of invalid attribute
+
+          params:
+            description: Invalid attribute values
+            type: array

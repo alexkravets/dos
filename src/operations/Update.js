@@ -1,10 +1,9 @@
 'use strict'
 
-const Operation  = require('../Operation')
-const startCase  = require('lodash.startcase')
-const capitalize = require('lodash.capitalize')
+const Operation       = require('../Operation')
+const getResourceName = require('../helpers/getResourceName')
 
-module.exports = (Component, componentAction = 'update') => {
+const Update = (Component, componentAction = 'update') => {
   if (!Component) {
     throw new Error('Argument "Component" is undefined for "Update" operation' +
       ' function')
@@ -24,23 +23,28 @@ module.exports = (Component, componentAction = 'update') => {
     }
 
     static get errors() {
+      const resourceName = getResourceName(this.Component)
+
       return {
         ...super.errors,
-        ResourceNotFoundError: { status: 'Not Found' }
+        ResourceNotFoundError: {
+          statusCode:  404,
+          description: `${resourceName} is not found`
+        }
       }
     }
 
     static get query() {
-      const { Component: { name } } = this
-      const componentTitle = capitalize(startCase(name))
+      const resourceName = getResourceName(this.Component)
 
       return {
         id: {
-          description: `${componentTitle} ID`,
-          type:        'string',
-          required:    true
+          description: `${resourceName} ID`,
+          required: true
         }
       }
     }
   }
 }
+
+module.exports = Update
