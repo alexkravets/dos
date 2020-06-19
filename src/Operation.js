@@ -180,6 +180,10 @@ class Operation {
   }
 
   async action(parameters) {
+    const { Component } = this.constructor
+
+    if (!Component) { return }
+
     const { componentActionMethod } = this.constructor
 
     const { mutation, ...query } = parameters

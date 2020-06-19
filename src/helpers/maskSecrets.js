@@ -1,6 +1,5 @@
 'use strict'
 
-const isString    = require('lodash.isstring')
 const isObject    = require('lodash.isobject')
 const cloneDeep   = require('lodash.clonedeep')
 const { isArray } = Array
@@ -17,25 +16,24 @@ const maskSecrets = object => {
       for (const item of value) {
         maskSecrets(item)
       }
+
       continue
     }
 
     if (isObject(value)) {
       maskSecrets(value)
+
       continue
     }
 
-    const shouldContinue = !isString(value)
+    const isSecret = SECRET_REGEXP.test(key)
 
-    if (shouldContinue) { continue }
-
-    if (SECRET_REGEXP.test(key)) {
+    if (isSecret) {
       object[key] = '[MASKED]'
     }
   }
 }
 
-// TODO: Refactor to use transformPlainObject helper:
 module.exports = input => {
   const object = cloneDeep(input)
 

@@ -1,8 +1,8 @@
 'use strict'
 
+const get                = require('lodash.get')
 const uniq               = require('lodash.uniq')
 const compact            = require('lodash.compact')
-const isString           = require('lodash.isstring')
 const authorize          = require('./helpers/authorize')
 const createSpec         = require('./helpers/createSpec')
 const { Validator }      = require('@kravc/schema')
@@ -78,7 +78,7 @@ class Service {
   }
 
   getOperationId(httpMethod, httpPath) {
-    this._spec.paths[httpPath][httpMethod].operationId
+    return get(this._spec.paths, `${httpPath}.${httpMethod}.operationId`, 'OPERATION_NOT_FOUND')
   }
 
   async process(context) {
@@ -105,11 +105,11 @@ class Service {
 
       const { code } = error
 
-      if (Operation && Operation.errors[code]) {
-        errorStatusCode = Operation.errors[code].statusCode || 500
+      if (Operation) {
+        errorStatusCode = get(Operation.errors, `${code}.statusCode`, 500)
 
       } else {
-        errorStatusCode = 500
+        errorStatusCode = get(error, 'statusCode', 500)
 
       }
 
@@ -124,7 +124,7 @@ class Service {
       return { statusCode, headers }
     }
 
-    const body = isString(output) ? output : JSON.stringify(output, null, 2)
+    const body = JSON.stringify(output, null, 2)
 
     return { statusCode, headers, body }
   }

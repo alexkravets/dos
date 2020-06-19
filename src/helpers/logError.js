@@ -13,9 +13,8 @@ const OPERATION_CONTEXT_FIELDS = [
 ]
 
 const logError = (context, errorResponse, originalError) => {
-  errorResponse.context = maskSecrets(
-    pick(context, OPERATION_CONTEXT_FIELDS)
-  )
+  const secureContext = maskSecrets(pick(context, OPERATION_CONTEXT_FIELDS))
+  errorResponse.contextJson = JSON.stringify(secureContext, null, 2)
 
   const log = [ 'OperationError', errorResponse ]
 

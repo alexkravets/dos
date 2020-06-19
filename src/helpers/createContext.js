@@ -10,8 +10,12 @@ const createContext = (service, request) => {
 
   let { operationId } = request
 
+
   if (!operationId) {
-    httpPath   = request.path.replace(service.basePath, '')
+    const { url }      = request
+    const { basePath } = service
+
+    httpPath   = parse(url, true).pathname.replace(basePath, '')
     httpMethod = (request.method || request.httpMethod).toLowerCase()
 
     operationId = service.getOperationId(httpMethod, httpPath)
@@ -33,15 +37,14 @@ const createContext = (service, request) => {
 
   const { url, queryStringParameters, body } = request
 
-  if (queryStringParameters !== undefined) {
-    context.query = queryStringParameters
+  context.query = {}
 
-  } else if (url) {
+  if (url) {
     context.query = parse(url, true).query
+  }
 
-  } else {
-    context.query = {}
-
+  if (queryStringParameters) {
+    context.query = queryStringParameters
   }
 
   if (body) {

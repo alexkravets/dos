@@ -3,7 +3,17 @@
 const Memory                = require('test/storage/Memory')
 const { expect }            = require('chai')
 const { Schema, Validator } = require('@kravc/schema')
-const { Operation, Document, Component, Create, Read, Update, Index, Delete } = require('src')
+
+const {
+  Read,
+  Index,
+  Create,
+  Update,
+  Delete,
+  Document,
+  Component,
+  Operation
+} = require('src')
 
 class Profile extends Memory(Document) {}
 Profile.schema = Schema.loadSync('test/schemas/Profile.yaml')
@@ -450,6 +460,14 @@ describe('Operation', () => {
 
       const { result } = await (new Health(DEFAULT_CONTEXT)).exec()
       expect(result).to.deep.eql({ status: 'OK', service: 'Test' })
+    })
+  })
+
+  describe('.action()', () => {
+    it('supports dummy mode without defined "Component"', async () => {
+      const { result } = await new Operation().exec()
+
+      expect(result).to.not.exist
     })
   })
 })

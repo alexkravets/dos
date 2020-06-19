@@ -31,7 +31,9 @@ const Memory = Document => class extends Document {
   }
 
   static _update(query, mutation) {
-    this._storage[query.id] = { ...this._storage[query.id], ...mutation }
+    const item = this._read(query)
+
+    this._storage[query.id] = { ...item, ...mutation }
 
     return this._storage[query.id]
   }
