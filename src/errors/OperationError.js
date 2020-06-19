@@ -14,12 +14,9 @@ class OperationError extends Component {
   }
 
   constructor(context, statusCode, originalError) {
-    let { code, message, validationErrors } = originalError
+    let { code, message, validationErrors, isCommonError } = originalError
 
-    code = code ? code : 'OperationError'
-
-    const shouldLogError   = statusCode === 500
-    const isOperationError = code === 'OperationError'
+    const shouldLogError = statusCode === 500
 
     const error = {
       code,
@@ -27,12 +24,13 @@ class OperationError extends Component {
       statusCode
     }
 
-    if (isOperationError) {
-      error.message = 'Unexpected operation error'
-    }
-
     if (validationErrors) {
       error.validationErrors = validationErrors
+    }
+
+    if (!isCommonError) {
+      error.code    = 'OperationError'
+      error.message = 'Unexpected operation error'
     }
 
     super(context, { error })

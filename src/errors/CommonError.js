@@ -10,6 +10,10 @@ class CommonError extends Error {
   get code() {
     return this._code
   }
+
+  get isCommonError() {
+    return true
+  }
 }
 
 module.exports = CommonError
