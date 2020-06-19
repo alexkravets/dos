@@ -11,5 +11,6 @@ module.exports = {
   Update:    require('./operations/Update'),
   Delete:    require('./operations/Delete'),
   errors:    require('./errors'),
+  security:  require('./security'),
   test:      require('./test')
 }

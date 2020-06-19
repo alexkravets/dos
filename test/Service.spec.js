@@ -70,7 +70,9 @@ describe('Service', () => {
 
   describe('Service.handler(service, _createContext = createContext)', () => {
     const service = new Service(modules, 'https://example.com/api/', '/test')
-    const exec = test.execute(service)
+    const handler = Service.handler(service)
+    const exec    = test.execute(handler)
+
     const authorization = test.createAccessToken({}, { group: 'Administrators' })
 
     it('returns "UnauthorizedError / 401" if missing authorization header', async () => {
@@ -134,7 +136,8 @@ describe('Service', () => {
 
       const modules  = [ InvalidIndexProfiles ]
       const service  = new Service(modules)
-      const response = await test.execute(service)('InvalidIndexProfiles')
+      const handler  = Service.handler(service)
+      const response = await test.execute(handler)('InvalidIndexProfiles')
 
       expect(response.statusCode).to.eql(422)
       expect(response.result.error.code).to.eql('InvalidParametersError')
@@ -148,7 +151,8 @@ describe('Service', () => {
       }
       const modules  = [ InvalidIndexProfiles ]
       const service  = new Service(modules)
-      const response = await test.execute(service)('InvalidIndexProfiles')
+      const handler  = Service.handler(service)
+      const response = await test.execute(handler)('InvalidIndexProfiles')
 
       expect(response.statusCode).to.eql(500)
       expect(response.result.error.code).to.eql('InvalidOutputError')
@@ -172,7 +176,8 @@ describe('Service', () => {
       }
       const modules  = [ InvalidIndexProfiles ]
       const service  = new Service(modules)
-      const response = await test.execute(service)('InvalidIndexProfiles')
+      const handler  = Service.handler(service)
+      const response = await test.execute(handler)('InvalidIndexProfiles')
 
       expect(response.statusCode).to.eql(500)
       expect(response.result.error.code).to.eql('OperationError')
