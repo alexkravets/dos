@@ -99,7 +99,7 @@ class JwtAuthorization {
       return { isAuthorized: false, error }
     }
 
-    return { isAuthorized: true, identity: payload }
+    return { isAuthorized: true, ...payload }
   }
 }
 
