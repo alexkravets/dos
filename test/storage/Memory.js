@@ -43,7 +43,7 @@ const Memory = Document => class extends Document {
   }
 
   static _index() {
-    const items = Object.values(this._storage)
+    const items = Object.values(this._storage || {})
 
     return { items, count: items.length }
   }

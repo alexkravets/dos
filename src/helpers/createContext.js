@@ -15,7 +15,7 @@ const createContext = (service, request) => {
     const { url }      = request
     const { basePath } = service
 
-    httpPath   = parse(url, true).pathname.replace(basePath, '')
+    httpPath   = parse(url, true).pathname.replace(basePath, '/')
     httpMethod = (request.method || request.httpMethod).toLowerCase()
 
     operationId = service.getOperationId(httpMethod, httpPath)

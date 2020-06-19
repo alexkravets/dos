@@ -107,7 +107,7 @@ const createSpec = (operations, schemasMap, url) => {
     const responses = {
       [successStatusCode]: success,
       default: {
-        description: 'Default operation error',
+        description: '`OperationError` — Default operation error',
         schema: { $ref: 'OperationError' }
       }
     }

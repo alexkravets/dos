@@ -1,6 +1,6 @@
 'use strict'
 
-const { Operation } = require('src')
+const { Operation } = require('../../src')
 
 class Health extends Operation {
 }

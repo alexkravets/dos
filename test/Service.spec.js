@@ -2,6 +2,7 @@
 
 const Health        = require('test/operations/Health')
 const { expect }    = require('chai')
+const ReadProfile   = require('test/operations/ReadProfile')
 const CreateProfile = require('test/operations/CreateProfile')
 const UpdateProfile = require('test/operations/UpdateProfile')
 const DeleteProfile = require('test/operations/DeleteProfile')
@@ -17,6 +18,7 @@ const {
 
 const modules = [
   Health,
+  ReadProfile,
   CreateProfile,
   UpdateProfile,
   DeleteProfile,
@@ -67,7 +69,7 @@ describe('Service', () => {
   })
 
   describe('Service.handler(service, _createContext = createContext)', () => {
-    const service = new Service(modules, 'https://example.com/api', '/test')
+    const service = new Service(modules, 'https://example.com/api/', '/test')
     const exec = test.execute(service)
     const authorization = test.createAccessToken({}, { group: 'Administrators' })
 
@@ -232,6 +234,29 @@ describe('Service', () => {
         body:    JSON.stringify({ name: 'HTTP test!' }),
         method:  'PATCH',
         headers: { authorization }
+      }
+
+      response = await lambdaFunction(request)
+      expect(response.statusCode).to.eql(200)
+    })
+
+    it('supports spec middleware', async () => {
+      const lambdaFunction = Service.handler(service)
+
+      let request
+      let response
+
+      request = {
+        url:        'http://localhost:3000/',
+        httpMethod: 'GET'
+      }
+
+      response = await lambdaFunction(request)
+      expect(response.statusCode).to.eql(200)
+
+      request = {
+        url:        'http://localhost:3000/Spec',
+        httpMethod: 'GET'
       }
 
       response = await lambdaFunction(request)
