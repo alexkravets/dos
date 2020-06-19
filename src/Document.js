@@ -45,8 +45,6 @@ class Document extends Component {
     }, this.id)
 
     this._bodySchema = schema
-
-    return this._schema
   }
 
   static async create(context, query, mutation) {
