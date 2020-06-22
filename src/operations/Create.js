@@ -1,7 +1,7 @@
 'use strict'
 
 const Operation       = require('../Operation')
-const getResourceName = require('../helpers/getResourceName')
+const getComponentTitle = require('../helpers/getComponentTitle')
 
 const Create = (Component, componentAction = 'create') => {
   if (!Component) {
@@ -23,13 +23,13 @@ const Create = (Component, componentAction = 'create') => {
     }
 
     static get errors() {
-      const resourceName = getResourceName(this.Component)
+      const documentTitle = getComponentTitle(this.Component)
 
       return {
         ...super.errors,
-        ResourceExistsError: {
+        DocumentExistsError: {
           statusCode:  422,
-          description: `${resourceName} could not be created, it already exists`
+          description: `${documentTitle} could not be created, it already exists`
         }
       }
     }

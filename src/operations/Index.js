@@ -1,8 +1,8 @@
 'use strict'
 
-const Operation       = require('../Operation')
-const capitalize      = require('lodash.capitalize')
-const getResourceName = require('../helpers/getResourceName')
+const Operation         = require('../Operation')
+const capitalize        = require('lodash.capitalize')
+const getComponentTitle = require('../helpers/getComponentTitle')
 
 const Index = (Component, componentAction = 'index') => {
   if (!Component) {
@@ -17,9 +17,9 @@ const Index = (Component, componentAction = 'index') => {
 
     static get summary() {
       const { Component, componentAction } = this
-      const resourceName = getResourceName(Component, false, true)
+      const documentTitle = getComponentTitle(Component, false, true)
 
-      return capitalize(`${componentAction} ${resourceName}`)
+      return capitalize(`${componentAction} ${documentTitle}`)
     }
 
     static get componentAction() {
@@ -36,11 +36,11 @@ const Index = (Component, componentAction = 'index') => {
 
     static get query() {
       const { Component, defaultSort, defaultLimit } = this
-      const resourceName = getResourceName(Component, false, true)
+      const documentTitle = getComponentTitle(Component, false, true)
 
       return {
         limit: {
-          description: `Limit number of ${resourceName} to be returned`,
+          description: `Limit number of ${documentTitle} to be returned`,
           type:        'integer',
           default:     defaultLimit
         },
@@ -50,7 +50,7 @@ const Index = (Component, componentAction = 'index') => {
           default:     defaultSort
         },
         exclusiveStartKey: {
-          description: `Return ${resourceName} starting from specific key`
+          description: `Return ${documentTitle} starting from specific key`
         }
       }
     }

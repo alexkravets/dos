@@ -1,6 +1,5 @@
 'use strict'
 
-const Memory                = require('test/storage/Memory')
 const { expect }            = require('chai')
 const { Schema, Validator } = require('@kravc/schema')
 
@@ -15,8 +14,8 @@ const {
   Operation
 } = require('src')
 
-class Profile extends Memory(Document) {}
-Profile.schema = Schema.loadSync('test/schemas/Profile.yaml')
+class Profile extends Document {}
+Profile.schema = Schema.loadSync('test/example/Profile.yaml')
 
 const validator = new Validator([ Profile.schema ])
 const identity  = { accountId: 'ACCOUNT_ID' }
@@ -63,7 +62,7 @@ describe('Operation', () => {
           }
         })
 
-        expect(CreateProfile.errors.ResourceExistsError.statusCode).eql(422)
+        expect(CreateProfile.errors.DocumentExistsError.statusCode).eql(422)
       })
 
       it('throws error if "Component" argument is undefined', () => {
@@ -102,7 +101,7 @@ describe('Operation', () => {
 
         expect(ReadProfile.mutationSchema).to.eql(null)
 
-        expect(ReadProfile.errors.ResourceNotFoundError.statusCode).eql(404)
+        expect(ReadProfile.errors.DocumentNotFoundError.statusCode).eql(404)
       })
 
       it('throws error if "Component" argument is undefined', () => {
@@ -171,7 +170,7 @@ describe('Operation', () => {
           }
         })
 
-        expect(UpdateProfile.errors.ResourceNotFoundError.statusCode).eql(404)
+        expect(UpdateProfile.errors.DocumentNotFoundError.statusCode).eql(404)
       })
 
       it('throws error if "Component" argument is undefined', () => {
@@ -195,7 +194,7 @@ describe('Operation', () => {
         expect(DeleteProfile.outputSchema).eql(null)
         expect(DeleteProfile.mutationSchema).eql(null)
 
-        expect(DeleteProfile.errors.ResourceNotFoundError.statusCode).eql(404)
+        expect(DeleteProfile.errors.DocumentNotFoundError.statusCode).eql(404)
       })
 
       it('throws error if "Component" argument is undefined', () => {
@@ -345,7 +344,7 @@ describe('Operation', () => {
   describe('Operation.mutation', () => {
     it('uses "schema" for components without "bodySchema"', () => {
       class RemoteProfile extends Component {}
-      RemoteProfile.schema = Schema.loadSync('test/schemas/Profile.yaml')
+      RemoteProfile.schema = Schema.loadSync('test/example/Profile.yaml')
 
       const CreateRemoteProfile = Create(RemoteProfile)
       expect(CreateRemoteProfile.mutation).to.exist

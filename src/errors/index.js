@@ -4,6 +4,7 @@ module.exports = {
   CommonError:            require('./CommonError'),
   UnauthorizedError:      require('./UnauthorizedError'),
   AccessDeniedError:      require('./AccessDeniedError'),
-  ResourceNotFoundError:  require('./ResourceNotFoundError'),
+  DocumentExistsError:    require('./DocumentExistsError'),
+  DocumentNotFoundError:  require('./DocumentNotFoundError'),
   InvalidParametersError: require('./InvalidParametersError')
 }

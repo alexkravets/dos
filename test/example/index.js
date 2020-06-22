@@ -4,12 +4,12 @@
 // $ npm i --save-dev @kravc/http
 // $ ./node_modules/.bin/http ./test/example`
 
-const Health        = require('../operations/Health')
-const ReadProfile   = require('../operations/ReadProfile'  )
-const CreateProfile = require('../operations/CreateProfile')
-const UpdateProfile = require('../operations/UpdateProfile')
-const DeleteProfile = require('../operations/DeleteProfile')
-const IndexProfiles = require('../operations/IndexProfiles')
+const Health        = require('./Health')
+const ReadProfile   = require('./ReadProfile'  )
+const CreateProfile = require('./CreateProfile')
+const UpdateProfile = require('./UpdateProfile')
+const DeleteProfile = require('./DeleteProfile')
+const IndexProfiles = require('./IndexProfiles')
 
 const { Service } = require('../../src')
 

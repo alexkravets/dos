@@ -1,7 +1,7 @@
 'use strict'
 
 const Create           = require('../../src/operations/Create')
-const Profile          = require('../documents/Profile')
+const Profile          = require('./Profile')
 const { publicKey }    = require('../../src/test/keys')
 const JwtAuthorization = require('../../src/security/JwtAuthorization')
 

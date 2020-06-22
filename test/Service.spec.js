@@ -1,12 +1,12 @@
 'use strict'
 
-const Health        = require('test/operations/Health')
+const Health        = require('test/example/Health')
 const { expect }    = require('chai')
-const ReadProfile   = require('test/operations/ReadProfile')
-const CreateProfile = require('test/operations/CreateProfile')
-const UpdateProfile = require('test/operations/UpdateProfile')
-const DeleteProfile = require('test/operations/DeleteProfile')
-const IndexProfiles = require('test/operations/IndexProfiles')
+const ReadProfile   = require('test/example/ReadProfile')
+const CreateProfile = require('test/example/CreateProfile')
+const UpdateProfile = require('test/example/UpdateProfile')
+const DeleteProfile = require('test/example/DeleteProfile')
+const IndexProfiles = require('test/example/IndexProfiles')
 
 const {
   test,

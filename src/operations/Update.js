@@ -1,7 +1,7 @@
 'use strict'
 
-const Operation       = require('../Operation')
-const getResourceName = require('../helpers/getResourceName')
+const Operation         = require('../Operation')
+const getComponentTitle = require('../helpers/getComponentTitle')
 
 const Update = (Component, componentAction = 'update') => {
   if (!Component) {
@@ -23,23 +23,23 @@ const Update = (Component, componentAction = 'update') => {
     }
 
     static get errors() {
-      const resourceName = getResourceName(this.Component)
+      const documentTitle = getComponentTitle(this.Component)
 
       return {
         ...super.errors,
-        ResourceNotFoundError: {
+        DocumentNotFoundError: {
           statusCode:  404,
-          description: `${resourceName} is not found`
+          description: `${documentTitle} is not found`
         }
       }
     }
 
     static get query() {
-      const resourceName = getResourceName(this.Component)
+      const documentTitle = getComponentTitle(this.Component)
 
       return {
         id: {
-          description: `${resourceName} ID`,
+          description: `${documentTitle} ID`,
           required: true
         }
       }

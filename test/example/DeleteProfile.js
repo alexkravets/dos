@@ -1,6 +1,6 @@
 'use strict'
 
 const Delete  = require('../../src/operations/Delete')
-const Profile = require('../documents/Profile')
+const Profile = require('./Profile')
 
 module.exports = Delete(Profile)

@@ -6,7 +6,7 @@ const { Component } = require('src')
 const { Validator } = require('@kravc/schema')
 
 class Profile extends Component {}
-Profile.schema = Schema.loadSync('test/schemas/Profile.yaml')
+Profile.schema = Schema.loadSync('test/example/Profile.yaml')
 
 describe('Component', () => {
   const validator = new Validator([ Profile.schema ])

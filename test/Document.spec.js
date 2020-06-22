@@ -1,13 +1,24 @@
 'use strict'
 
-const Memory        = require('test/storage/Memory')
 const { Schema }    = require('@kravc/schema')
 const { expect }    = require('chai')
 const { Document }  = require('src')
 const { Validator } = require('@kravc/schema')
 
-class Profile extends Memory(Document) {}
-Profile.schema = Schema.loadSync('test/schemas/Profile.yaml')
+const expectError = async (fn) => {
+  try {
+    await fn()
+
+  } catch (error) {
+    return error
+
+  }
+
+  throw new Error('Expected error has not been thrown')
+}
+
+class Profile extends Document {}
+Profile.schema = Schema.loadSync('test/example/Profile.yaml')
 
 describe('Document', () => {
   const validator = new Validator([ Profile.schema ])
@@ -45,6 +56,14 @@ describe('Document', () => {
       expect(profile.attributes.createdAt).to.exist
       expect(profile.attributes.createdBy).to.not.exist
     })
+
+    it('throws "DocumentExistsError" if document already exists', async () => {
+      const { id } = await Profile.create(context, {}, { name: 'Artem' })
+      const error = await expectError(() => Profile.create(context, {}, { id, name: 'Liam' }))
+
+      expect(error.code).to.eql('DocumentExistsError')
+      expect(error.message).to.include('Profile already exists {')
+    })
   })
 
   describe('Document.read(context, query)', () => {
@@ -52,6 +71,14 @@ describe('Document', () => {
       const profile = await Profile.read(context, { id })
 
       expect(profile).to.exist
+    })
+
+    it('throws "DocumentNotFoundError" if document not found', async () => {
+      const error = await expectError(() => Profile.read(
+        { validator }, {}))
+
+      expect(error.code).to.eql('DocumentNotFoundError')
+      expect(error.message).to.include('Profile not found {')
     })
   })
 
@@ -67,12 +94,20 @@ describe('Document', () => {
     })
 
     it('updates document without identity in context', async () => {
-      const { id } = await Profile.create({ validator }, { mutation: { name: 'Gustav' } })
+      const { id } = await Profile.create({ validator }, { name: 'Gustav' })
 
-      const profile = await Profile.update({ validator }, { id, mutation: { name: 'Jack' } })
+      const profile = await Profile.update({ validator }, { id }, { name: 'Jack' })
 
       expect(profile.attributes.updatedAt).to.exist
       expect(profile.attributes.updatedBy).to.not.exist
+    })
+
+    it('throws "DocumentNotFoundError" if document not found', async () => {
+      const error = await expectError(() => Profile.update(
+        { validator }, {}, { name: 'Liam' }))
+
+      expect(error.code).to.eql('DocumentNotFoundError')
+      expect(error.message).to.include('Profile not found {')
     })
   })
 
@@ -84,25 +119,42 @@ describe('Document', () => {
         await Profile.read(context, { id })
 
       } catch (error) {
-        expect(error.code).to.eql('ResourceNotFoundError')
+        expect(error.code).to.eql('DocumentNotFoundError')
 
         return
       }
 
       throw new Error('Document has not been deleted')
     })
+
+    it('throws "DocumentNotFoundError" if document not found', async () => {
+      const error = await expectError(() => Profile.delete(
+        { validator }, {}))
+
+      expect(error.code).to.eql('DocumentNotFoundError')
+      expect(error.message).to.include('Profile not found {')
+    })
   })
 
   describe('Document.index(context, query)', () => {
     it('returns documents', async () => {
+      await Profile.reset()
+
+      let result
+
+      result = await Profile.index(context)
+
+      expect(result.objects.length).to.eql(0)
+      expect(result.count).to.eql(0)
+
       await Profile.create(context, { name: 'Oleksandr' })
       await Profile.create(context, { name: 'Margarita' })
       await Profile.create(context, { name: 'Veronica' })
 
-      const { objects, count } = await Profile.index(context)
+      result = await Profile.index(context)
 
-      expect(objects.length).to.eql(6)
-      expect(count).to.eql(6)
+      expect(result.objects.length).to.eql(3)
+      expect(result.count).to.eql(3)
     })
   })
 
@@ -123,7 +175,7 @@ describe('Document', () => {
         await Profile.read(context, { id })
 
       } catch (error) {
-        expect(error.code).to.eql('ResourceNotFoundError')
+        expect(error.code).to.eql('DocumentNotFoundError')
 
         return
       }

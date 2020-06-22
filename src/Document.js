@@ -1,14 +1,30 @@
 'use strict'
 
-const get        = require('lodash.get')
-const omit       = require('lodash.omit')
-const Component  = require('./Component')
-const startCase  = require('lodash.startcase')
-const capitalize = require('lodash.capitalize')
+const get                   = require('lodash.get')
+const omit                  = require('lodash.omit')
+const { ulid }              = require('ulid')
+const Component             = require('./Component')
+const capitalize            = require('lodash.capitalize')
+const getIdPrefix           = require('./helpers/getIdPrefix')
+const getComponentTitle     = require('./helpers/getComponentTitle')
+const DocumentExistsError   = require('./errors/DocumentExistsError')
+const DocumentNotFoundError = require('./errors/DocumentNotFoundError')
+
+const STORE = {}
 
 class Document extends Component {
   static get idKey() {
     return 'id'
+  }
+
+  static get idKeyPrefix() {
+    return getIdPrefix(this.name)
+  }
+
+  static createId(attributes) {
+    if (attributes[this.idKey]) { return attributes[this.idKey] }
+
+    return `${this.idKeyPrefix}_` + ulid()
   }
 
   static get bodySchema() {
@@ -20,27 +36,27 @@ class Document extends Component {
   }
 
   static set schema(schema) {
-    const documentName = startCase(this.id).toLowerCase()
+    const documentTitle = getComponentTitle(this, false)
 
     this._schema = schema.extend({
       id: {
-        description: capitalize(documentName) + ' ID',
+        description: capitalize(documentTitle) + ' ID',
         required:    true
       },
       createdAt: {
-        description: `Date and time when ${documentName} was created`,
+        description: `Date and time when ${documentTitle} was created`,
         format:      'date-time',
         required:    true
       },
       updatedAt: {
-        description: `Date and time when ${documentName} was updated`,
+        description: `Date and time when ${documentTitle} was updated`,
         format:      'date-time'
       },
       createdBy: {
-        description: `ID of a user who created ${documentName}`
+        description: `ID of a user who created ${documentTitle}`
       },
       updatedBy: {
-        description: `ID of a user who updated ${documentName}`
+        description: `ID of a user who updated ${documentTitle}`
       }
     }, this.id)
 
@@ -70,8 +86,15 @@ class Document extends Component {
       await this.beforeCreate(context, query, mutation)
     }
 
-    const item     = await this._create(mutation)
-    const document = new this(context, item)
+    mutation[this.idKey] = this.createId(mutation)
+
+    const isCreated = await this._create(mutation)
+
+    if (!isCreated) {
+      throw new DocumentExistsError(this, { query, mutation })
+    }
+
+    const document = new this(context, mutation)
 
     if (this.afterCreate) {
       await this.afterCreate(context, query, mutation, document)
@@ -80,11 +103,34 @@ class Document extends Component {
     return document
   }
 
+  static _create(attributes) {
+    STORE[this.name] = STORE[this.name] || {}
+
+    const item = STORE[this.name][attributes.id]
+
+    if (!item) {
+      STORE[this.name][attributes.id] = attributes
+
+      return true
+    }
+
+    return false
+  }
+
   static async read(context, query, options) {
-    const item     = await this._read(query, options)
+    const item = await this._read(query, options)
+
+    if (!item) {
+      throw new DocumentNotFoundError(this, { query, options })
+    }
+
     const document = new this(context, item)
 
     return document
+  }
+
+  static _read({ id = 'NONE' }) {
+    return STORE[this.name][id]
   }
 
   static async index(context, query = {}, options = {}) {
@@ -93,6 +139,12 @@ class Document extends Component {
     const objects = items.map(item => new this(context, item))
 
     return { objects, ...rest }
+  }
+
+  static _index() {
+    const items = Object.values(STORE[this.name] || {})
+
+    return { items, count: items.length }
   }
 
   static async update(context, query, mutation) {
@@ -111,8 +163,13 @@ class Document extends Component {
       await this.beforeUpdate(context, query, mutation)
     }
 
-    const item     = await this._update(query, mutation)
-    const document = new this(context, item)
+    const updatedItem = await this._update(query, mutation)
+
+    if (!updatedItem) {
+      throw new DocumentNotFoundError(this, { query })
+    }
+
+    const document = new this(context, updatedItem)
 
     if (this.afterUpdate) {
       await this.afterUpdate(context, query, mutation, document)
@@ -121,24 +178,60 @@ class Document extends Component {
     return document
   }
 
+  static _update({ id = 'NONE' }, mutation) {
+    const item = STORE[this.name][id]
+
+    if (!item) {
+      return false
+    }
+
+    STORE[this.name][id] = { ...item, ...mutation }
+
+    return STORE[this.name][id]
+  }
+
   static async delete(context, query) {
     if (this.beforeDelete) {
       await this.beforeDelete(context, query)
     }
 
-    await this._delete(query)
+    const isDeleted = await this._delete(query)
+
+    if (!isDeleted) {
+      throw new DocumentNotFoundError(this, { query })
+    }
 
     if (this.afterDelete) {
       await this.afterDelete(context, query)
     }
   }
 
+  static _delete({ id = 'NONE' }) {
+    const item = STORE[this.name][id]
+
+    if (!item) {
+      return false
+    }
+
+    delete STORE[this.name][id]
+
+    return true
+  }
+
+  static async reset() {
+    return this._reset()
+  }
+
+  static _reset() {
+    STORE[this.name] = null
+  }
+
   delete() {
-    return this.constructor.delete(this.context, this._getQuery)
+    return this.constructor.delete(this.context, this._query)
   }
 
   async update(mutation, shouldMutate = false) {
-    const document = await this.constructor.update(this.context, this._getQuery, mutation)
+    const document = await this.constructor.update(this.context, this._query, mutation)
 
     if (shouldMutate) {
       this._attributes = document.attributes
@@ -147,7 +240,7 @@ class Document extends Component {
     return document
   }
 
-  get _getQuery() {
+  get _query() {
     const { idKey } = this.constructor
 
     return {
