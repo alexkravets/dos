@@ -1,6 +1,6 @@
 {
   "name": "@kravc/dos",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Convention based, easy to use library for building API-driven node.js services",
   "main": "src/index.js",
   "repository": {

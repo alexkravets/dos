@@ -2,13 +2,12 @@
 
 const get                = require('lodash.get')
 const uniq               = require('lodash.uniq')
+const handler            = require('./helpers/handler')
 const compact            = require('lodash.compact')
 const authorize          = require('./helpers/authorize')
 const createSpec         = require('./helpers/createSpec')
 const { Validator }      = require('@kravc/schema')
-const createContext      = require('./helpers/createContext')
 const OperationError     = require('./errors/OperationError')
-const specMiddleware     = require('./helpers/specMiddleware')
 const createSchemasMap   = require('./helpers/createSchemasMap')
 const InvalidInputError  = require('./errors/InvalidInputError')
 const InvalidOutputError = require('./errors/InvalidOutputError')
@@ -183,15 +182,8 @@ class Service {
     return 200
   }
 
-  static handler(service, _createContext = createContext, _middleware = specMiddleware) {
-    return request => {
-      const context = _createContext(service, request)
-
-      const result = _middleware(service, context)
-      if (result) { return result }
-
-      return service.process(context)
-    }
+  static handler(...params) {
+    return handler(...params)
   }
 }
 

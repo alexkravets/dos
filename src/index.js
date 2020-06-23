@@ -1,16 +1,17 @@
 'use strict'
 
 module.exports = {
-  Service:   require('./Service'),
   Document:  require('./Document'),
-  Component: require('./Component'),
   Operation: require('./Operation'),
+  Service:   require('./Service'),
   Read:      require('./operations/Read'),
   Index:     require('./operations/Index'),
   Create:    require('./operations/Create'),
   Update:    require('./operations/Update'),
   Delete:    require('./operations/Delete'),
+  Component: require('./Component'),
   errors:    require('./errors'),
   security:  require('./security'),
-  test:      require('./test')
+  test:      require('./test'),
+  handler:   require('./helpers/handler')
 }
