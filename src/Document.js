@@ -70,7 +70,7 @@ class Document extends Component {
     }
 
     const { validator } = context
-    validator.normalize(mutation, this.id)
+    mutation = validator.normalize(mutation, this.id)
 
     const accountId = get(context, 'identity.accountId')
 

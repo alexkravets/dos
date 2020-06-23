@@ -11,8 +11,8 @@ const createAccessToken = (options, attributes) => {
   } = options
 
   const payload = {
-    sub:    'SESSION_ID',
-    userId: 'USER_ID',
+    sub:       'SESSION_ID',
+    accountId: 'ACCOUNT_ID',
     ...attributes
   }
 
