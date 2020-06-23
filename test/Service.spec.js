@@ -68,10 +68,9 @@ describe('Service', () => {
     })
   })
 
-  describe('Service.handler(service, _createContext = createContext)', () => {
+  describe('.handler(request)', () => {
     const service = new Service(modules, 'https://example.com/api/', '/test')
-    const handler = Service.handler(service)
-    const exec    = test.execute(handler)
+    const exec    = test.execute(service)
 
     const authorization = test.createAccessToken({}, { group: 'Administrators' })
 
@@ -136,8 +135,7 @@ describe('Service', () => {
 
       const modules  = [ InvalidIndexProfiles ]
       const service  = new Service(modules)
-      const handler  = Service.handler(service)
-      const response = await test.execute(handler)('InvalidIndexProfiles')
+      const response = await test.execute(service)('InvalidIndexProfiles')
 
       expect(response.statusCode).to.eql(422)
       expect(response.result.error.code).to.eql('InvalidParametersError')
@@ -151,8 +149,7 @@ describe('Service', () => {
       }
       const modules  = [ InvalidIndexProfiles ]
       const service  = new Service(modules)
-      const handler  = Service.handler(service)
-      const response = await test.execute(handler)('InvalidIndexProfiles')
+      const response = await test.execute(service)('InvalidIndexProfiles')
 
       expect(response.statusCode).to.eql(500)
       expect(response.result.error.code).to.eql('InvalidOutputError')
@@ -176,8 +173,7 @@ describe('Service', () => {
       }
       const modules  = [ InvalidIndexProfiles ]
       const service  = new Service(modules)
-      const handler  = Service.handler(service)
-      const response = await test.execute(handler)('InvalidIndexProfiles')
+      const response = await test.execute(service)('InvalidIndexProfiles')
 
       expect(response.statusCode).to.eql(500)
       expect(response.result.error.code).to.eql('OperationError')
@@ -211,7 +207,7 @@ describe('Service', () => {
     })
 
     it('executes operation via HTTP request', async () => {
-      const lambdaFunction = Service.handler(service)
+      const lambdaFunction = request => service.handler(request)
 
       let request
       let response
@@ -246,7 +242,7 @@ describe('Service', () => {
     })
 
     it('supports spec middleware', async () => {
-      const lambdaFunction = Service.handler(service)
+      const lambdaFunction = request => service.handler(request)
 
       let request
       let response
@@ -260,7 +256,7 @@ describe('Service', () => {
       expect(response.statusCode).to.eql(200)
 
       request = {
-        url:        'http://localhost:3000/Spec',
+        path:       '/Spec',
         httpMethod: 'GET'
       }
 

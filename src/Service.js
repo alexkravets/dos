@@ -87,6 +87,10 @@ class Service {
     return get(this._spec.paths, `${httpPath}.${httpMethod}.operationId`, 'NONE')
   }
 
+  handler(request) {
+    return handler(this)(request)
+  }
+
   async process(context) {
     const { operationId } = context
     const Operation = this._operationsMap[operationId]
@@ -180,10 +184,6 @@ class Service {
     }
 
     return 200
-  }
-
-  static handler(...params) {
-    return handler(...params)
   }
 }
 

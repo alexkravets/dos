@@ -12,10 +12,16 @@ const createContext = (service, request) => {
 
 
   if (!operationId) {
-    const { url }      = request
+    let { path } = request
+
+    if (!path) {
+      const { url } = request
+      path = parse(url, true).pathname
+    }
+
     const { basePath } = service
 
-    httpPath   = parse(url, true).pathname.replace(basePath, '/')
+    httpPath   = path.replace(basePath, '/')
     httpMethod = (request.method || request.httpMethod).toLowerCase()
 
     operationId = service.getOperationId(httpMethod, httpPath)

@@ -1,6 +1,6 @@
 'use strict'
 
-const execute = handler => {
+const execute = service => {
   return async (operationId, input = {}, headers = {}) => {
     const { mutation: body, ...queryStringParameters } = input
 
@@ -11,7 +11,7 @@ const execute = handler => {
       queryStringParameters
     }
 
-    const response = await handler(request)
+    const response = await service.handler(request)
 
     let result
 
