@@ -1,5 +1,6 @@
 'use strict'
 
+const get          = require('lodash.get')
 const isString     = require('lodash.isstring')
 const { parse }    = require('url')
 const { v4: uuid } = require('uuid')
@@ -9,7 +10,6 @@ const createContext = (service, request) => {
   let httpMethod
 
   let { operationId } = request
-
 
   if (!operationId) {
     let { path } = request
@@ -27,12 +27,14 @@ const createContext = (service, request) => {
     operationId = service.getOperationId(httpMethod, httpPath)
   }
 
+  const requestId = get(request, 'requestContext.requestId', uuid())
+
   const context = {
     headers:   {},
-    requestId: uuid(),
     validator: service.validator,
     requestReceivedAt: new Date().toISOString(),
     httpPath,
+    requestId,
     httpMethod,
     operationId
   }
