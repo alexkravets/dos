@@ -197,6 +197,13 @@ describe('Service', () => {
       expect(response.statusCode).to.eql(200)
       expect(response.result.data).to.include({ name: 'Test update!' })
 
+      response = await exec('UpdateProfile', {
+        id, mutation: { name: 'System operation request!' }
+      }, {})
+
+      expect(response.statusCode).to.eql(200)
+      expect(response.result.data).to.include({ name: 'System operation request!' })
+
       response = await exec('IndexProfiles')
       expect(response.statusCode).to.eql(200)
       expect(response.result.data).to.be.not.empty

@@ -24,7 +24,7 @@ class JwtAuthorization {
         definition: {
           in:   'header',
           type: 'apiKey',
-          name
+          name: 'Authorization'
         },
         klass: this,
         publicKey,
@@ -38,7 +38,7 @@ class JwtAuthorization {
     return {
       UnauthorizedError: {
         statusCode:  401,
-        description: 'Unauthroized request, make sure "authorization" header' +
+        description: 'Unauthorized request, make sure "authorization" header' +
           ' is defined, is valid and not expired'
       },
       AccessDeniedError: {
