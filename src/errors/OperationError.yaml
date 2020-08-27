@@ -33,4 +33,4 @@ error:
 
           params:
             description: Invalid attribute values
-            type: array
+            type: [ array, integer, boolean ]

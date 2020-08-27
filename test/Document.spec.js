@@ -48,6 +48,13 @@ describe('Document', () => {
       expect(profile.attributes.createdBy).to.exist
     })
 
+    it('creates document with custom ID', async () => {
+      const profile = await Profile.create(context, {}, { id: 'CUSTOM_ID', name: 'Olga' })
+
+      expect(profile.id).to.eql('CUSTOM_ID')
+      expect(profile.attributes.name).to.eql('Olga')
+    })
+
     it('creates document without identity in context', async () => {
       const profile = await Profile.create({ validator }, { name: 'Oleg' })
 
