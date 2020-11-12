@@ -6,7 +6,7 @@ const pluralize = require('pluralize')
 const defaultId = Operation => {
   const { name, Component, componentAction } = Operation
 
-  const isCustom = name !== 'Operation'
+  const isCustom = name !== 'Operation' && name !== ''
 
   if (isCustom) {
     return name

@@ -11,7 +11,7 @@ const UpdateProfile = require('./UpdateProfile')
 const DeleteProfile = require('./DeleteProfile')
 const IndexProfiles = require('./IndexProfiles')
 
-const { Service, handler } = require('../../src')
+const { Service, handler } = require('../src')
 
 const modules = [
   Health,
@@ -22,6 +22,6 @@ const modules = [
   IndexProfiles
 ]
 
-const service = new Service(modules, 'http://localhost:3000/', '/test')
+const service = new Service(modules, 'http://localhost:3000/', '/examples')
 
 exports.handler = handler(service)

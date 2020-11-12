@@ -1,12 +1,12 @@
 'use strict'
 
-const Health        = require('test/example/Health')
+const Health        = require('examples/Health')
 const { expect }    = require('chai')
-const ReadProfile   = require('test/example/ReadProfile')
-const CreateProfile = require('test/example/CreateProfile')
-const UpdateProfile = require('test/example/UpdateProfile')
-const DeleteProfile = require('test/example/DeleteProfile')
-const IndexProfiles = require('test/example/IndexProfiles')
+const ReadProfile   = require('examples/ReadProfile')
+const CreateProfile = require('examples/CreateProfile')
+const UpdateProfile = require('examples/UpdateProfile')
+const DeleteProfile = require('examples/DeleteProfile')
+const IndexProfiles = require('examples/IndexProfiles')
 
 const {
   test,
@@ -33,7 +33,7 @@ describe('Service', () => {
 
   describe('Service.constructor(modules, url, path = \'/src\')', () => {
     it('initializes service', () => {
-      const service = new Service(modules, 'https://example.com/api', '/test')
+      const service = new Service(modules, 'https://example.com/api', '/examples')
       expect(service).to.exist
     })
 
@@ -69,7 +69,7 @@ describe('Service', () => {
   })
 
   describe('.handler(request)', () => {
-    const service = new Service(modules, 'https://example.com/api/', '/test')
+    const service = new Service(modules, 'https://example.com/api/', '/examples')
     const exec    = test.execute(service)
 
     const authorization = test.createAccessToken({}, { group: 'Administrators' })

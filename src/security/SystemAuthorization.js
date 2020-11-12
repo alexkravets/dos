@@ -26,8 +26,8 @@ class SystemAuthorization {
     return {
       AccessDeniedError: {
         statusCode:  403,
-        description: 'Operation access denied, operation could only be' +
-          ' executed internally'
+        description: 'Operation access denied, operation is available for' +
+          ' internal execution only'
       }
     }
   }

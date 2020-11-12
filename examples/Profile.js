@@ -1,6 +1,6 @@
 'use strict'
 
-const { Document } = require('../../src')
+const { Document } = require('../src')
 
 class Profile extends Document {
 }

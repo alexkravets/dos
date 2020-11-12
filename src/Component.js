@@ -11,8 +11,6 @@ class Component {
 
   static set schema(schema) {
     this._schema = schema
-
-    return schema
   }
 
   constructor(context = {}, attributes = {}) {

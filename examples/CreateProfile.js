@@ -1,9 +1,9 @@
 'use strict'
 
-const Create           = require('../../src/operations/Create')
+const Create           = require('../src/operations/Create')
 const Profile          = require('./Profile')
-const { publicKey }    = require('../../src/test/keys')
-const JwtAuthorization = require('../../src/security/JwtAuthorization')
+const { publicKey }    = require('../src/test/keys')
+const JwtAuthorization = require('../src/security/JwtAuthorization')
 
 class CreateProfile extends Create(Profile) {
   static get security() {

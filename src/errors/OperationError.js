@@ -1,12 +1,12 @@
 'use strict'
 
 const path       = require('path')
+const loadSync   = require('../helpers/loadSync')
 const logError   = require('../helpers/logError')
 const Component  = require('../Component')
-const { Schema } = require('@kravc/schema')
 
 const SCHEMA_PATH = path.resolve(__dirname) + '/OperationError.yaml'
-const OPERATION_ERROR_SCHEMA = Schema.loadSync(SCHEMA_PATH)
+const OPERATION_ERROR_SCHEMA = loadSync(SCHEMA_PATH)
 
 class OperationError extends Component {
   static get schema() {

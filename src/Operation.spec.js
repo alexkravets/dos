@@ -1,7 +1,8 @@
 'use strict'
 
-const { expect }            = require('chai')
-const { Schema, Validator } = require('@kravc/schema')
+const loadSync      = require('./helpers/loadSync')
+const { expect }    = require('chai')
+const { Validator } = require('@kravc/schema')
 
 const {
   Read,
@@ -15,7 +16,7 @@ const {
 } = require('src')
 
 class Profile extends Document {}
-Profile.schema = Schema.loadSync('test/example/Profile.yaml')
+Profile.schema = loadSync('examples/Profile.yaml')
 
 const validator = new Validator([ Profile.schema ])
 const identity  = { accountId: 'ACCOUNT_ID' }
@@ -344,7 +345,7 @@ describe('Operation', () => {
   describe('Operation.mutation', () => {
     it('uses "schema" for components without "bodySchema"', () => {
       class RemoteProfile extends Component {}
-      RemoteProfile.schema = Schema.loadSync('test/example/Profile.yaml')
+      RemoteProfile.schema = loadSync('examples/Profile.yaml')
 
       const CreateRemoteProfile = Create(RemoteProfile)
       expect(CreateRemoteProfile.mutation).to.exist

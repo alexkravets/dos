@@ -38,13 +38,11 @@ class JwtAuthorization {
     return {
       UnauthorizedError: {
         statusCode:  401,
-        description: 'Unauthorized request, make sure "authorization" header' +
-          ' is defined, is valid and not expired'
+        description: 'Request authorization failed'
       },
       AccessDeniedError: {
         statusCode:  403,
-        description: 'Operation access denied, ensure requied permissions are' +
-          ' defined in authorization token'
+        description: 'Operation access denied'
       }
     }
   }

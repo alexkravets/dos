@@ -1,23 +1,31 @@
 {
   "name": "@kravc/dos",
-  "version": "1.0.12",
-  "description": "Convention based, easy to use library for building API-driven node.js services",
+  "version": "1.2.0",
+  "description": "Convention based, easy to use library for building API-driven node.js services.",
+  "keywords": [
+    "Service",
+    "Swagger",
+    "Open API",
+    "JSON API",
+    "Serverless",
+    "Specification",
+    "Lambda Function"
+  ],
   "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "http://github.com/alexkravets/dos.git"
   },
   "directories": {
-    "src": "src",
-    "test": "test"
+    "src": "src"
   },
   "scripts": {
-    "test": "eslint src/ test/ && NODE_PATH=./ NODE_CONFIG_DIR=./test/config nyc mocha --exit --bail"
+    "test": "eslint src/ examples/ && NODE_PATH=./ nyc mocha \"./src/**/*.spec.js\""
   },
   "author": "Alexander Kravets <a@kra.vc>",
   "license": "ISC",
   "dependencies": {
-    "@kravc/schema": "^1.1.1",
+    "@kravc/schema": "^2.0.0",
     "cookie": "^0.4.1",
     "js-yaml": "^3.14.0",
     "jsonwebtoken": "^8.5.1",
@@ -28,21 +36,25 @@
     "lodash.isempty": "^4.4.0",
     "lodash.isobject": "^3.0.2",
     "lodash.isstring": "^4.0.1",
+    "lodash.isundefined": "^3.0.1",
     "lodash.keyby": "^4.6.0",
     "lodash.omit": "^4.5.0",
     "lodash.pick": "^4.4.0",
     "lodash.startcase": "^4.4.0",
     "lodash.uniq": "^4.5.0",
     "pluralize": "^8.0.0",
-    "uuid": "^7.0.3",
     "ulid": "^2.3.0",
-    "z-schema": "^4.2.3"
+    "uuid": "^7.0.3",
+    "z-schema": "^5.0.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "eslint": "^6.8.0",
-    "mocha": "^7.2.0",
-    "nock": "^12.0.3",
+    "eslint": "^7.12.1",
+    "mocha": "^8.2.1",
     "nyc": "^15.1.0"
+  },
+  "nyc": {
+    "include": "src",
+    "exclude": "**/*.spec.js"
   }
 }

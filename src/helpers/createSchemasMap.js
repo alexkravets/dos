@@ -1,8 +1,8 @@
 'use strict'
 
-const path       = require('path')
-const keyBy      = require('lodash.keyby')
-const { Schema } = require('@kravc/schema')
+const path     = require('path')
+const keyBy    = require('lodash.keyby')
+const loadSync = require('./loadSync')
 const { readdirSync, statSync } = require('fs')
 
 const ROOT_PATH = process.cwd()
@@ -18,7 +18,7 @@ const listFilesSync = dir =>
 const readSchemasSync = path =>
   listFilesSync(ROOT_PATH + path)
     .filter(fileName => fileName.endsWith('.yaml'))
-    .map(schemaPath => Schema.loadSync(schemaPath))
+    .map(schemaPath => loadSync(schemaPath))
 
 const createSchemasMap = path => {
   const yamlSchemas = readSchemasSync(path)
