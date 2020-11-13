@@ -1,6 +1,6 @@
 {
   "name": "@kravc/dos",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Convention based, easy to use library for building API-driven node.js services.",
   "keywords": [
     "Service",
@@ -25,7 +25,7 @@
   "author": "Alexander Kravets <a@kra.vc>",
   "license": "ISC",
   "dependencies": {
-    "@kravc/schema": "^2.1.0",
+    "@kravc/schema": "^2.2.0",
     "cookie": "^0.4.1",
     "js-yaml": "^3.14.0",
     "jsonwebtoken": "^8.5.1",
