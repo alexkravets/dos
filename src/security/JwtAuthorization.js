@@ -5,14 +5,13 @@ const AccessDeniedError  = require('../errors/AccessDeniedError')
 const UnauthorizedError  = require('../errors/UnauthorizedError')
 const { verify, decode } = require('jsonwebtoken')
 
+const verifyToken  = (token, publicKey, algorithm) => verify(token, publicKey, { algorithms: [ algorithm ] })
+const verifyAccess = () => true
+
 class JwtAuthorization {
-  static createRequirement(
-    publicKey,
-    algorithm = 'RS256',
-    verificationMethod = () => true
-  ) {
+  static createRequirement(options) {
     /* istanbul ignore next */
-    if (!publicKey) {
+    if (!options.publicKey) {
       throw new Error('"JwtAuthorization.createRequirement" requires' +
         ' "publicKey" to be defined')
     }
@@ -27,9 +26,7 @@ class JwtAuthorization {
           name: 'Authorization'
         },
         klass: this,
-        publicKey,
-        algorithm,
-        verificationMethod
+        ...options
       }
     }
   }
@@ -47,10 +44,21 @@ class JwtAuthorization {
     }
   }
 
-  constructor({ publicKey, algorithm, verificationMethod }) {
+  static get verifyToken() {
+    return verifyToken
+  }
+
+  constructor({
+    publicKey,
+    algorithm = 'RS256',
+    tokenVerificationMethod  = verifyToken,
+    accessVerificationMethod = verifyAccess
+  }) {
     this._publicKey = publicKey
     this._algorithm = algorithm
-    this._verificationMethod = verificationMethod
+
+    this._verifyToken  = tokenVerificationMethod
+    this._verifyAccess = accessVerificationMethod
   }
 
   async verify(context) {
@@ -81,16 +89,16 @@ class JwtAuthorization {
     }
 
     try {
-      verify(token, this._publicKey, { algorithms: [ this._algorithm ] })
+      await this._verifyToken(token, this._publicKey, this._algorithm)
 
     } catch (originalError) {
-      const error = new UnauthorizedError()
+      const error = new UnauthorizedError(originalError.message)
       return { isAuthorized: false, error }
 
     }
 
     const { payload }  = object
-    const isAuthorized = this._verificationMethod(payload)
+    const isAuthorized = await this._verifyAccess(payload)
 
     if (!isAuthorized) {
       const error = new AccessDeniedError()

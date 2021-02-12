@@ -1,6 +1,6 @@
 {
   "name": "@kravc/dos",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "Convention based, easy to use library for building API-driven node.js services.",
   "keywords": [
     "Service",

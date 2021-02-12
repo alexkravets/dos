@@ -10,7 +10,7 @@ class UpdateProfile extends Update(Profile) {
   static get security() {
     return [
       SystemAuthorization.createRequirement(),
-      JwtAuthorization.createRequirement(publicKey)
+      JwtAuthorization.createRequirement({ publicKey })
     ]
   }
 }
