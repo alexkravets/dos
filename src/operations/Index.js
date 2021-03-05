@@ -88,8 +88,8 @@ const Index = (Component, componentAction = 'index') => {
     }
 
     async action(parameters) {
-      const { exclusiveStartKey, limit, sort, ...query } = parameters
-      const options = { exclusiveStartKey, limit, sort }
+      const { exclusiveStartKey, limit, sort, index, ...query } = parameters
+      const options = { exclusiveStartKey, limit, sort, index }
 
       const { componentActionMethod } = this.constructor
       const result = await componentActionMethod(this.context, query, options)
