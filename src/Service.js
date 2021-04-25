@@ -65,22 +65,27 @@ class Service {
     const schemas   = Object.values(schemasMap)
     const validator = new Validator(schemas)
 
+    this._url           = url
     this._spec          = spec
     this._validator     = validator
     this._schemasMap    = schemasMap
     this._operationsMap = operationsMap
   }
 
+  get baseUrl() {
+    return this._url
+  }
+
   get validator() {
     return this._validator
   }
 
-  get basePath() {
-    return this._spec.basePath
-  }
-
   get spec() {
     return this._spec
+  }
+
+  get basePath() {
+    return this._spec.basePath
   }
 
   getOperationId(httpMethod, httpPath) {

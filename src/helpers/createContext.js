@@ -31,6 +31,7 @@ const createContext = (service, request) => {
 
   const context = {
     headers:   {},
+    baseUrl:   service.baseUrl,
     validator: service.validator,
     requestReceivedAt: new Date().toISOString(),
     httpPath,
@@ -60,14 +61,13 @@ const createContext = (service, request) => {
     const isJSON = isString(body)
 
     if (isJSON) {
+      context.bodyJson = body
       context.mutation = JSON.parse(body)
 
     } else {
       context.mutation = body
 
     }
-
-    context.body = body
   }
 
   return context
