@@ -49,7 +49,6 @@ const createContext = (service, request) => {
   context.query = {}
 
   if (url) {
-    context.url   = url
     context.query = parse(url, true).query
   }
 
