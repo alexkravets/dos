@@ -3,6 +3,7 @@
 const get               = require('lodash.get')
 const cookie            = require('cookie')
 const { decode }        = require('jsonwebtoken')
+const capitalize        = require('lodash.capitalize')
 const verifyToken       = require('./verifyToken')
 const AccessDeniedError = require('../errors/AccessDeniedError')
 const UnauthorizedError = require('../errors/UnauthorizedError')
@@ -15,8 +16,8 @@ class JwtAuthorization {
         ' "publicKey" to be defined')
     }
 
-    const { name: requirementName } = this
     const name = get(options, 'name', 'authorization')
+    const requirementName = capitalize(name)
 
     return {
       [requirementName]: {

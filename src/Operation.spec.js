@@ -418,15 +418,16 @@ describe('Operation', () => {
     it('supports passthrough execution, when parameters are not changed', async () => {
       const CreateProfile = class extends Create(Profile) {
         before() {
-          this.setHeader('x-before-time', Date.now)
+          this.setHeader('set-cookie', [ 'a=1', 'b=2' ], true)
         }
       }
 
-      const { headers, result: { data: profile } } = await (
+      const { multiValueHeaders, result: { data: profile } } = await (
         new CreateProfile(DEFAULT_CONTEXT)
       ).exec({ mutation: { name: 'Oleksandr' } })
 
-      expect(headers['x-before-time']).to.exist
+      expect(multiValueHeaders['set-cookie']).to.exist
+      expect(multiValueHeaders['set-cookie']).to.have.lengthOf(2)
       expect(profile.attributes.name).to.eql('Oleksandr')
     })
   })

@@ -170,7 +170,12 @@ class Operation {
     this._context = context
   }
 
-  setHeader(name, value) {
+  setHeader(name, value, isMultiValue = false) {
+    if (isMultiValue) {
+      this._multiValueHeaders = this._headers || {}
+      this._multiValueHeaders[name.toLowerCase()] = value
+    }
+
     this._headers = this._headers || {}
     this._headers[name.toLowerCase()] = value
   }
@@ -212,7 +217,7 @@ class Operation {
       result = _ ? ( result.data ? { data: _ } : _ ) : result
     }
 
-    return { result, headers: this._headers }
+    return { result, headers: this._headers, multiValueHeaders: this._multiValueHeaders }
   }
 }
 

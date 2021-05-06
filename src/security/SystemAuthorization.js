@@ -5,8 +5,8 @@ const AccessDeniedError = require('../errors/AccessDeniedError')
 
 class SystemAuthorization {
   static createRequirement(options = {}) {
-    const { name: requirementName } = this
     const name = get(options, 'name', 'authorization')
+    const requirementName = 'System'
 
     return {
       [requirementName]: {
@@ -35,8 +35,6 @@ class SystemAuthorization {
     }
   }
 
-  // NOTE: Verification method relies on a gateway that adds headers for all
-  //       external requests. Request without headers considered to be internal.
   async verify(context) {
     const { headers } = context
     const isExternalRequest = Object.keys(headers).length > 0
