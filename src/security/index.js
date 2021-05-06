@@ -1,9 +1,9 @@
 'use strict'
 
-const JwtAuthorization    = require('./JwtAuthorization')
-const SystemAuthorization = require('./SystemAuthorization')
+const JwtAuthorization = require('./JwtAuthorization')
 
-module.exports = {
-  JwtAuthorization,
-  SystemAuthorization
+/* istanbul ignore next */
+module.exports = (options = {}) => {
+  const requirement = JwtAuthorization.createRequirement(options)
+  return [ requirement ]
 }

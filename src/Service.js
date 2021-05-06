@@ -132,15 +132,15 @@ class Service {
       response.statusCode = errorStatusCode
     }
 
-    const { output, statusCode, headers } = response
+    const { output, statusCode, headers, multiValueHeaders } = response
 
     if (!output) {
-      return { statusCode, headers }
+      return { statusCode, headers, multiValueHeaders }
     }
 
     const body = JSON.stringify(output, null, 2)
 
-    return { statusCode, headers, body }
+    return { statusCode, headers, multiValueHeaders, body }
   }
 
   _getParameters(inputSchema, context) {

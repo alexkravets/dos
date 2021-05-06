@@ -1,21 +1,24 @@
 'use strict'
 
+const get = require('lodash.get')
 const AccessDeniedError = require('../errors/AccessDeniedError')
 
 class SystemAuthorization {
-  static createRequirement() {
-    const { name } = this
+  static createRequirement(options = {}) {
+    const { name: requirementName } = this
+    const name = get(options, 'name', 'authorization')
 
     return {
-      [name]: {
+      [requirementName]: {
         definition: {
+          description: 'This security definition and a header for system' +
+            ' operations should be ignored. The verification method of system' +
+            ' operations relies on a gateway that adds headers for all' +
+            ' external requests. Request without headers considered to be' +
+            ' internal.',
           in:   'header',
           type: 'apiKey',
-          name: 'Authorization',
-          description: 'System operations could only be executed internally.' +
-            ' This security definition and header should be ignored. They are' +
-            ' used to identify internal operations and differentiate them from' +
-            ' public operations.'
+          name
         },
         klass: this
       }
@@ -26,14 +29,14 @@ class SystemAuthorization {
     return {
       AccessDeniedError: {
         statusCode:  403,
-        description: 'Operation access denied, operation is available for' +
-          ' internal execution only'
+        description: 'Operation access denied, operation is available only' +
+          ' for internal requests'
       }
     }
   }
 
-  // NOTE: This verification method relies on gateway which adds headers for
-  //       all external requests.
+  // NOTE: Verification method relies on a gateway that adds headers for all
+  //       external requests. Request without headers considered to be internal.
   async verify(context) {
     const { headers } = context
     const isExternalRequest = Object.keys(headers).length > 0

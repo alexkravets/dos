@@ -1,12 +1,11 @@
 'use strict'
 
-const cookie             = require('cookie')
-const AccessDeniedError  = require('../errors/AccessDeniedError')
-const UnauthorizedError  = require('../errors/UnauthorizedError')
-const { verify, decode } = require('jsonwebtoken')
-
-const verifyToken  = (token, publicKey, algorithm) => verify(token, publicKey, { algorithms: [ algorithm ] })
-const verifyAccess = () => true
+const get               = require('lodash.get')
+const cookie            = require('cookie')
+const { decode }        = require('jsonwebtoken')
+const verifyToken       = require('./verifyToken')
+const AccessDeniedError = require('../errors/AccessDeniedError')
+const UnauthorizedError = require('../errors/UnauthorizedError')
 
 class JwtAuthorization {
   static createRequirement(options) {
@@ -16,16 +15,18 @@ class JwtAuthorization {
         ' "publicKey" to be defined')
     }
 
-    const { name } = this
+    const { name: requirementName } = this
+    const name = get(options, 'name', 'authorization')
 
     return {
-      [name]: {
+      [requirementName]: {
         definition: {
           in:   'header',
           type: 'apiKey',
-          name: 'Authorization'
+          name
         },
         klass: this,
+        name,
         ...options
       }
     }
@@ -35,7 +36,7 @@ class JwtAuthorization {
     return {
       UnauthorizedError: {
         statusCode:  401,
-        description: 'Request authorization failed'
+        description: 'Unauthorized request'
       },
       AccessDeniedError: {
         statusCode:  403,
@@ -44,16 +45,14 @@ class JwtAuthorization {
     }
   }
 
-  static get verifyToken() {
-    return verifyToken
-  }
-
   constructor({
+    name,
     publicKey,
     algorithm = 'RS256',
     tokenVerificationMethod  = verifyToken,
-    accessVerificationMethod = verifyAccess
+    accessVerificationMethod = () => [ true ]
   }) {
+    this._name      = name
     this._publicKey = publicKey
     this._algorithm = algorithm
 
@@ -63,21 +62,22 @@ class JwtAuthorization {
 
   async verify(context) {
     let token
+
     const { headers } = context
 
     const hasCookie = headers['cookie']
 
     if (hasCookie) {
       const cookies = cookie.parse(headers['cookie'])
-      token = cookies.authorization
+      token = cookies[this._name]
     }
 
     if (!token) {
-      token = headers.authorization
+      token = headers[this._name]
     }
 
     if (!token) {
-      const error = new UnauthorizedError('Authorization header is missing')
+      const error = new UnauthorizedError(`Header "${this._name}" is missing`)
       return { isAuthorized: false, error }
     }
 
@@ -88,20 +88,21 @@ class JwtAuthorization {
       return { isAuthorized: false, error }
     }
 
-    try {
-      await this._verifyToken(token, this._publicKey, this._algorithm)
+    const [ isTokenOk, tokenErrorMessage ] =
+      await this._verifyToken(context, token, this._publicKey, this._algorithm)
 
-    } catch (originalError) {
-      const error = new UnauthorizedError(originalError.message)
+    if (!isTokenOk) {
+      const error = new UnauthorizedError(tokenErrorMessage)
+
       return { isAuthorized: false, error }
-
     }
 
-    const { payload }  = object
-    const isAuthorized = await this._verifyAccess(payload)
+    const { payload } = object
+    const [ isAccessOk, accessErrorMessage ] =
+      await this._verifyAccess(context, payload)
 
-    if (!isAuthorized) {
-      const error = new AccessDeniedError()
+    if (!isAccessOk) {
+      const error = new AccessDeniedError(accessErrorMessage)
       return { isAuthorized: false, error }
     }
 

@@ -2,6 +2,7 @@
 
 const Create           = require('../src/operations/Create')
 const Profile          = require('./Profile')
+const verifyToken      = require('../src/security/verifyToken')
 const { publicKey }    = require('../src/test/keys')
 const JwtAuthorization = require('../src/security/JwtAuthorization')
 
@@ -9,13 +10,13 @@ class CreateProfile extends Create(Profile) {
   static get security() {
     const algorithm = 'RS256'
 
-    const accessVerificationMethod = payload => {
-      const { group } = payload
+    const accessVerificationMethod = (context, { group }) => {
+      const isAccessGranted = [ 'Administrators' ].includes(group)
 
-      return [ 'Administrators' ].includes(group)
+      return [ isAccessGranted, 'Access denied' ]
     }
 
-    const tokenVerificationMethod = (...args) => JwtAuthorization.verifyToken(...args)
+    const tokenVerificationMethod = (...args) => verifyToken(...args)
 
     return [
       JwtAuthorization.createRequirement({
