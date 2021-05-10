@@ -16,7 +16,9 @@ class JwtAuthorization {
         ' "publicKey" to be defined')
     }
 
-    const name = get(options, 'name', 'authorization')
+    const name       = get(options, 'name', 'authorization')
+    const cookieName = get(options, 'cookieName', name)
+
     const requirementName = capitalize(name)
 
     return {
@@ -28,6 +30,7 @@ class JwtAuthorization {
         },
         klass: this,
         name,
+        cookieName,
         ...options
       }
     }
@@ -49,13 +52,15 @@ class JwtAuthorization {
   constructor({
     name,
     publicKey,
+    cookieName,
     algorithm = 'RS256',
     tokenVerificationMethod  = verifyToken,
     accessVerificationMethod = () => [ true ]
   }) {
-    this._name      = name
-    this._publicKey = publicKey
-    this._algorithm = algorithm
+    this._name       = name
+    this._publicKey  = publicKey
+    this._algorithm  = algorithm
+    this._cookieName = cookieName
 
     this._verifyToken  = tokenVerificationMethod
     this._verifyAccess = accessVerificationMethod
@@ -70,7 +75,7 @@ class JwtAuthorization {
 
     if (hasCookie) {
       const cookies = cookie.parse(headers['cookie'])
-      token = cookies[this._name]
+      token = cookies[this._cookieName]
     }
 
     if (!token) {
