@@ -174,6 +174,8 @@ class Operation {
     if (isMultiValue) {
       this._multiValueHeaders = this._headers || {}
       this._multiValueHeaders[name.toLowerCase()] = value
+
+      return
     }
 
     this._headers = this._headers || {}
