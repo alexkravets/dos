@@ -58,6 +58,12 @@ class Operation {
         description: 'Invalid operation input, make sure operation parameters' +
           ' do match specification'
       }
+
+      errors.InvalidParametersError = {
+        statusCode:  400,
+        description: 'Invalid operation parameters, input syntax is correct,' +
+          ' but input values are not processible'
+      }
     }
 
     if (this.outputSchema) {
@@ -66,6 +72,12 @@ class Operation {
         description: 'Invalid output returned by the operation, this issue' +
           ' to be addressed by service developer'
       }
+    }
+
+    errors.UnprocessibleConditionError = {
+      statusCode:  422,
+      description: 'Operation failed to process the request cause of expected' +
+        ' exit condition'
     }
 
     return errors

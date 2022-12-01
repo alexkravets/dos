@@ -6,5 +6,6 @@ module.exports = {
   AccessDeniedError:      require('./AccessDeniedError'),
   DocumentExistsError:    require('./DocumentExistsError'),
   DocumentNotFoundError:  require('./DocumentNotFoundError'),
-  InvalidParametersError: require('./InvalidParametersError')
+  InvalidParametersError: require('./InvalidParametersError'),
+  UnprocessibleConditionError: require('./UnprocessibleConditionError')
 }

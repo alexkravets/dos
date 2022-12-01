@@ -115,19 +115,8 @@ describe('Service', () => {
       expect(response.result.error.code).to.eql('InvalidInputError')
     })
 
-    it('returns "OperationNotFoundError / 404" if operation not found', async () => {
-      const response = await exec('DestroyProfile', {}, { authorization })
-
-      expect(response.statusCode).to.eql(404)
-      expect(response.result.error.code).to.eql('OperationNotFoundError')
-    })
-
-    it('returns "InvalidParametersError / 422" if invalid parameters', async () => {
+    it('returns "InvalidParametersError / 400" if invalid parameters', async () => {
       class InvalidIndexProfiles extends IndexProfiles {
-        static get errors() {
-          return { ...super.errors, InvalidParametersError: { statusCode: 422 } }
-        }
-
         action() {
           throw new errors.InvalidParametersError()
         }
@@ -137,8 +126,30 @@ describe('Service', () => {
       const service  = new Service(modules)
       const response = await test.execute(service)('InvalidIndexProfiles')
 
-      expect(response.statusCode).to.eql(422)
+      expect(response.statusCode).to.eql(400)
       expect(response.result.error.code).to.eql('InvalidParametersError')
+    })
+
+    it('returns "OperationNotFoundError / 404" if operation not found', async () => {
+      const response = await exec('DestroyProfile', {}, { authorization })
+
+      expect(response.statusCode).to.eql(404)
+      expect(response.result.error.code).to.eql('OperationNotFoundError')
+    })
+
+    it('returns "UnprocessibleConditionError / 422" if unprocessible condition', async () => {
+      class InvalidIndexProfiles extends IndexProfiles {
+        action() {
+          throw new errors.UnprocessibleConditionError()
+        }
+      }
+
+      const modules  = [ InvalidIndexProfiles ]
+      const service  = new Service(modules)
+      const response = await test.execute(service)('InvalidIndexProfiles')
+
+      expect(response.statusCode).to.eql(422)
+      expect(response.result.error.code).to.eql('UnprocessibleConditionError')
     })
 
     it('returns "InvalidOutputError / 500" if invalid output, logs an error', async () => {
