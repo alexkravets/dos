@@ -228,7 +228,7 @@ class Operation {
 
     if (this.after) {
       const _ = await this.after(parameters, result.data || result)
-      result = _ ? ( result.data ? { data: _ } : _ ) : result
+      result = _ ? ( result.data ? { ...result, data: _ } : _ ) : result
     }
 
     return { result, headers: this._headers, multiValueHeaders: this._multiValueHeaders }
