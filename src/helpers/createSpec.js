@@ -1,6 +1,7 @@
 'use strict'
 
 const omit          = require('lodash.omit')
+const uniq          = require('lodash.uniq')
 const ZSchema       = require('z-schema')
 const { parse }     = require('url')
 const jsonSchema    = require('../../assets/schemas/oas2.json')
@@ -50,6 +51,7 @@ const createSpec = (operations, schemasMap, url) => {
     }
   }
 
+  let serviceTags = []
   for (const Operation of operations) {
     const httpPath    = `/${Operation.id}`
     const httpMethod  = getHttpMethod(Operation)
@@ -65,6 +67,8 @@ const createSpec = (operations, schemasMap, url) => {
       outputSchema,
       mutationSchema
     } = Operation
+
+    serviceTags = serviceTags.concat(tags)
 
     const operationSpec = {
       tags,
@@ -153,6 +157,10 @@ const createSpec = (operations, schemasMap, url) => {
 
     spec.paths[httpPath] = { [httpMethod]: operationSpec }
   }
+
+  serviceTags = uniq(serviceTags)
+  serviceTags.sort((a, b) => a.localeCompare(b))
+  spec.tags = serviceTags.map(name => ({ name }))
 
   const json = JSON
     .stringify(spec, null, 2)
