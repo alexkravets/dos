@@ -53,6 +53,12 @@ const createContext = (service, request) => {
   }
 
   if (queryStringParameters) {
+    const keys = Object.keys(queryStringParameters)
+
+    for (const key in keys) {
+      queryStringParameters[key] = decodeURIComponent(queryStringParameters[key])
+    }
+
     context.query = queryStringParameters
   }
 
