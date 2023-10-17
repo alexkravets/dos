@@ -1,6 +1,6 @@
 {
   "name": "@kravc/dos",
-  "version": "1.4.13",
+  "version": "1.5.0",
   "description": "Convention-based, easy-to-use library for building API-driven serverless services.",
   "keywords": [
     "Service",
@@ -25,10 +25,10 @@
   "author": "Alexander Kravets <a@kra.vc>",
   "license": "ISC",
   "dependencies": {
-    "@kravc/schema": "^2.3.4",
+    "@kravc/schema": "^2.4.0",
     "cookie": "^0.5.0",
     "js-yaml": "^4.1.0",
-    "jsonwebtoken": "^9.0.0",
+    "jsonwebtoken": "^9.0.2",
     "lodash.capitalize": "^4.2.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.compact": "^3.0.1",
@@ -44,12 +44,12 @@
     "lodash.uniq": "^4.5.0",
     "pluralize": "^8.0.0",
     "ulid": "^2.3.0",
-    "uuid": "^9.0.0",
-    "z-schema": "^5.0.5"
+    "uuid": "^9.0.1",
+    "z-schema": "^6.0.1"
   },
   "devDependencies": {
-    "chai": "^4.3.7",
-    "eslint": "^8.35.0",
+    "chai": "^4.3.10",
+    "eslint": "^8.51.0",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0"
   },
