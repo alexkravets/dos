@@ -1,10 +1,12 @@
 'use strict'
 
-const isEmpty        = require('lodash.isempty')
-const cloneDeep      = require('lodash.clonedeep')
-const defaultId      = require('./helpers/defaultId')
-const { Schema }     = require('@kravc/schema')
-const defaultTags    = require('./helpers/defaultTags')
+const isEmpty = require('lodash.isempty')
+const cloneDeep = require('lodash.clonedeep')
+const { Schema } = require('@kravc/schema')
+
+const defaultId = require('./helpers/defaultId')
+const defaultTags = require('./helpers/defaultTags')
+const asSafeClass = require('./helpers/asSafeClass')
 const defaultSummary = require('./helpers/defaultSummary')
 
 class Operation {
@@ -180,17 +182,20 @@ class Operation {
 
   constructor(context) {
     this._context = context
+
+    this._headers = {}
+    this._multiValueHeaders = {}
+
+    return asSafeClass(this)
   }
 
   setHeader(name, value, isMultiValue = false) {
     if (isMultiValue) {
-      this._multiValueHeaders = this._headers || {}
       this._multiValueHeaders[name.toLowerCase()] = value
 
       return
     }
 
-    this._headers = this._headers || {}
     this._headers[name.toLowerCase()] = value
   }
 
@@ -198,40 +203,56 @@ class Operation {
     return this._context
   }
 
+  before() {
+    return
+  }
+
   async action(parameters) {
     const { Component } = this.constructor
 
-    if (!Component) { return }
+    if (!Component) {
+      return {}
+    }
 
     const { componentActionMethod } = this.constructor
 
     const { mutation, ...query } = parameters
 
-    const data = await (mutation ?
-      componentActionMethod(this.context, query, mutation) :
-      componentActionMethod(this.context, query)
+    const data = await (mutation
+      ? componentActionMethod(this.context, query, mutation)
+      : componentActionMethod(this.context, query)
     )
 
     return { data }
+  }
+
+  after() {
+    return
   }
 
   async exec(_parameters) {
     let parameters = cloneDeep(_parameters)
     let result
 
-    if (this.before) {
-      const _ = await this.before(parameters)
-      parameters = _ ? _ : parameters
-    }
+    const beforeResult = await this.before(parameters)
+
+    parameters = beforeResult
+      ? beforeResult
+      : parameters
 
     result = await this.action(parameters)
 
-    if (this.after) {
-      const _ = await this.after(parameters, result.data || result)
-      result = _ ? ( result.data ? { ...result, data: _ } : _ ) : result
-    }
+    const afterResult = await this.after(parameters, result.data || result)
 
-    return { result, headers: this._headers, multiValueHeaders: this._multiValueHeaders }
+    result = afterResult
+      ? ( result.data ? { ...result, data: afterResult } : afterResult )
+      : result
+
+    return {
+      result,
+      headers: this._headers,
+      multiValueHeaders: this._multiValueHeaders
+    }
   }
 }
 

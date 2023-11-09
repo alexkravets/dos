@@ -1,5 +1,7 @@
 'use strict'
 
+const asSafeClass = require('./helpers/asSafeClass')
+
 class Component {
   static get id() {
     return this.name
@@ -21,6 +23,8 @@ class Component {
     if (!this._validator) {
       throw new Error(`Validator is undefined for "${this.componentId}:${this.id}"`)
     }
+
+    return asSafeClass(this)
   }
 
   get context() {

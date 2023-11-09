@@ -468,7 +468,7 @@ describe('Operation', () => {
     it('supports dummy mode without defined "Component"', async () => {
       const { result } = await new Operation().exec()
 
-      expect(result).to.not.exist
+      expect(result).to.be.empty
     })
   })
 })

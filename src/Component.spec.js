@@ -52,4 +52,14 @@ describe('Component', () => {
       ).to.throw('"Profile" validation failed')
     })
   })
+
+  describe('.undefined', () => {
+    it('throw error if attributes or method is not defined by a class', () => {
+      const profile = new Profile({ validator }, { ...attributes, id: null })
+
+      expect(
+        () => profile.sex
+      ).to.throw('Undefined property or method: sex')
+    })
+  })
 })
