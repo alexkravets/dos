@@ -64,6 +64,13 @@ describe('Document', () => {
       expect(profile.attributes.createdBy).to.not.exist
     })
 
+    it('returns exiting document from the context', async () => {
+      const profile = await Profile.create(context, { name: 'Volodymyr' })
+      const existingProfile = await Profile.create({ ...context, document: profile }, { name: 'Volodymyr' })
+
+      expect(profile.id).to.eql(existingProfile.id)
+    })
+
     it('throws "DocumentExistsError" if document already exists', async () => {
       const { id } = await Profile.create(context, {}, { name: 'Artem' })
       const error = await expectError(() => Profile.create(context, {}, { id, name: 'Liam' }))

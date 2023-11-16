@@ -64,6 +64,12 @@ class Document extends Component {
   }
 
   static async create(context, query, mutation) {
+    const { document: existingDocument } = context
+
+    if (existingDocument) {
+      return existingDocument
+    }
+
     if (!mutation) {
       mutation = query
       query    = {}
