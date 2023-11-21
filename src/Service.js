@@ -107,7 +107,8 @@ class Service {
       if (!Operation) { throw new OperationNotFoundError({ operationId, httpMethod, httpPath }) }
 
       context.identity = await authorize(Operation, context)
-      const parameters = this._getParameters(Operation.inputSchema, context)
+      const isUpdate = Operation.type === Operation.types.UPDATE
+      const parameters = this._getParameters(Operation.inputSchema, context, isUpdate)
 
       const operation = new Operation(context)
       response = await operation.exec(parameters)
@@ -143,7 +144,7 @@ class Service {
     return { statusCode, headers, multiValueHeaders, body }
   }
 
-  _getParameters(inputSchema, context) {
+  _getParameters(inputSchema, context, shouldNullifyEmptyValues) {
     if (!inputSchema) { return {} }
 
     const { query, mutation } = context
@@ -152,7 +153,7 @@ class Service {
     let result
 
     try {
-      result = this._validator.validate(input, inputSchema.id)
+      result = this._validator.validate(input, inputSchema.id, shouldNullifyEmptyValues)
 
     } catch (validationError) {
       throw new InvalidInputError(validationError, context)
