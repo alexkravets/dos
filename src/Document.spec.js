@@ -23,12 +23,13 @@ Profile.schema = loadSync('examples/Profile.yaml')
 describe('Document', () => {
   const validator = new Validator([ Profile.schema ])
   const identity  = { accountId: 'ACCOUNT_ID' }
-  const context   = { validator, identity }
+  const getContext = () => ({ validator, identity })
 
   let id
 
   describe('Document.create(context, query, mutation)', () => {
     it('creates document', async () => {
+      const context = getContext()
       const profile = await Profile.create(context, { name: 'Oleksandr' })
 
       expect(profile.id).to.exist
@@ -40,6 +41,7 @@ describe('Document', () => {
     })
 
     it('creates document via mutation', async () => {
+      const context = getContext()
       const profile = await Profile.create(context, {}, { name: 'Olga' })
 
       expect(profile.id).to.exist
@@ -49,6 +51,7 @@ describe('Document', () => {
     })
 
     it('creates document with custom ID', async () => {
+      const context = getContext()
       const profile = await Profile.create(context, {}, { id: 'CUSTOM_ID', name: 'Olga' })
 
       expect(profile.id).to.eql('CUSTOM_ID')
@@ -56,7 +59,8 @@ describe('Document', () => {
     })
 
     it('creates document without identity in context', async () => {
-      const profile = await Profile.create({ validator }, { name: 'Oleg' })
+      const context = { validator }
+      const profile = await Profile.create(context, { name: 'Oleg' })
 
       expect(profile.id).to.exist
       expect(profile.attributes.name).to.eql('Oleg')
@@ -65,6 +69,7 @@ describe('Document', () => {
     })
 
     it('returns exiting document from the context', async () => {
+      const context = getContext()
       const profile = await Profile.create(context, { name: 'Volodymyr' })
       const existingProfile = await Profile.create({ ...context, document: profile }, { name: 'Volodymyr' })
 
@@ -72,6 +77,7 @@ describe('Document', () => {
     })
 
     it('throws "DocumentExistsError" if document already exists', async () => {
+      const context = getContext()
       const { id } = await Profile.create(context, {}, { name: 'Artem' })
       const error = await expectError(() => Profile.create(context, {}, { id, name: 'Liam' }))
 
@@ -82,6 +88,7 @@ describe('Document', () => {
 
   describe('Document.read(context, query)', () => {
     it('returns document', async () => {
+      const context = getContext()
       const profile = await Profile.read(context, { id })
 
       expect(profile).to.exist
@@ -98,6 +105,7 @@ describe('Document', () => {
 
   describe('Document.update(context, query, mutation)', () => {
     it('updates document', async () => {
+      const context = getContext()
       await Profile.update(context, { id }, { name: 'Margarita' })
 
       const profile = await Profile.read(context, { id })
@@ -108,9 +116,10 @@ describe('Document', () => {
     })
 
     it('updates document without identity in context', async () => {
-      const { id } = await Profile.create({ validator }, { name: 'Gustav' })
+      const context = { validator }
+      const { id } = await Profile.create(context, { name: 'Gustav' })
 
-      const profile = await Profile.update({ validator }, { id }, { name: 'Jack' })
+      const profile = await Profile.update(context, { id }, { name: 'Jack' })
 
       expect(profile.attributes.updatedAt).to.exist
       expect(profile.attributes.updatedBy).to.not.exist
@@ -127,6 +136,7 @@ describe('Document', () => {
 
   describe('Document.delete(context, query)', () => {
     it('deletes document', async () => {
+      const context = getContext()
       await Profile.delete(context, { id })
 
       try {
@@ -152,6 +162,7 @@ describe('Document', () => {
 
   describe('Document.index(context, query)', () => {
     it('returns documents', async () => {
+      const context = getContext()
       await Profile.reset()
 
       let result
@@ -162,7 +173,7 @@ describe('Document', () => {
       expect(result.count).to.eql(0)
 
       await Profile.create(context, { name: 'Oleksandr' })
-      await Profile.create(context, { name: 'Margarita' })
+      await Profile.create(context, { name: 'Dasha' })
       await Profile.create(context, { name: 'Veronica' })
 
       result = await Profile.index(context)
@@ -180,8 +191,10 @@ describe('Document', () => {
 
   describe('.delete()', () => {
     it('deletes document', async () => {
+      const context = getContext()
       const profile = await Profile.create(context, { name: 'Oleksandr' })
-      const { id }  = profile
+
+      const { id } = profile
 
       await profile.delete()
 
@@ -200,6 +213,7 @@ describe('Document', () => {
 
   describe('.update(mutation, shouldMutate = false)', () => {
     it('updates document', async () => {
+      const context = getContext()
       const profile = await Profile.create(context, { name: 'Oleksandr' })
 
       const updatedProfile = await profile.update({ name: 'Anton' })
@@ -209,6 +223,7 @@ describe('Document', () => {
     })
 
     it('updates and mutates document', async () => {
+      const context = getContext()
       const profile = await Profile.create(context, { name: 'Oleksandr' })
 
       await profile.update({ name: 'Anton' }, true)
@@ -252,6 +267,8 @@ describe('Document', () => {
       const validator = new Validator([ CustomProfile.schema ])
 
       const { id } = await CustomProfile.create({ validator }, { name: 'Irina' })
+
+      const context = getContext()
       await CustomProfile.update(context, { id, mutation: { name: 'Maria' } })
       await CustomProfile.delete(context, { id })
 
@@ -261,6 +278,44 @@ describe('Document', () => {
       expect(callbacks.afterUpdate).to.exist
       expect(callbacks.beforeDelete).to.exist
       expect(callbacks.afterDelete).to.exist
+    })
+  })
+
+  describe('.hasAttributeChanged(attributePath)', () => {
+    it('throws "Error" if context has no original document', async () => {
+      const context = getContext()
+      const profile = await Profile.create(context, { name: 'Sonya' })
+
+      try {
+        profile.hasAttributeChanged('name')
+
+      } catch (error) {
+        expect(error.message).to.eql('Orginal document is undefined')
+
+        return
+      }
+
+      throw new Error('Error has not been thrown')
+    })
+
+    it('returns true if attribute value has changed', async () => {
+      const context = getContext()
+      const profile = await Profile.create(context, { name: 'Sonya' })
+
+      await profile.update({ name: 'Sasha', age: 7 }, true)
+
+      expect(profile.hasAttributeChanged('name')).to.be.true
+      expect(profile.hasAttributeChanged('age')).to.be.true
+    })
+
+    it('returns false if attribute value has not changed', async () => {
+      const context = getContext()
+      const profile = await Profile.create(context, { name: 'Sonya' })
+
+      await profile.update({ name: 'Sonya', age: 5 }, true)
+      const hasNameChanged = profile.hasAttributeChanged('name')
+
+      expect(hasNameChanged).to.be.false
     })
   })
 })

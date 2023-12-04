@@ -64,6 +64,8 @@ class Document extends Component {
   }
 
   static async create(context, query, mutation) {
+    /* NOTE: existing document in the context allows to return document without
+             duplicate been created */
     const { document: existingDocument } = context
 
     if (existingDocument) {
@@ -169,13 +171,14 @@ class Document extends Component {
       await this.beforeUpdate(context, query, mutation)
     }
 
+    /* NOTE: ensure that document to be updated exists and save it in the
+             context so can be referenced in the after action helper */
+    const originalDocument = await this.read(context, query)
+
     const updatedItem = await this._update(query, mutation)
 
-    if (!updatedItem) {
-      throw new DocumentNotFoundError(this, { query })
-    }
-
     const document = new this(context, updatedItem)
+    document._originalDocument = originalDocument
 
     if (this.afterUpdate) {
       await this.afterUpdate(context, query, mutation, document)
@@ -184,9 +187,11 @@ class Document extends Component {
     return document
   }
 
-  static _update({ id = 'NONE' }, mutation) {
+  static _update({ id }, mutation) {
     const item = STORE[this.name][id]
 
+    /* istanbul ignore next: not used anymore by update interface as read
+                             operation throws an error if document not found */
     if (!item) {
       return false
     }
@@ -201,20 +206,24 @@ class Document extends Component {
       await this.beforeDelete(context, query)
     }
 
-    const isDeleted = await this._delete(query)
+    /* NOTE: ensure that document to be removed exists and save it in the
+             context so can be referenced in the after action helper */
+    const originalDocument = await this.read(context, query)
 
-    if (!isDeleted) {
-      throw new DocumentNotFoundError(this, { query })
-    }
+    await this._delete(query)
 
     if (this.afterDelete) {
-      await this.afterDelete(context, query)
+      await this.afterDelete(context, query, originalDocument)
     }
+
+    return originalDocument
   }
 
-  static _delete({ id = 'NONE' }) {
+  static _delete({ id }) {
     const item = STORE[this.name][id]
 
+    /* istanbul ignore next: not used anymore by delete interface as read
+                             operation throws an error if document not found */
     if (!item) {
       return false
     }
@@ -240,10 +249,30 @@ class Document extends Component {
     const document = await this.constructor.update(this.context, this._query, mutation)
 
     if (shouldMutate) {
-      this._attributes = document.attributes
+      this._attributes = document._attributes
+      this._originalDocument = document._originalDocument
     }
 
     return document
+  }
+
+  get originalDocument() {
+    if (!this._originalDocument) {
+      throw new Error('Orginal document is undefined')
+    }
+
+    return this._originalDocument
+  }
+
+  hasAttributeChanged(attributePath) {
+    const { originalDocument } = this
+
+    const originalValue = get(originalDocument.attributes, attributePath)
+    const updatedValue = get(this.attributes, attributePath)
+
+    const hasChanged = originalValue !== updatedValue
+
+    return hasChanged
   }
 
   get _query() {
