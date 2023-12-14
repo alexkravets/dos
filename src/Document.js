@@ -68,7 +68,10 @@ class Document extends Component {
              duplicate been created */
     const { document: existingDocument } = context
 
-    if (existingDocument) {
+    const skipCreate =
+      !!existingDocument && existingDocument.constructor.name === this.name
+
+    if (skipCreate) {
       return existingDocument
     }
 
