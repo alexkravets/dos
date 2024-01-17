@@ -9,15 +9,17 @@ const logRequest = context => {
 
   const {
     operationId,
-    baseUrl,
     query,
     mutation,
     requestId,
+    headers,
     requestReceivedAt
   } = context
 
+  const { host } = headers
+
   const metadata = {
-    baseUrl,
+    host,
     requestId,
     requestReceivedAt,
     query,
