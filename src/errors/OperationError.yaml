@@ -30,4 +30,3 @@ error:
 
           path:
             description: Path of invalid attribute
-            type: array
