@@ -158,7 +158,7 @@ class Document extends Component {
     return { items, count: items.length }
   }
 
-  static async update(context, query, mutation) {
+  static async update(context, query, mutation, originalDocument = null) {
     mutation = omit(mutation, [ this.idKey, 'createdAt', 'createdBy' ])
 
     const accountId = get(context, 'identity.accountId')
@@ -176,7 +176,9 @@ class Document extends Component {
 
     /* NOTE: ensure that document to be updated exists and save it in the
              context so can be referenced in the after action helper */
-    const originalDocument = await this.read(context, query)
+    if (!originalDocument) {
+      originalDocument = await this.read(context, query)
+    }
 
     const updatedItem = await this._update(query, mutation)
 
@@ -249,7 +251,9 @@ class Document extends Component {
   }
 
   async update(mutation, shouldMutate = false) {
-    const document = await this.constructor.update(this.context, this._query, mutation)
+    const originalDocument = new this.constructor(this.context, { ...this._attributes })
+
+    const document = await this.constructor.update(this.context, this._query, mutation, originalDocument)
 
     if (shouldMutate) {
       this._attributes = document._attributes
