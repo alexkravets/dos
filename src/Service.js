@@ -169,7 +169,7 @@ class Service {
     let output
 
     try {
-      output = this._validator.validate(object, outputSchema.id)
+      output = this._validator.validate(object, outputSchema.id, false, true)
 
     } catch (validationError) {
       throw new InvalidOutputError(object, validationError)
