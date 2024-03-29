@@ -1,9 +1,9 @@
 'use strict'
 
-const isTestEnvironment = process.env.NODE_APP_INSTANCE === 'test'
+const isTestEnvironment = () => process.env.NODE_APP_INSTANCE === 'test'
 
 const logRequest = context => {
-  if (isTestEnvironment) {
+  if (isTestEnvironment()) {
     return
   }
 

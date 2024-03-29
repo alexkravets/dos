@@ -11,7 +11,11 @@ const { name: title, version } = require(`${ROOT_PATH}/package.json`)
 
 const SWAGGER_UI_HTML = SWAGGER_UI_TEMPLATE.replace('$TITLE', title)
 
-const isProduction = process.env.NODE_APP_INSTANCE === 'prd'
+const isDevelopment = () => process.env.NODE_APP_INSTANCE === 'dev' || !process.env.NODE_APP_INSTANCE
+
+const _getHomeBody = () => isDevelopment() ? SWAGGER_UI_HTML : 'healthy'
+
+const _getSpecBody = (service) => isDevelopment() ? service.spec : { info: { title, version } }
 
 const specMiddleware = (service, context) => {
   const { httpPath, httpMethod } = context
@@ -19,22 +23,26 @@ const specMiddleware = (service, context) => {
   if (httpMethod !== 'get') { return null }
 
   if (httpPath === '/') {
+    const bodyText = _getHomeBody()
+
     return {
       headers: {
         'Content-Type': 'text/html; charset=UTF-8'
       },
       statusCode: 200,
-      body: isProduction ? 'healthy' : SWAGGER_UI_HTML
+      body: bodyText,
     }
   }
 
   if (httpPath === '/Spec') {
+    const bodyJson = JSON.stringify(_getSpecBody(service), null, 2)
+
     return {
       headers: {
         'Content-Type': 'application/json; charset=utf-8'
       },
       statusCode: 200,
-      body: JSON.stringify(isProduction ? { info: { title, version } } : service.spec, null, 2)
+      body: bodyJson,
     }
   }
 

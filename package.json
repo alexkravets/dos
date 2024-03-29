@@ -1,6 +1,6 @@
 {
   "name": "@kravc/dos",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "description": "Convention-based, easy-to-use library for building API-driven serverless services.",
   "keywords": [
     "Service",
@@ -20,7 +20,7 @@
     "src": "src"
   },
   "scripts": {
-    "test": "eslint src/ examples/ && NODE_APP_INSTANCE=test NODE_PATH=./ nyc mocha \"./src/**/*.spec.js\""
+    "test": "eslint src/ examples/ && NODE_APP_INSTANCE=test NODE_PATH=./ nyc --skip-full mocha \"./src/**/*.spec.js\""
   },
   "author": "Alexander Kravets <a@kra.vc>",
   "license": "ISC",

@@ -259,7 +259,9 @@ describe('Service', () => {
       expect(response.statusCode).to.eql(200)
     })
 
-    it('supports spec middleware', async () => {
+    it('supports spec middleware in dev environment', async () => {
+      process.env.NODE_APP_INSTANCE = 'dev'
+
       const lambdaFunction = request => service.handler(request)
 
       let request
@@ -272,6 +274,7 @@ describe('Service', () => {
 
       response = await lambdaFunction(request)
       expect(response.statusCode).to.eql(200)
+      expect(response.body.startsWith('<!DOCTYPE')).to.be.true
 
       request = {
         path:       '/Spec',
@@ -280,6 +283,56 @@ describe('Service', () => {
 
       response = await lambdaFunction(request)
       expect(response.statusCode).to.eql(200)
+
+      const body = JSON.parse(response.body)
+      expect(body.swagger).to.exist
+
+      process.env.NODE_APP_INSTANCE = undefined
+    })
+
+    it('does not expose spec middleware in non-dev environment', async () => {
+      const lambdaFunction = request => service.handler(request)
+
+      let request
+      let response
+
+      request = {
+        url:        'http://localhost:3000/',
+        httpMethod: 'GET'
+      }
+
+      response = await lambdaFunction(request)
+      expect(response.statusCode).to.eql(200)
+      expect(response.body).to.eql('healthy')
+
+      request = {
+        path:       '/Spec',
+        httpMethod: 'GET'
+      }
+
+      response = await lambdaFunction(request)
+      expect(response.statusCode).to.eql(200)
+
+      const body = JSON.parse(response.body)
+      expect(body.swagger).to.not.exist
+    })
+
+    it('logs operation input in non-test environment', async () => {
+      process.env.NODE_APP_INSTANCE = 'dev'
+
+      const lambdaFunction = request => service.handler(request)
+
+      await lambdaFunction({
+        url: 'http://localhost:3000/api/Health',
+        httpMethod: 'GET'
+      })
+
+      const id = 'HELLO_WORLD'
+      await exec('CreateProfile', {
+        mutation: { id, name: 'Hello, world!' }
+      }, { authorization })
+
+      process.env.NODE_APP_INSTANCE = undefined
     })
   })
 })
