@@ -265,7 +265,7 @@ class Document extends Component {
 
   get originalDocument() {
     if (!this._originalDocument) {
-      throw new Error('Orginal document is undefined')
+      throw new Error('Original document is undefined')
     }
 
     return this._originalDocument

@@ -290,7 +290,7 @@ describe('Document', () => {
         profile.hasAttributeChanged('name')
 
       } catch (error) {
-        expect(error.message).to.eql('Orginal document is undefined')
+        expect(error.message).to.eql('Original document is undefined')
 
         return
       }
