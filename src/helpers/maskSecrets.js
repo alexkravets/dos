@@ -1,7 +1,6 @@
 'use strict'
 
-const isObject    = require('lodash.isobject')
-const cloneDeep   = require('lodash.clonedeep')
+const { isObject, cloneDeep } = require('lodash')
 const { isArray } = Array
 
 const SECRET_REGEXP = /(password|code|token|authorization|cookie)/i

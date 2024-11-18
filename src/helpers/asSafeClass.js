@@ -1,7 +1,6 @@
 'use strict'
 
 const asSafeClass = classTarget => {
-  // eslint-disable-next-line no-undef
   return new Proxy(classTarget, {
     get(target, prop) {
       const isPropertyDefined = (prop in target)

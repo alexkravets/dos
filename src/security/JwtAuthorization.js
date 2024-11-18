@@ -1,9 +1,8 @@
 'use strict'
 
-const get               = require('lodash.get')
+const { get, capitalize } = require('lodash')
 const cookie            = require('cookie')
 const { decode }        = require('jsonwebtoken')
-const capitalize        = require('lodash.capitalize')
 const verifyToken       = require('./verifyToken')
 const AccessDeniedError = require('../errors/AccessDeniedError')
 const UnauthorizedError = require('../errors/UnauthorizedError')

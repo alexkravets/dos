@@ -1,7 +1,7 @@
 'use strict'
 
+const { capitalize }    = require('lodash')
 const Operation         = require('../Operation')
-const capitalize        = require('lodash.capitalize')
 const getComponentTitle = require('../helpers/getComponentTitle')
 
 const Index = (Component, componentAction = 'index') => {

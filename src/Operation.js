@@ -1,8 +1,7 @@
 'use strict'
 
-const isEmpty = require('lodash.isempty')
-const cloneDeep = require('lodash.clonedeep')
 const { Schema } = require('@kravc/schema')
+const { isEmpty, cloneDeep } = require('lodash')
 
 const defaultId = require('./helpers/defaultId')
 const defaultTags = require('./helpers/defaultTags')

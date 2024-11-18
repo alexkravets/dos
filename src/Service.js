@@ -1,9 +1,7 @@
 'use strict'
 
-const get                = require('lodash.get')
-const uniq               = require('lodash.uniq')
+const { get, uniq, compact } = require('lodash')
 const handler            = require('./helpers/handler')
-const compact            = require('lodash.compact')
 const authorize          = require('./helpers/authorize')
 const createSpec         = require('./helpers/createSpec')
 const { Validator }      = require('@kravc/schema')

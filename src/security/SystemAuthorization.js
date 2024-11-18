@@ -1,6 +1,6 @@
 'use strict'
 
-const get = require('lodash.get')
+const { get } = require('lodash')
 const AccessDeniedError = require('../errors/AccessDeniedError')
 
 class SystemAuthorization {

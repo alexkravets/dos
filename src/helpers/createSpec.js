@@ -1,7 +1,6 @@
 'use strict'
 
-const omit          = require('lodash.omit')
-const uniq          = require('lodash.uniq')
+const { omit, uniq } = require('lodash')
 const ZSchema       = require('z-schema')
 const { parse }     = require('url')
 const jsonSchema    = require('../../assets/schemas/oas2.json')

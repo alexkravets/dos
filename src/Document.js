@@ -1,10 +1,8 @@
 'use strict'
 
-const get                   = require('lodash.get')
-const omit                  = require('lodash.omit')
+const { get, omit, capitalize } = require('lodash')
 const { ulid }              = require('ulid')
 const Component             = require('./Component')
-const capitalize            = require('lodash.capitalize')
 const getIdPrefix           = require('./helpers/getIdPrefix')
 const getComponentTitle     = require('./helpers/getComponentTitle')
 const DocumentExistsError   = require('./errors/DocumentExistsError')

@@ -1,8 +1,8 @@
 'use strict'
 
-const path     = require('path')
-const keyBy    = require('lodash.keyby')
-const loadSync = require('./loadSync')
+const path      = require('path')
+const { keyBy } = require('lodash')
+const loadSync  = require('./loadSync')
 const { readdirSync, statSync } = require('fs')
 
 const ROOT_PATH = process.cwd()

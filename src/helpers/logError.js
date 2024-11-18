@@ -1,6 +1,6 @@
 'use strict'
 
-const pick        = require('lodash.pick')
+const { pick }    = require('lodash')
 const maskSecrets = require('./maskSecrets')
 
 const OPERATION_CONTEXT_FIELDS = [

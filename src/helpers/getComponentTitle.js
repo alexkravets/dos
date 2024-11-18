@@ -1,8 +1,7 @@
 'use strict'
 
-const startCase  = require('lodash.startcase')
-const pluralize  = require('pluralize')
-const capitalize = require('lodash.capitalize')
+const { startCase, capitalize } = require('lodash')
+const pluralize = require('pluralize')
 
 const getComponentTitle = (Component, isCapitalized = true, isPlural = false) => {
   const { name } = Component

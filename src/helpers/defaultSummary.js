@@ -1,7 +1,6 @@
 'use strict'
 
-const startCase  = require('lodash.startcase')
-const capitalize = require('lodash.capitalize')
+const { startCase, capitalize } = require('lodash')
 
 const defaultSummary = (Component, componentAction) => {
   if (!Component) { return '' }

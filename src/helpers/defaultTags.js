@@ -1,6 +1,6 @@
 'use strict'
 
-const startCase = require('lodash.startcase')
+const { startCase } = require('lodash')
 const pluralize = require('pluralize')
 
 const defaultTags = Component => {

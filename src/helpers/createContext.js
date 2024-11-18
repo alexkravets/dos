@@ -1,7 +1,6 @@
 'use strict'
 
-const get          = require('lodash.get')
-const isString     = require('lodash.isstring')
+const { get, isString } = require('lodash')
 const { parse }    = require('url')
 const { v4: uuid } = require('uuid')
 
