@@ -158,9 +158,6 @@ const createSpec = (operations, schemasMap, url) => {
   }
 
   serviceTags = uniq(serviceTags)
-
-  console.log(serviceTags)
-
   serviceTags.sort((a, b) => {
     const aStartsWithUpper = /^[A-Z]/.test(a)
     const bStartsWithUpper = /^[A-Z]/.test(b)
