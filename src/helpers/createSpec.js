@@ -158,7 +158,19 @@ const createSpec = (operations, schemasMap, url) => {
   }
 
   serviceTags = uniq(serviceTags)
-  serviceTags.sort((a, b) => a.localeCompare(b))
+
+  console.log(serviceTags)
+
+  serviceTags.sort((a, b) => {
+    const aStartsWithUpper = /^[A-Z]/.test(a)
+    const bStartsWithUpper = /^[A-Z]/.test(b)
+
+    if (aStartsWithUpper && !bStartsWithUpper) { return -1 }
+
+    if (!aStartsWithUpper && bStartsWithUpper) { return 1 }
+
+    return a.localeCompare(b)
+  })
   spec.tags = serviceTags.map(name => ({ name }))
 
   const json = JSON

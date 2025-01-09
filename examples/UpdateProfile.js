@@ -7,6 +7,13 @@ const JwtAuthorization = require('../src/security/JwtAuthorization')
 const SystemAuthorization = require('../src/security/SystemAuthorization')
 
 class UpdateProfile extends Update(Profile) {
+  static get tags() {
+    return [
+      'profiles-write',
+      'Profiles',
+    ]
+  }
+
   static get security() {
     return [
       SystemAuthorization.createRequirement(),

@@ -7,6 +7,14 @@ const { publicKey }    = require('../src/test/keys')
 const JwtAuthorization = require('../src/security/JwtAuthorization')
 
 class CreateProfile extends Create(Profile) {
+  static get tags() {
+    return [
+      'Profiles',
+      'profiles-write',
+      'System'
+    ]
+  }
+
   static get security() {
     const algorithm = 'RS256'
 
