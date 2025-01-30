@@ -25,6 +25,8 @@ const modules = [
   IndexProfiles
 ]
 
+const ROOT_PATH = process.cwd()
+
 describe('Service', () => {
   before(() => {
     const { Component: Profile } = CreateProfile
@@ -33,7 +35,7 @@ describe('Service', () => {
 
   describe('Service.constructor(modules, url, path = \'/src\')', () => {
     it('initializes service', () => {
-      const service = new Service(modules, 'https://example.com/api', '/examples')
+      const service = new Service(modules, 'https://example.com/api', `${ROOT_PATH}/examples`)
       expect(service).to.exist
     })
 
@@ -69,7 +71,7 @@ describe('Service', () => {
   })
 
   describe('.handler(request)', () => {
-    const service = new Service(modules, 'https://example.com/api/', '/examples')
+    const service = new Service(modules, 'https://example.com/api/', `${ROOT_PATH}/examples`)
     const exec    = test.execute(service)
 
     const authorization = test.createAccessToken({}, { group: 'Administrators' })

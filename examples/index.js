@@ -22,6 +22,8 @@ const modules = [
   IndexProfiles
 ]
 
-const service = new Service(modules, 'http://localhost:3000/', '/examples')
+const ROOT_PATH = process.cwd()
+
+const service = new Service(modules, 'http://localhost:3000/', `${ROOT_PATH}/examples`)
 
 exports.handler = handler(service)

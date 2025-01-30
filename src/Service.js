@@ -1,18 +1,20 @@
 'use strict'
 
-const { get, uniq, compact } = require('lodash')
-const handler            = require('./helpers/handler')
-const authorize          = require('./helpers/authorize')
-const createSpec         = require('./helpers/createSpec')
-const { Validator }      = require('@kravc/schema')
-const OperationError     = require('./errors/OperationError')
-const createSchemasMap   = require('./helpers/createSchemasMap')
-const InvalidInputError  = require('./errors/InvalidInputError')
+const handler = require('./helpers/handler')
+const authorize = require('./helpers/authorize')
+const createSpec = require('./helpers/createSpec')
+const { Validator } = require('@kravc/schema')
+const OperationError = require('./errors/OperationError')
+const createSchemasMap = require('./helpers/createSchemasMap')
+const InvalidInputError = require('./errors/InvalidInputError')
 const InvalidOutputError = require('./errors/InvalidOutputError')
 const OperationNotFoundError = require('./errors/OperationNotFoundError')
+const { get, uniq, compact } = require('lodash')
+
+const ROOT_PATH = process.cwd()
 
 class Service {
-  constructor(modules, url = 'http://localhost:3000/', path = '/src') {
+  constructor(modules, url = 'http://localhost:3000/', path = `${ROOT_PATH}/src`) {
     if (!url.endsWith('/')) { url = url + '/' }
 
     const schemasMap = createSchemasMap(path)

@@ -5,8 +5,6 @@ const { keyBy } = require('lodash')
 const loadSync  = require('./loadSync')
 const { readdirSync, statSync } = require('fs')
 
-const ROOT_PATH = process.cwd()
-
 const listFilesSync = dir =>
   readdirSync(dir)
     .reduce((files, file) =>
@@ -16,7 +14,7 @@ const listFilesSync = dir =>
     , [])
 
 const readSchemasSync = path =>
-  listFilesSync(ROOT_PATH + path)
+  listFilesSync(path)
     .filter(fileName => fileName.endsWith('.yaml'))
     .map(schemaPath => loadSync(schemaPath))
 
