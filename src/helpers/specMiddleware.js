@@ -1,6 +1,7 @@
 'use strict'
 
-const { resolve }      = require('path')
+const { resolve } = require('path')
+const readYamlFile = require('read-yaml-file')
 const { readFileSync } = require('fs')
 
 const SWAGGER_UI_TEMPLATE_PATH = resolve(__dirname, '../../assets/index.html')
@@ -43,6 +44,34 @@ const specMiddleware = (service, context) => {
       },
       statusCode: 200,
       body: bodyJson,
+    }
+  }
+
+  const readFileJson = httpPath => {
+    const fileName = httpPath.replace('/', '')
+    const source = readYamlFile.sync(`${ROOT_PATH}/specs/${fileName}`)
+
+    return JSON.stringify(source, null, 2)
+  }
+
+  const isComposer = [
+    '/Enums.yaml',
+    '/Schemas.yaml',
+    '/Documents.yaml',
+    '/Scenarios.yaml',
+    '/Operations.yaml',
+    '/Parameters.yaml'
+  ].includes(httpPath)
+
+  const shouldReturnComposerSpecs = isComposer && isDevelopment()
+
+  if (shouldReturnComposerSpecs) {
+    return {
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+      },
+      statusCode: 200,
+      body: readFileJson(httpPath),
     }
   }
 

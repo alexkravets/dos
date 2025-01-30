@@ -289,6 +289,14 @@ describe('Service', () => {
       const body = JSON.parse(response.body)
       expect(body.swagger).to.exist
 
+      response = await lambdaFunction({ path: '/Documents.yaml', httpMethod: 'GET' })
+      response = await lambdaFunction({ path: '/Enums.yaml', httpMethod: 'GET' })
+      response = await lambdaFunction({ path: '/Operations.yaml', httpMethod: 'GET' })
+      response = await lambdaFunction({ path: '/Parameters.yaml', httpMethod: 'GET' })
+      response = await lambdaFunction({ path: '/Schenarios.yaml', httpMethod: 'GET' })
+      response = await lambdaFunction({ path: '/Schemas.yaml', httpMethod: 'GET' })
+      expect(response.statusCode).to.eql(200)
+
       process.env.NODE_APP_INSTANCE = undefined
     })
 
