@@ -1,12 +1,12 @@
 'use strict'
 
-const { get, omit, capitalize } = require('lodash')
 const { ulid }              = require('ulid')
 const Component             = require('./Component')
 const getIdPrefix           = require('./helpers/getIdPrefix')
 const getComponentTitle     = require('./helpers/getComponentTitle')
 const DocumentExistsError   = require('./errors/DocumentExistsError')
 const DocumentNotFoundError = require('./errors/DocumentNotFoundError')
+const { get, omit, capitalize, cloneDeep } = require('lodash')
 
 const STORE = {}
 
@@ -139,7 +139,7 @@ class Document extends Component {
   }
 
   static _read({ id = 'NONE' }) {
-    return STORE[this.name][id]
+    return cloneDeep(STORE[this.name][id])
   }
 
   static async index(context, query = {}, options = {}) {
@@ -151,7 +151,7 @@ class Document extends Component {
   }
 
   static _index() {
-    const items = Object.values(STORE[this.name] || {})
+    const items = Object.values(STORE[this.name] || {}).map(cloneDeep)
 
     return { items, count: items.length }
   }
@@ -201,7 +201,7 @@ class Document extends Component {
 
     STORE[this.name][id] = { ...item, ...mutation }
 
-    return STORE[this.name][id]
+    return cloneDeep(STORE[this.name][id])
   }
 
   static async delete(context, query) {
