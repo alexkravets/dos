@@ -19,7 +19,7 @@ class Profile extends Document {}
 Profile.schema = loadSync('examples/Profile.yaml')
 
 const validator = new Validator([ Profile.schema ])
-const identity  = { accountId: 'ACCOUNT_ID' }
+const identity  = { sub: 'USER_ID' }
 const DEFAULT_CONTEXT = { validator, identity }
 
 describe('Operation', () => {

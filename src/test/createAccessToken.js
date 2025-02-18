@@ -5,14 +5,13 @@ const { privateKey: PRIVATE_KEY } = require('./keys')
 
 const createAccessToken = (options, attributes) => {
   const {
-    algorithm  = 'RS256',
+    algorithm = 'RS256',
     privateKey = PRIVATE_KEY,
     ...jwtOptions
   } = options
 
   const payload = {
-    sub:       'SESSION_ID',
-    accountId: 'ACCOUNT_ID',
+    sub: 'USER_ID',
     ...attributes
   }
 
