@@ -81,10 +81,10 @@ class Document extends Component {
     const { validator } = context
     mutation = validator.normalize(mutation, this.id)
 
-    const accountId = get(context, 'identity.accountId')
+    const identitySubjectId = get(context, 'identity.sub')
 
-    if (accountId) {
-      mutation.createdBy = accountId
+    if (identitySubjectId) {
+      mutation.createdBy = identitySubjectId
     }
 
     const timestamp = new Date().toJSON()
@@ -159,10 +159,10 @@ class Document extends Component {
   static async update(context, query, mutation, originalDocument = null) {
     mutation = omit(mutation, [ this.idKey, 'createdAt', 'createdBy' ])
 
-    const accountId = get(context, 'identity.accountId')
+    const identitySubjectId = get(context, 'identity.sub')
 
-    if (accountId) {
-      mutation.updatedBy = accountId
+    if (identitySubjectId) {
+      mutation.updatedBy = identitySubjectId
     }
 
     const timestamp = new Date().toJSON()

@@ -22,7 +22,7 @@ Profile.schema = loadSync('examples/Profile.yaml')
 
 describe('Document', () => {
   const validator = new Validator([ Profile.schema ])
-  const identity  = { accountId: 'ACCOUNT_ID' }
+  const identity  = { sub: 'USER_ID' }
   const getContext = () => ({ validator, identity })
 
   let id

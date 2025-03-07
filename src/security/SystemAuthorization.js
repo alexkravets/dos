@@ -44,7 +44,7 @@ class SystemAuthorization {
       return { isAuthorized: false, error }
     }
 
-    return { isAuthorized: true, accountId: 'SYSTEM' }
+    return { isAuthorized: true, isSystem: true }
   }
 }
 
