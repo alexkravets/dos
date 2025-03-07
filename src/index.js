@@ -14,6 +14,7 @@ module.exports = {
   test:                require('./test'),
   handler:             require('./helpers/handler'),
   security:            require('./security'),
+  getOrFail:           require('./helpers/getOrFail'),
   JwtAuthorization:    require('./security/JwtAuthorization'),
   SystemAuthorization: require('./security/SystemAuthorization')
 }
