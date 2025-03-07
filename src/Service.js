@@ -92,8 +92,8 @@ class Service {
     return get(this._spec.paths, `${httpPath}.${httpMethod}.operationId`, 'NONE')
   }
 
-  handler(request) {
-    return handler(this)(request)
+  handler(request, logger) {
+    return handler(this)(request, logger)
   }
 
   async process(context) {

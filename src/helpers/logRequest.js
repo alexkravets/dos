@@ -10,6 +10,7 @@ const logRequest = context => {
   const {
     operationId,
     query,
+    logger,
     mutation,
     requestId,
     headers,
@@ -29,7 +30,7 @@ const logRequest = context => {
     metadata.mutation = mutation
   }
 
-  console.log(operationId, metadata)
+  logger.info(operationId, metadata)
 }
 
 module.exports = logRequest

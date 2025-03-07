@@ -4,7 +4,7 @@ const { get, isString } = require('lodash')
 const { parse }    = require('url')
 const { v4: uuid } = require('uuid')
 
-const createContext = (service, request) => {
+const createContext = (service, request, logger = console) => {
   let httpPath
   let httpMethod
 
@@ -33,6 +33,7 @@ const createContext = (service, request) => {
     baseUrl:   service.baseUrl,
     validator: service.validator,
     requestReceivedAt: new Date().toISOString(),
+    logger,
     httpPath,
     requestId,
     httpMethod,
