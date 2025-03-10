@@ -150,8 +150,18 @@ class Document extends Component {
     return { objects, ...rest }
   }
 
-  static _index() {
-    const items = Object.values(STORE[this.name] || {}).map(cloneDeep)
+  static async indexAll(context, query, options) {
+    return this.index(context, query, options)
+  }
+
+  static _index(query) {
+    const filter = item =>
+      Object.keys(query).every(key => item[key] === query[key])
+
+    const items = Object
+      .values(STORE[this.name] || {})
+      .filter(filter)
+      .map(cloneDeep)
 
     return { items, count: items.length }
   }
