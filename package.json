@@ -1,6 +1,6 @@
 {
   "name": "@kravc/dos",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "description": "Convention-based, easy-to-use library for building API-driven serverless services.",
   "keywords": [
     "Service",
@@ -12,6 +12,7 @@
     "Lambda Function"
   ],
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "repository": {
     "type": "git",
     "url": "http://github.com/alexkravets/dos.git"

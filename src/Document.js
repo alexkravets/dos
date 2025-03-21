@@ -61,6 +61,14 @@ class Document extends Component {
     this._bodySchema = schema
   }
 
+  static _extendWithPartition(context, parameters) {
+    if (!this.getPartition) {
+      return
+    }
+
+    parameters.partition = this.getPartition(context, parameters)
+  }
+
   static async create(context, query, mutation) {
     /* NOTE: existing document in the context allows to return document without
              duplicate been created */
@@ -96,6 +104,7 @@ class Document extends Component {
     }
 
     mutation[this.idKey] = this.createId(mutation)
+    this._extendWithPartition(context, mutation)
 
     const isCreated = await this._create(mutation)
 
