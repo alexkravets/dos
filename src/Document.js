@@ -136,6 +136,8 @@ class Document extends Component {
   }
 
   static async read(context, query, options) {
+    this._extendWithPartition(context, query)
+
     const item = await this._read(query, options)
 
     if (!item) {
@@ -197,6 +199,8 @@ class Document extends Component {
       originalDocument = await this.read(context, query)
     }
 
+    this._extendWithPartition(context, query)
+
     const updatedItem = await this._update(query, mutation)
 
     const document = new this(context, updatedItem)
@@ -231,6 +235,8 @@ class Document extends Component {
     /* NOTE: ensure that document to be removed exists and save it in the
              context so can be referenced in the after action helper */
     const originalDocument = await this.read(context, query)
+
+    this._extendWithPartition(context, query)
 
     await this._delete(query)
 
