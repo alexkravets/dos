@@ -12,15 +12,27 @@ const OperationNotFoundError = require('./errors/OperationNotFoundError')
 const { get, uniq, compact } = require('lodash')
 
 const ROOT_PATH = process.cwd()
+const DEFAULT_URL = 'http://localhost:3000/'
+const DEFAULT_SERVICE_PATH = `${ROOT_PATH}/src`
+const DEFAULT_SKIP_OPERATIONS = []
 
 class Service {
-  constructor(modules, url = 'http://localhost:3000/', path = `${ROOT_PATH}/src`) {
+  constructor(modules, options = {}) {
+    let {
+      url = DEFAULT_URL,
+      path = DEFAULT_SERVICE_PATH,
+      skipOperations = DEFAULT_SKIP_OPERATIONS,
+    } = options
+
     if (!url.endsWith('/')) { url = url + '/' }
 
     const schemasMap = createSchemasMap(path)
 
     let components = modules.filter(Component => !Component.types)
-    let operations = modules.filter(Component => !!Component.types)
+
+    let operations = modules
+      .filter(Component => !!Component.types)
+      .filter(({ id }) => !skipOperations.includes(id))
 
     const operationComponents = compact(operations.map(({ Component }) => Component))
     components = uniq([ ...components, ...operationComponents ])

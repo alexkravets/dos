@@ -180,6 +180,9 @@ describe('Document', () => {
 
       expect(result.objects.length).to.eql(3)
       expect(result.count).to.eql(3)
+
+      result = await Profile.indexAll(context, { name: 'Dasha' })
+      expect(result.count).to.eql(1)
     })
   })
 

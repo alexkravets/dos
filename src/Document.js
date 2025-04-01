@@ -61,6 +61,14 @@ class Document extends Component {
     this._bodySchema = schema
   }
 
+  static _extendWithPartition(context, parameters) {
+    if (!this.getPartition) {
+      return
+    }
+
+    parameters.partition = this.getPartition(context, parameters)
+  }
+
   static async create(context, query, mutation) {
     /* NOTE: existing document in the context allows to return document without
              duplicate been created */
@@ -96,6 +104,7 @@ class Document extends Component {
     }
 
     mutation[this.idKey] = this.createId(mutation)
+    this._extendWithPartition(context, mutation)
 
     const isCreated = await this._create(mutation)
 
@@ -127,6 +136,8 @@ class Document extends Component {
   }
 
   static async read(context, query, options) {
+    this._extendWithPartition(context, query)
+
     const item = await this._read(query, options)
 
     if (!item) {
@@ -150,8 +161,18 @@ class Document extends Component {
     return { objects, ...rest }
   }
 
-  static _index() {
-    const items = Object.values(STORE[this.name] || {}).map(cloneDeep)
+  static async indexAll(context, query, options) {
+    return this.index(context, query, options)
+  }
+
+  static _index(query) {
+    const filter = item =>
+      Object.keys(query).every(key => item[key] === query[key])
+
+    const items = Object
+      .values(STORE[this.name] || {})
+      .filter(filter)
+      .map(cloneDeep)
 
     return { items, count: items.length }
   }
@@ -177,6 +198,8 @@ class Document extends Component {
     if (!originalDocument) {
       originalDocument = await this.read(context, query)
     }
+
+    this._extendWithPartition(context, query)
 
     const updatedItem = await this._update(query, mutation)
 
@@ -212,6 +235,8 @@ class Document extends Component {
     /* NOTE: ensure that document to be removed exists and save it in the
              context so can be referenced in the after action helper */
     const originalDocument = await this.read(context, query)
+
+    this._extendWithPartition(context, query)
 
     await this._delete(query)
 
