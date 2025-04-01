@@ -1,10 +1,12 @@
 'use strict'
 
-const { get, isString } = require('lodash')
-const { parse }    = require('url')
+const { parse } = require('url')
 const { v4: uuid } = require('uuid')
+const { get, isString } = require('lodash')
 
-const createContext = (service, request, logger = console) => {
+const createContext = (service, request, extraContext = {}) => {
+  const { logger = console } = extraContext
+
   let httpPath
   let httpMethod
 
@@ -37,7 +39,8 @@ const createContext = (service, request, logger = console) => {
     httpPath,
     requestId,
     httpMethod,
-    operationId
+    operationId,
+    ...extraContext,
   }
 
   for (const name in request.headers) {
