@@ -1,6 +1,4 @@
 
-export declare function getOrFail(object: Record<string, any>, path: string): any;
-
 export declare type SortOrder = 'asc' | 'desc';
 export declare type Context = Record<string, any>;
 export declare type QueryMap = Record<string, any>;
@@ -124,3 +122,15 @@ export declare class Document<T> {
   hasAttributeChanged(attributePath: string): boolean;
   toJSON(): Record<string, any>;
 }
+
+export declare function getOrFail(
+  object: Record<string, any>,
+  path: string
+): any;
+
+export declare function verifyToken(
+  context: Context,
+  token: string,
+  publicKey: string,
+  algorithm: string,
+): Promise<[ boolean, string | undefined ]>;
