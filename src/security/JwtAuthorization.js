@@ -53,8 +53,9 @@ class JwtAuthorization {
     publicKey,
     cookieName,
     algorithm = 'RS256',
-    tokenVerificationMethod  = verifyToken,
-    accessVerificationMethod = () => [ true ]
+    normalizePayload = payload => payload,
+    tokenVerificationMethod = verifyToken,
+    accessVerificationMethod = () => [ true ],
   }) {
     this._name       = name
     this._publicKey  = publicKey
@@ -63,6 +64,7 @@ class JwtAuthorization {
 
     this._verifyToken  = tokenVerificationMethod
     this._verifyAccess = accessVerificationMethod
+    this._normalizePayload = normalizePayload
   }
 
   async verify(context) {
@@ -111,7 +113,9 @@ class JwtAuthorization {
       return { isAuthorized: false, error }
     }
 
-    return { isAuthorized: true, ...payload }
+    const normalizedPayload = this._normalizePayload(payload)
+
+    return { isAuthorized: true, ...normalizedPayload }
   }
 }
 
