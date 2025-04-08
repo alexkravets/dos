@@ -4,6 +4,7 @@ export declare type Context = Record<string, any>;
 export declare type QueryMap = Record<string, any>;
 export declare type CreateMutationMap = Record<string, any>;
 export declare type UpdateMutationMap = Record<string, any>;
+export declare type AttributesMap = Record<string, any>;
 
 export declare interface IndexOptions {
   sort?: SortOrder;
@@ -29,6 +30,10 @@ export declare class Document<T> {
   static get idKeyPrefix(): string;
   static get documentName(): string;
 
+  static _read(query: QueryMap): Promise<AttributesMap>;
+  static _create(attributes: AttributesMap): Promise<Boolean>;
+  static _update(query: QueryMap, mutation: UpdateMutationMap): Promise<AttributesMap>;
+
   static getPartition(
     context: Context,
     parameters: Record<string, any>
@@ -43,6 +48,16 @@ export declare class Document<T> {
     count: number;
     objects: D[];
     lastEvaluatedKey: string;
+  }>;
+
+  static indexAll<T, D extends Document<T> = Document<T>>(
+    this: DocumentConstructor<T, D>,
+    context: Context,
+    query?: QueryMap,
+    options?: IndexOptions,
+  ): Promise<{
+    count: number;
+    objects: D[];
   }>;
 
   static read<T, D extends Document<T> = Document<T>>(
