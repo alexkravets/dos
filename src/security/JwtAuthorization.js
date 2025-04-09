@@ -88,6 +88,8 @@ class JwtAuthorization {
       return { isAuthorized: false, error }
     }
 
+    token = token.replace(/^bearer\s+/i, '')
+
     const object = decode(token, { complete: true })
 
     if (!object) {

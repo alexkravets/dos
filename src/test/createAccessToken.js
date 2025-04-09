@@ -17,7 +17,7 @@ const createAccessToken = (options, attributes) => {
 
   const token = JWT.sign(payload, privateKey, { algorithm, ...jwtOptions })
 
-  return token
+  return `Bearer ${token}`
 }
 
 module.exports = createAccessToken
