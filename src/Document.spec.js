@@ -183,6 +183,9 @@ describe('Document', () => {
 
       result = await Profile.indexAll(context, { name: 'Dasha' })
       expect(result.count).to.eql(1)
+
+      result = await Profile.indexAll(context)
+      expect(result.count).to.eql(3)
     })
   })
 
@@ -240,6 +243,10 @@ describe('Document', () => {
       const callbacks = {}
 
       class CustomProfile extends Profile {
+        static getPartition() {
+          return 'CustomProfile'
+        }
+
         static beforeCreate(context, mutation) {
           callbacks.beforeCreate = mutation
         }

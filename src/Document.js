@@ -161,10 +161,6 @@ class Document extends Component {
     return { objects, ...rest }
   }
 
-  static async indexAll(context, query, options) {
-    return this.index(context, query, options)
-  }
-
   static _index(query) {
     const filter = item =>
       Object.keys(query).every(key => item[key] === query[key])
@@ -175,6 +171,18 @@ class Document extends Component {
       .map(cloneDeep)
 
     return { items, count: items.length }
+  }
+
+  static async indexAll(context, query = {}, options = {}) {
+    let { items, ...rest } = await this._indexAll(query, options)
+
+    const objects = items.map(item => new this(context, item))
+
+    return { objects, ...rest }
+  }
+
+  static _indexAll(query) {
+    return this._index(query)
   }
 
   static async update(context, query, mutation, originalDocument = null) {
