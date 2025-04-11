@@ -6,6 +6,8 @@ export declare type QueryMap = Record<string, any>;
 export declare type CreateMutationMap = Record<string, any>;
 export declare type UpdateMutationMap = Record<string, any>;
 export declare type AttributesMap = Record<string, any>;
+export declare type OperationParameters = Record<string, unknown>;
+export declare type Headers = Record<string, string>;
 
 export declare interface IndexOptions {
   sort?: SortOrder;
@@ -31,7 +33,7 @@ export declare class Document<T> {
   static get idKeyPrefix(): string;
   static get documentName(): string;
 
-  static set schema(schema: Schema): void;
+  static set schema(schema: Schema);
   static get schema(): Schema;
 
   static _read(query: QueryMap): Promise<AttributesMap>;
@@ -158,7 +160,6 @@ export declare class JwtAuthorization {
   static createRequirement(options: {
     publicKey: string;
     name?: string;
-    publicKey?: string;
     algorithm?: string;
     cookieName?: string;
     normalizePayload?: Function;
@@ -170,7 +171,7 @@ export declare class JwtAuthorization {
 export declare class SystemAuthorization {
   static createRequirement(options?: {
     name?: string;
-  } = {}): Record<string, any>
+  }): Record<string, any>
 };
 
 type ComponentConstructor = new (...args: any[]) => any;
@@ -218,13 +219,13 @@ interface IRequest {
   url: string;
   body?: string | Record<string, unknown>;
   method: string;
-  headers: Record<string, any>;
+  headers: Headers;
   operationId?: string;
 };
 
 interface IResponse {
   body?: string,
-  headers: Record<string, string>,
+  headers: Headers,
   statusCode: number,
 }
 
@@ -238,5 +239,29 @@ export declare class Service {
   get spec(): ISpec;
   get baseUrl(): string;
 
-  async handler(request: IRequest, Context): Promise<IResponse>;
+  handler(request: IRequest, Context): Promise<IResponse>;
 }
+
+export declare function createAccessToken(
+  options: Record<string, string>,
+  payload: Record<string, unknown>
+): string;
+
+export declare function wait(ms: number): Promise<void>;
+
+export type Data = Record<string, unknown>[] | Record<string, unknown>;
+
+interface ExecutionResult {
+  error?: {
+    code: string,
+    message: string,
+  }
+  data?: Data,
+}
+
+export declare function execute(service: Service):
+  (
+    operationId: string,
+    parameters: OperationParameters,
+    headers: Headers
+  ) => { statusCode: number, result: ExecutionResult };

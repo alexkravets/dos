@@ -10,8 +10,8 @@ const UpdateProfile = require('examples/UpdateProfile')
 const DeleteProfile = require('examples/DeleteProfile')
 const IndexProfiles = require('examples/IndexProfiles')
 
+const test = require('src/test')
 const {
-  test,
   errors,
   Create,
   Service,

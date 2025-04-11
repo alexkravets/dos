@@ -1,5 +1,7 @@
 'use strict'
 
+const { wait, execute, createAccessToken } = require('./test')
+
 module.exports = {
   Document:            require('./Document'),
   Operation:           require('./Operation'),
@@ -11,11 +13,13 @@ module.exports = {
   Delete:              require('./operations/Delete'),
   Component:           require('./Component'),
   errors:              require('./errors'),
-  test:                require('./test'),
   handler:             require('./helpers/handler'),
   security:            require('./security'),
   getOrFail:           require('./helpers/getOrFail'),
   verifyToken:         require('./security/verifyToken'),
   JwtAuthorization:    require('./security/JwtAuthorization'),
-  SystemAuthorization: require('./security/SystemAuthorization')
+  SystemAuthorization: require('./security/SystemAuthorization'),
+  wait,
+  execute,
+  createAccessToken,
 }
