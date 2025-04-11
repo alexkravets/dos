@@ -1,5 +1,7 @@
 'use strict'
 
+const { Schema } = require('@kravc/schema')
+
 const Health        = require('examples/Health')
 const { expect }    = require('chai')
 const ReadProfile   = require('examples/ReadProfile')
@@ -16,7 +18,14 @@ const {
   Component,
 } = require('src')
 
+const testSchema = new Schema({
+  test: {
+    type: 'string'
+  }
+}, 'Test')
+
 const modules = [
+  testSchema,
   Health,
   ReadProfile,
   CreateProfile,

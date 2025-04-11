@@ -1,3 +1,4 @@
+import type { Schema, SchemaAttributes } from '@kravc/schema';
 
 export declare type SortOrder = 'asc' | 'desc';
 export declare type Context = Record<string, any>;
@@ -29,6 +30,9 @@ export declare class Document<T> {
   static get sortBy(): string;
   static get idKeyPrefix(): string;
   static get documentName(): string;
+
+  static set schema(schema: Schema): void;
+  static get schema(): Schema;
 
   static _read(query: QueryMap): Promise<AttributesMap>;
   static _create(attributes: AttributesMap): Promise<Boolean>;
@@ -149,3 +153,90 @@ export declare function verifyToken(
   publicKey: string,
   algorithm: string,
 ): Promise<[ boolean, string | undefined ]>;
+
+export declare class JwtAuthorization {
+  static createRequirement(options: {
+    publicKey: string;
+    name?: string;
+    publicKey?: string;
+    algorithm?: string;
+    cookieName?: string;
+    normalizePayload?: Function;
+    tokenVerificationMethod?: Function;
+    accessVerificationMethod?: Function;
+  }): Record<string, any>
+};
+
+export declare class SystemAuthorization {
+  static createRequirement(options?: {
+    name?: string;
+  } = {}): Record<string, any>
+};
+
+type ComponentConstructor = new (...args: any[]) => any;
+type OperationConstructor = new (...args: any[]) => any;
+
+export declare class Operation {
+  public context: Context;
+  static get query(): SchemaAttributes | null;
+  static get mutation(): Schema | SchemaAttributes | null;
+  static get output(): Schema | SchemaAttributes | null;
+}
+
+export declare function Read(
+  Component: ComponentConstructor,
+  componentAction?: string
+): typeof Operation;
+
+export declare function Create(
+  Component: ComponentConstructor,
+  componentAction?: string
+): typeof Operation;
+
+export declare function Update(
+  Component: ComponentConstructor,
+  componentAction?: string
+): typeof Operation;
+
+export declare function Delete(
+  Component: ComponentConstructor,
+  componentAction?: string
+): typeof Operation;
+
+export declare function Index(
+  Component: ComponentConstructor,
+  componentAction?: string
+): typeof Operation;
+
+declare type Module = Operation | Schema | ComponentConstructor;
+
+interface ISpec {
+  paths: Record<string, unknown>;
+}
+
+interface IRequest {
+  url: string;
+  body?: string | Record<string, unknown>;
+  method: string;
+  headers: Record<string, any>;
+  operationId?: string;
+};
+
+interface IResponse {
+  body?: string,
+  headers: Record<string, string>,
+  statusCode: number,
+}
+
+export declare class Service {
+  constructor(modules: Module[], options: {
+    url?: string;
+    path?: string;
+    skipOperations?: string[];
+  });
+
+  get spec(): ISpec;
+  get baseUrl(): string;
+
+  async handler(request: IRequest, Context): Promise<IResponse>;
+}

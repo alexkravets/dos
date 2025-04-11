@@ -26,7 +26,7 @@ class Service {
 
     if (!url.endsWith('/')) { url = url + '/' }
 
-    const schemasMap = createSchemasMap(path)
+    const schemasMap = createSchemasMap(path, modules)
 
     let components = modules.filter(Component => !Component.types)
 
