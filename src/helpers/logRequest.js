@@ -30,7 +30,7 @@ const logRequest = context => {
     metadata.mutation = mutation
   }
 
-  logger.info(operationId, metadata)
+  logger.info(`${operationId}: ${JSON.stringify(metadata, null, 2)}`)
 }
 
 module.exports = logRequest
