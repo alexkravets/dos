@@ -178,6 +178,8 @@ export type ComponentConstructor = new (...args: any[]) => any;
 type OperationConstructor = new (...args: any[]) => any;
 
 export declare class Operation {
+  constructor(context: Context);
+
   public context: Context;
   static get query(): SchemaAttributes | null;
   static get mutation(): Schema | SchemaAttributes | null;
