@@ -174,7 +174,7 @@ export declare class SystemAuthorization {
   }): Record<string, any>
 };
 
-type ComponentConstructor = new (...args: any[]) => any;
+export type ComponentConstructor = new (...args: any[]) => any;
 type OperationConstructor = new (...args: any[]) => any;
 
 export declare class Operation {
@@ -182,6 +182,8 @@ export declare class Operation {
   static get query(): SchemaAttributes | null;
   static get mutation(): Schema | SchemaAttributes | null;
   static get output(): Schema | SchemaAttributes | null;
+
+  exec(parameters: Record<string, unknown>): Promise<Record<string, unknown>>;
 }
 
 export declare function Read(
