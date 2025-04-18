@@ -150,7 +150,7 @@ class Document extends Component {
   }
 
   static _read({ id = 'NONE' }) {
-    return cloneDeep(STORE[this.name][id])
+    return cloneDeep(get(STORE, `${this.name}.${id}`))
   }
 
   static async index(context, query = {}, options = {}) {
