@@ -89,49 +89,57 @@ describe('Service', () => {
       path: `${ROOT_PATH}/examples`
     })
 
-    const exec = test.execute(service)
+    const { exec, request: executeRequest, expectError } = test.execute(service)
 
     const authorization = test.createAccessToken({}, { group: 'Administrators' })
 
     it('returns "UnauthorizedError / 401" if missing authorization header', async () => {
-      const response = await exec('CreateProfile')
+      const error = await expectError('CreateProfile', {}, {}, 'UnauthorizedError')
+      expect(error.statusCode).to.eql(401)
 
-      expect(response.statusCode).to.eql(401)
-      expect(response.result.error.code).to.eql('UnauthorizedError')
+      // NOTE: Additional tests for execute helpers to get code coverage.
+      try {
+        await executeRequest('CreateProfile', {}, {})
+        throw new Error('Expected error was not thrown')
+      } catch (error) {
+        expect(error.message).to.include('RequestError for "CreateProfile"')
+      }
+
+      try {
+        await expectError('CreateProfile', {}, {}, 'AccessDeniedError')
+        throw new Error('Expected error was not thrown')
+      } catch (error) {
+        expect(error.message).to.include('Unexpected error code received')
+      }
     })
 
     it('returns "UnauthorizedError / 401" if invalid authorization header', async () => {
       const cookie   = 'authorization=INVALID_TOKEN; path=/; HttpOnly'
-      const response = await exec('CreateProfile', {}, { cookie })
+      const error = await expectError('CreateProfile', {}, { cookie }, 'UnauthorizedError')
 
-      expect(response.statusCode).to.eql(401)
-      expect(response.result.error.code).to.eql('UnauthorizedError')
+      expect(error.statusCode).to.eql(401)
     })
 
     it('returns "UnauthorizedError / 401" if token expired', async () => {
       const authorization = test.createAccessToken({ expiresIn: '1 second' })
       await test.wait(1200)
 
-      const response = await exec('CreateProfile', {}, { authorization })
+      const error = await expectError('CreateProfile', {}, { authorization }, 'UnauthorizedError')
 
-      expect(response.statusCode).to.eql(401)
-      expect(response.result.error.code).to.eql('UnauthorizedError')
+      expect(error.statusCode).to.eql(401)
     })
 
     it('returns "AccessDeniedError / 403" if operation access denied', async () => {
       const authorization = test.createAccessToken({}, { group: 'Clients' })
+      const error = await expectError('CreateProfile', {}, { authorization }, 'AccessDeniedError')
 
-      const response = await exec('CreateProfile', {}, { authorization })
-
-      expect(response.statusCode).to.eql(403)
-      expect(response.result.error.code).to.eql('AccessDeniedError')
+      expect(error.statusCode).to.eql(403)
     })
 
     it('returns "InvalidInputError / 400" if invalid input', async () => {
-      const response = await exec('CreateProfile', {}, { authorization })
+      const error = await expectError('CreateProfile', {}, { authorization }, 'InvalidInputError')
 
-      expect(response.statusCode).to.eql(400)
-      expect(response.result.error.code).to.eql('InvalidInputError')
+      expect(error.statusCode).to.eql(400)
     })
 
     it('returns "InvalidParametersError / 400" if invalid parameters', async () => {
@@ -143,17 +151,16 @@ describe('Service', () => {
 
       const modules  = [ InvalidIndexProfiles ]
       const service  = new Service(modules)
-      const response = await test.execute(service)('InvalidIndexProfiles')
+      const { expectError: customExpectError } = test.execute(service)
+      const error = await customExpectError('InvalidIndexProfiles', {}, {}, 'InvalidParametersError')
 
-      expect(response.statusCode).to.eql(400)
-      expect(response.result.error.code).to.eql('InvalidParametersError')
+      expect(error.statusCode).to.eql(400)
     })
 
     it('returns "OperationNotFoundError / 404" if operation not found', async () => {
-      const response = await exec('DestroyProfile', {}, { authorization })
+      const error = await expectError('DestroyProfile', {}, { authorization }, 'OperationNotFoundError')
 
-      expect(response.statusCode).to.eql(404)
-      expect(response.result.error.code).to.eql('OperationNotFoundError')
+      expect(error.statusCode).to.eql(404)
     })
 
     it('returns "UnprocessibleConditionError / 422" if unprocessible condition', async () => {
@@ -165,10 +172,10 @@ describe('Service', () => {
 
       const modules  = [ InvalidIndexProfiles ]
       const service  = new Service(modules)
-      const response = await test.execute(service)('InvalidIndexProfiles')
+      const { expectError: customExpectError } = test.execute(service)
+      const error = await customExpectError('InvalidIndexProfiles', {}, {}, 'UnprocessibleConditionError')
 
-      expect(response.statusCode).to.eql(422)
-      expect(response.result.error.code).to.eql('UnprocessibleConditionError')
+      expect(error.statusCode).to.eql(422)
     })
 
     it('returns "InvalidOutputError / 500" if invalid output, logs an error', async () => {
@@ -179,10 +186,10 @@ describe('Service', () => {
       }
       const modules  = [ InvalidIndexProfiles ]
       const service  = new Service(modules)
-      const response = await test.execute(service)('InvalidIndexProfiles')
+      const { expectError: customExpectError } = test.execute(service)
+      const error = await customExpectError('InvalidIndexProfiles', {}, {}, 'InvalidOutputError')
 
-      expect(response.statusCode).to.eql(500)
-      expect(response.result.error.code).to.eql('InvalidOutputError')
+      expect(error.statusCode).to.eql(500)
     })
 
     it('returns "OperationError / 500" if unexpected operation error, logs an error', async () => {
@@ -203,10 +210,10 @@ describe('Service', () => {
       }
       const modules  = [ InvalidIndexProfiles ]
       const service  = new Service(modules)
-      const response = await test.execute(service)('InvalidIndexProfiles')
+      const { expectError: customExpectError } = test.execute(service)
+      const error = await customExpectError('InvalidIndexProfiles', {}, {}, 'OperationError')
 
-      expect(response.statusCode).to.eql(500)
-      expect(response.result.error.code).to.eql('OperationError')
+      expect(error.statusCode).to.eql(500)
     })
 
     it('executes operations', async () => {
@@ -227,12 +234,21 @@ describe('Service', () => {
       expect(response.statusCode).to.eql(200)
       expect(response.result.data).to.include({ name: 'Test update!' })
 
-      response = await exec('UpdateProfile', {
+      const data = await executeRequest('UpdateProfile', {
         id, mutation: { name: 'System operation request!' }
       }, {})
 
-      expect(response.statusCode).to.eql(200)
-      expect(response.result.data).to.include({ name: 'System operation request!' })
+      expect(data).to.include({ name: 'System operation request!' })
+
+      // NOTE: Additional tests for execute helpers to get code coverage.
+      try {
+        await expectError('UpdateProfile', {
+          id, mutation: { name: 'System operation request!' }
+        }, {}, 'AccessDeniedError')
+        throw new Error('Expected error was not thrown')
+      } catch (error) {
+        expect(error.message).to.include('Success NOT expected for')
+      }
 
       response = await exec('IndexProfiles')
       expect(response.statusCode).to.eql(200)
@@ -241,6 +257,12 @@ describe('Service', () => {
       response = await exec('DeleteProfile', { id })
       expect(response.statusCode).to.eql(204)
       expect(response.result).to.not.exist
+
+      await executeRequest('CreateProfile', {
+        mutation: { id, name: 'Hello, world!' }
+      }, { authorization })
+
+      await executeRequest('DeleteProfile', { id })
     })
 
     it('executes operation via HTTP request', async () => {

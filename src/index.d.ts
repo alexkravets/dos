@@ -255,17 +255,28 @@ export declare function wait(ms: number): Promise<void>;
 
 export type Data = Record<string, unknown>[] | Record<string, unknown>;
 
+export type OperationError = {
+  code: string;
+  message: string;
+  statusCode: string;
+};
+
 interface ExecutionResult {
-  error?: {
-    code: string,
-    message: string,
-  }
+  error?: OperationError,
   data?: Data,
 }
 
-export declare function execute(service: Service):
-  (
-    operationId: string,
-    parameters: OperationParameters,
-    headers: Headers
-  ) => { statusCode: number, result: ExecutionResult };
+export declare function execute(service: Service, extraContext?: Record<string, unknown>):
+  {
+    request: (
+      operationId: string,
+      parameters: OperationParameters,
+      headers: Headers
+    ) => Promise<Data>;
+    expectError: (
+      operationId: string,
+      parameters: OperationParameters,
+      headers: Headers,
+      errorName: string
+    ) => Promise<OperationError>;
+  }
