@@ -246,7 +246,7 @@ class Document extends Component {
 
     this._extendWithPartition(context, query)
 
-    await this._delete(query)
+    await this._delete(query, context)
 
     if (this.afterDelete) {
       await this.afterDelete(context, query, originalDocument)
