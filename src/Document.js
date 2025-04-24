@@ -154,6 +154,8 @@ class Document extends Component {
   }
 
   static async index(context, query = {}, options = {}) {
+    this._extendWithPartition(context, query)
+
     let { items, ...rest } = await this._index(query, options)
 
     const objects = items.map(item => new this(context, item))
@@ -174,6 +176,8 @@ class Document extends Component {
   }
 
   static async indexAll(context, query = {}, options = {}) {
+    this._extendWithPartition(context, query)
+
     let { items, ...rest } = await this._indexAll(query, options)
 
     const objects = items.map(item => new this(context, item))
