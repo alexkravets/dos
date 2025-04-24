@@ -207,11 +207,13 @@ class Document extends Component {
 
     /* NOTE: ensure that document to be updated exists and save it in the
              context so can be referenced in the after action helper */
-    if (!originalDocument) {
-      originalDocument = await this.read(context, query)
-    }
+    if (originalDocument) {
+      this._extendWithPartition(context, query)
 
-    this._extendWithPartition(context, query)
+    } else {
+      originalDocument = await this.read(context, query)
+
+    }
 
     const updatedItem = await this._update(query, mutation)
 
@@ -247,8 +249,11 @@ class Document extends Component {
     /* NOTE: ensure that document to be removed exists and save it in the
              context so can be referenced in the after action helper */
     const originalDocument = await this.read(context, query)
+    const hasQueryPartition = !!query.partition
 
-    this._extendWithPartition(context, query)
+    if (!hasQueryPartition) {
+      this._extendWithPartition(context, query)
+    }
 
     await this._delete(query, context)
 
