@@ -40,6 +40,8 @@ export declare class Document<T> {
   static _create(attributes: AttributesMap): Promise<Boolean>;
   static _update(query: QueryMap, mutation: UpdateMutationMap): Promise<AttributesMap>;
 
+  static createId(attributes: AttributesMap): string;
+
   static getPartition(
     context: Context,
     parameters: Record<string, any>
