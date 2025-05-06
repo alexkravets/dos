@@ -166,13 +166,14 @@ export declare class JwtAuthorization {
     cookieName?: string;
     normalizePayload?: Function;
     tokenVerificationMethod?: Function;
-    accessVerificationMethod?: Function;
+    accessVerificationMethod?: (context: Context, payload: Record<string, unknown>) => [boolean, string?];
   }): Record<string, any>
 };
 
 export declare class SystemAuthorization {
   static createRequirement(options?: {
     name?: string;
+    accessVerificationMethod?: (context: Context) => [boolean, string?];
   }): Record<string, any>
 };
 

@@ -3,10 +3,24 @@
 const { get } = require('lodash')
 const AccessDeniedError = require('../errors/AccessDeniedError')
 
+const SYSTEM_NAME = 'System'
+
+const verifySystemAccess = (context) => {
+  const { headers } = context
+  const isExternalRequest = Object.keys(headers).length > 0
+
+  if (!isExternalRequest) {
+    return [ true ]
+  }
+
+  return [ false ]
+}
+
 class SystemAuthorization {
   static createRequirement(options = {}) {
     const name = get(options, 'name', 'authorization')
-    const requirementName = 'System'
+
+    const requirementName = SYSTEM_NAME
 
     return {
       [requirementName]: {
@@ -20,7 +34,8 @@ class SystemAuthorization {
           type: 'apiKey',
           name
         },
-        klass: this
+        klass: this,
+        ...options
       }
     }
   }
@@ -35,12 +50,17 @@ class SystemAuthorization {
     }
   }
 
-  async verify(context) {
-    const { headers } = context
-    const isExternalRequest = Object.keys(headers).length > 0
+  constructor({
+    accessVerificationMethod = verifySystemAccess,
+  }) {
+    this._verifyAccess = accessVerificationMethod
+  }
 
-    if (isExternalRequest) {
-      const error = new AccessDeniedError()
+  async verify(context) {
+    const [ isAccessOk, accessErrorMessage ] = await this._verifyAccess(context)
+
+    if (!isAccessOk) {
+      const error = new AccessDeniedError(accessErrorMessage)
       return { isAuthorized: false, error }
     }
 
