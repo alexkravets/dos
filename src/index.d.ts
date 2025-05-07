@@ -283,3 +283,33 @@ export declare function execute(service: Service, extraContext?: Record<string, 
       errorName: string
     ) => Promise<OperationError>;
   }
+
+export declare class CommonError extends Error {
+  constructor(code: string, message: string);
+  get code(): string;
+  get isCommonError(): boolean;
+};
+
+export declare class UnauthorizedError extends CommonError {
+  constructor(message: string);
+};
+
+export declare class AccessDeniedError extends CommonError {
+  constructor(message: string);
+};
+
+export declare class InvalidParametersError extends CommonError {
+  constructor(message: string)
+};
+
+export declare class UnprocessibleConditionError extends CommonError {
+  constructor(message: string)
+};
+
+export declare class DocumentExistsError extends CommonError {
+  constructor(Document: { name: string }, parameters: Record<string, unknown>);
+};
+
+export declare class DocumentNotFoundError extends CommonError {
+  constructor(Document: { name: string }, parameters: Record<string, unknown>);
+};

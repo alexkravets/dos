@@ -12,10 +12,11 @@ const IndexProfiles = require('examples/IndexProfiles')
 
 const test = require('src/test')
 const {
-  errors,
   Create,
   Service,
   Component,
+  InvalidParametersError,
+  UnprocessibleConditionError,
 } = require('src')
 
 const testSchema = new Schema({
@@ -145,7 +146,7 @@ describe('Service', () => {
     it('returns "InvalidParametersError / 400" if invalid parameters', async () => {
       class InvalidIndexProfiles extends IndexProfiles {
         action() {
-          throw new errors.InvalidParametersError()
+          throw new InvalidParametersError()
         }
       }
 
@@ -166,7 +167,7 @@ describe('Service', () => {
     it('returns "UnprocessibleConditionError / 422" if unprocessible condition', async () => {
       class InvalidIndexProfiles extends IndexProfiles {
         action() {
-          throw new errors.UnprocessibleConditionError()
+          throw new UnprocessibleConditionError()
         }
       }
 
