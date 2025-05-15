@@ -14,6 +14,7 @@ module.exports = {
   Component:                   require('./Component'),
   handler:                     require('./helpers/handler'),
   getOrFail:                   require('./helpers/getOrFail'),
+  authorize:                   require('./helpers/authorize'),
   security:                    require('./security'),
   verifyToken:                 require('./security/verifyToken'),
   JwtAuthorization:            require('./security/JwtAuthorization'),

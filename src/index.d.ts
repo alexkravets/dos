@@ -313,3 +313,10 @@ export declare class DocumentExistsError extends CommonError {
 export declare class DocumentNotFoundError extends CommonError {
   constructor(Document: { name: string }, parameters: Record<string, unknown>);
 };
+
+interface Identity {
+  sub: string;
+  email: string;
+}
+
+export declare function authorize(Operation, Context): Promise<Identity>;
