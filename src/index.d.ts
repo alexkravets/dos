@@ -222,13 +222,27 @@ interface ISpec {
   paths: Record<string, unknown>;
 }
 
-interface IRequest {
+interface HttpRequest {
   url: string;
+  path?: string;
   body?: string | Record<string, unknown>;
   method: string;
-  headers: Headers;
-  operationId?: string;
-};
+  headers?: Headers;
+  requestContext?: {
+    requestId?: string;
+  };
+}
+
+interface SystemRequest {
+  body?: string | Record<string, unknown>;
+  operationId: string;
+  queryStringParameters?: Record<string, unknown>;
+  requestContext?: {
+    requestId?: string;
+  };
+}
+
+type IRequest = HttpRequest | SystemRequest;
 
 interface IResponse {
   body?: string,
