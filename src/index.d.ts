@@ -334,3 +334,5 @@ interface Identity {
 }
 
 export declare function authorize(Operation, Context): Promise<Identity>;
+
+export declare function maskSecrets(object: Record<string, unknown>): Record<string, unknown>;
