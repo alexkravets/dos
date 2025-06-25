@@ -13,20 +13,21 @@ const OPERATION_CONTEXT_FIELDS = [
 ]
 
 const logError = (context, errorResponse, originalError) => {
-  const secureContext = maskSecrets(pick(context, OPERATION_CONTEXT_FIELDS))
-  errorResponse.contextJson = JSON.stringify(secureContext, null, 2)
+  const { logger } = context
 
-  const log = [ 'OperationError', errorResponse ]
+  errorResponse.context = maskSecrets(pick(context, OPERATION_CONTEXT_FIELDS))
+
+  let unexpectedErrorMessage = ''
 
   if (originalError.toJSON) {
-    errorResponse.originalErrorJson = JSON.stringify(originalError, null, 2)
+    errorResponse.originalError = originalError
 
   } else {
-    log.push(originalError)
-
+    unexpectedErrorMessage = `, Unexpected ${originalError.stack}`
   }
 
-  console.error(...log)
+  const errorResponseJson = JSON.stringify(errorResponse, null, 2)
+  logger.error(`OperationError ${errorResponseJson}${unexpectedErrorMessage}`)
 }
 
 module.exports = logError
