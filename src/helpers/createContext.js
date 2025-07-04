@@ -65,6 +65,18 @@ const createContext = (service, request, extraContext = {}) => {
     context.query = queryStringParameters
   }
 
+  const queryKeys = Object.keys(context.query)
+
+  for (const queryKey of queryKeys) {
+    const value = context.query[queryKey]
+
+    const isJsonArray = `${value}`.startsWith('["')
+
+    if (isJsonArray) {
+      context.query[queryKey] = JSON.parse(value)
+    }
+  }
+
   if (body) {
     const isJSON = isString(body)
 

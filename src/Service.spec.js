@@ -291,7 +291,7 @@ describe('Service', () => {
       expect(response.statusCode).to.eql(201)
 
       request = {
-        url:    'http://localhost:3000/api/UpdateProfile?id=HELLO_WORLD',
+        url:    'http://localhost:3000/api/UpdateProfile?id=HELLO_WORLD&tags=["tag1","tag2"]',
         body:    JSON.stringify({ name: 'HTTP test!' }),
         method:  'PATCH',
         headers: { authorization }
