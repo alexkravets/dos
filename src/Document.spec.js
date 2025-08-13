@@ -58,14 +58,14 @@ describe('Document', () => {
       expect(profile.attributes.name).to.eql('Olga')
     })
 
-    it('creates document without identity in context', async () => {
+    it('creates document without identity in context as SYSTEM', async () => {
       const context = { validator }
       const profile = await Profile.create(context, { name: 'Oleg' })
 
       expect(profile.id).to.exist
       expect(profile.attributes.name).to.eql('Oleg')
       expect(profile.attributes.createdAt).to.exist
-      expect(profile.attributes.createdBy).to.not.exist
+      expect(profile.attributes.createdBy).to.eql('SYSTEM')
     })
 
     it('returns exiting document from the context', async () => {
@@ -115,14 +115,14 @@ describe('Document', () => {
       expect(profile.attributes.updatedBy).to.exist
     })
 
-    it('updates document without identity in context', async () => {
+    it('updates document without identity in context as SYSTEM', async () => {
       const context = { validator }
       const { id } = await Profile.create(context, { name: 'Gustav' })
 
       const profile = await Profile.update(context, { id }, { name: 'Jack' })
 
       expect(profile.attributes.updatedAt).to.exist
-      expect(profile.attributes.updatedBy).to.not.exist
+      expect(profile.attributes.updatedBy).to.eql('SYSTEM')
     })
 
     it('throws "DocumentNotFoundError" if document not found', async () => {

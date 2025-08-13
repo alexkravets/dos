@@ -9,6 +9,8 @@ const DocumentNotFoundError = require('./errors/DocumentNotFoundError')
 const { get, omit, capitalize, cloneDeep } = require('lodash')
 
 const STORE = {}
+const SYSTEM = 'SYSTEM'
+const IDENTITY_SUBJECT_PATH = 'identity.sub'
 
 class Document extends Component {
   static get idKey() {
@@ -88,12 +90,7 @@ class Document extends Component {
 
     const { validator } = context
     mutation = validator.normalize(mutation, this.id)
-
-    const identitySubjectId = get(context, 'identity.sub')
-
-    if (identitySubjectId) {
-      mutation.createdBy = identitySubjectId
-    }
+    mutation.createdBy = get(context, IDENTITY_SUBJECT_PATH, SYSTEM)
 
     const timestamp = new Date().toJSON()
     mutation.createdAt = timestamp
@@ -191,12 +188,7 @@ class Document extends Component {
 
   static async update(context, query, mutation, originalDocument = null) {
     mutation = omit(mutation, [ this.idKey, 'createdAt', 'createdBy' ])
-
-    const identitySubjectId = get(context, 'identity.sub')
-
-    if (identitySubjectId) {
-      mutation.updatedBy = identitySubjectId
-    }
+    mutation.updatedBy = get(context, IDENTITY_SUBJECT_PATH, SYSTEM)
 
     const timestamp = new Date().toJSON()
     mutation.updatedAt = timestamp

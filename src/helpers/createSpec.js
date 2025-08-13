@@ -80,7 +80,11 @@ const createSpec = (operations, schemasMap, url) => {
 
     for (const name in query) {
       const queryParameter = { in: 'query', name, type: 'string', ...query[name] }
-      delete queryParameter.example
+
+      if (queryParameter.example) {
+        queryParameter['x-example'] = queryParameter.example
+        delete queryParameter.example
+      }
 
       parameters.push(queryParameter)
     }
