@@ -35,10 +35,10 @@ class Document extends Component {
     return this._schema
   }
 
-  static set schema(schema) {
+  static get _defaultSchemaProperties() {
     const documentTitle = getComponentTitle(this, false)
 
-    this._schema = schema.extend({
+    return {
       id: {
         description: capitalize(documentTitle) + ' ID',
         required:    true
@@ -58,8 +58,11 @@ class Document extends Component {
       updatedBy: {
         description: `ID of a user who updated ${documentTitle}`
       }
-    }, this.id)
+    }
+  }
 
+  static set schema(schema) {
+    this._schema = schema.extend(this._defaultSchemaProperties, this.id)
     this._bodySchema = schema
   }
 
@@ -69,6 +72,13 @@ class Document extends Component {
     }
 
     parameters.partition = this.getPartition(context, parameters)
+  }
+
+  static _extendWithCreateStamps(mutation) {
+    const timestamp = new Date().toJSON()
+    mutation.createdAt = timestamp
+    mutation.updatedAt = timestamp
+    mutation.createdBy = get(context, IDENTITY_SUBJECT_PATH, SYSTEM)
   }
 
   static async create(context, query, mutation) {
@@ -90,11 +100,8 @@ class Document extends Component {
 
     const { validator } = context
     mutation = validator.normalize(mutation, this.id)
-    mutation.createdBy = get(context, IDENTITY_SUBJECT_PATH, SYSTEM)
 
-    const timestamp = new Date().toJSON()
-    mutation.createdAt = timestamp
-    mutation.updatedAt = timestamp
+    this._extendWithCreateStamps(mutation)
 
     if (this.beforeCreate) {
       await this.beforeCreate(context, query, mutation)
@@ -186,12 +193,16 @@ class Document extends Component {
     return this._index(query)
   }
 
-  static async update(context, query, mutation, originalDocument = null) {
-    mutation = omit(mutation, [ this.idKey, 'createdAt', 'createdBy' ])
-    mutation.updatedBy = get(context, IDENTITY_SUBJECT_PATH, SYSTEM)
-
+  static _extendWithUpdateStamps(mutation) {
     const timestamp = new Date().toJSON()
     mutation.updatedAt = timestamp
+    mutation.updatedBy = get(context, IDENTITY_SUBJECT_PATH, SYSTEM)
+  }
+
+  static async update(context, query, mutation, originalDocument = null) {
+    mutation = omit(mutation, [ this.idKey, 'createdAt', 'createdBy' ])
+
+    this._extendWithUpdateStamps(mutation)
 
     if (this.beforeUpdate) {
       await this.beforeUpdate(context, query, mutation)
