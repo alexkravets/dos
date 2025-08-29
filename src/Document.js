@@ -74,7 +74,7 @@ class Document extends Component {
     parameters.partition = this.getPartition(context, parameters)
   }
 
-  static _extendWithCreateStamps(mutation) {
+  static _extendWithCreateStamps(context, mutation) {
     const timestamp = new Date().toJSON()
     mutation.createdAt = timestamp
     mutation.updatedAt = timestamp
@@ -101,7 +101,7 @@ class Document extends Component {
     const { validator } = context
     mutation = validator.normalize(mutation, this.id)
 
-    this._extendWithCreateStamps(mutation)
+    this._extendWithCreateStamps(context, mutation)
 
     if (this.beforeCreate) {
       await this.beforeCreate(context, query, mutation)
@@ -193,7 +193,7 @@ class Document extends Component {
     return this._index(query)
   }
 
-  static _extendWithUpdateStamps(mutation) {
+  static _extendWithUpdateStamps(context, mutation) {
     const timestamp = new Date().toJSON()
     mutation.updatedAt = timestamp
     mutation.updatedBy = get(context, IDENTITY_SUBJECT_PATH, SYSTEM)
@@ -202,7 +202,7 @@ class Document extends Component {
   static async update(context, query, mutation, originalDocument = null) {
     mutation = omit(mutation, [ this.idKey, 'createdAt', 'createdBy' ])
 
-    this._extendWithUpdateStamps(mutation)
+    this._extendWithUpdateStamps(context, mutation)
 
     if (this.beforeUpdate) {
       await this.beforeUpdate(context, query, mutation)
