@@ -1,12 +1,13 @@
 'use strict'
 
-const { ulid }              = require('ulid')
+const { ulid } = require('ulid')
+const { get, omit, cloneDeep } = require('lodash')
+
 const Component             = require('./Component')
 const getIdPrefix           = require('./helpers/getIdPrefix')
-const getComponentTitle     = require('./helpers/getComponentTitle')
 const DocumentExistsError   = require('./errors/DocumentExistsError')
 const DocumentNotFoundError = require('./errors/DocumentNotFoundError')
-const { get, omit, capitalize, cloneDeep } = require('lodash')
+const getDefaultSchemaAttributes = require('./helpers/getDefaultSchemaAttributes')
 
 const STORE = {}
 const SYSTEM = 'SYSTEM'
@@ -35,34 +36,12 @@ class Document extends Component {
     return this._schema
   }
 
-  static get _defaultSchemaProperties() {
-    const documentTitle = getComponentTitle(this, false)
-
-    return {
-      id: {
-        description: capitalize(documentTitle) + ' ID',
-        required:    true
-      },
-      createdAt: {
-        description: `Date and time when ${documentTitle} was created`,
-        format:      'date-time',
-        required:    true
-      },
-      updatedAt: {
-        description: `Date and time when ${documentTitle} was updated`,
-        format:      'date-time'
-      },
-      createdBy: {
-        description: `ID of a user who created ${documentTitle}`
-      },
-      updatedBy: {
-        description: `ID of a user who updated ${documentTitle}`
-      }
-    }
+  static get _defaultSchemaAttributes() {
+    return getDefaultSchemaAttributes(this)
   }
 
   static set schema(schema) {
-    this._schema = schema.extend(this._defaultSchemaProperties, this.id)
+    this._schema = schema.extend(this._defaultSchemaAttributes, this.id)
     this._bodySchema = schema
   }
 
@@ -74,10 +53,9 @@ class Document extends Component {
     parameters.partition = this.getPartition(context, parameters)
   }
 
-  static _extendWithCreateStamps(context, mutation) {
+  static _extendWithCreatedStamps(context, mutation) {
     const timestamp = new Date().toJSON()
     mutation.createdAt = timestamp
-    mutation.updatedAt = timestamp
     mutation.createdBy = get(context, IDENTITY_SUBJECT_PATH, SYSTEM)
   }
 
@@ -101,7 +79,7 @@ class Document extends Component {
     const { validator } = context
     mutation = validator.normalize(mutation, this.id)
 
-    this._extendWithCreateStamps(context, mutation)
+    this._extendWithCreatedStamps(context, mutation)
 
     if (this.beforeCreate) {
       await this.beforeCreate(context, query, mutation)
@@ -193,7 +171,7 @@ class Document extends Component {
     return this._index(query)
   }
 
-  static _extendWithUpdateStamps(context, mutation) {
+  static _extendWithUpdatedStamps(context, mutation) {
     const timestamp = new Date().toJSON()
     mutation.updatedAt = timestamp
     mutation.updatedBy = get(context, IDENTITY_SUBJECT_PATH, SYSTEM)
@@ -202,7 +180,7 @@ class Document extends Component {
   static async update(context, query, mutation, originalDocument = null) {
     mutation = omit(mutation, [ this.idKey, 'createdAt', 'createdBy' ])
 
-    this._extendWithUpdateStamps(context, mutation)
+    this._extendWithUpdatedStamps(context, mutation)
 
     if (this.beforeUpdate) {
       await this.beforeUpdate(context, query, mutation)
@@ -253,7 +231,7 @@ class Document extends Component {
 
     this._extendWithPartition(context, query)
 
-    await this._delete(query, context)
+    await this._delete(context, query)
 
     if (this.afterDelete) {
       await this.afterDelete(context, query, originalDocument)
@@ -262,7 +240,7 @@ class Document extends Component {
     return originalDocument
   }
 
-  static _delete({ id }) {
+  static _delete(context, { id }) {
     const item = STORE[this.name][id]
 
     /* istanbul ignore next: not used anymore by delete interface as read

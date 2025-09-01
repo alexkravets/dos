@@ -16,6 +16,8 @@ module.exports = {
   getOrFail:                   require('./helpers/getOrFail'),
   authorize:                   require('./helpers/authorize'),
   maskSecrets:                 require('./helpers/maskSecrets'),
+  getComponentTitle:           require('./helpers/getComponentTitle'),
+  getDefaultSchemaAttributes:  require('./helpers/getDefaultSchemaAttributes'),
   security:                    require('./security'),
   verifyToken:                 require('./security/verifyToken'),
   JwtAuthorization:            require('./security/JwtAuthorization'),

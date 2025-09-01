@@ -36,8 +36,12 @@ export declare class Document<T> {
   static set schema(schema: Schema);
   static get schema(): Schema;
 
+  static get _defaultSchemaAttributes(): SchemaAttributes;
+
   static _read(query: QueryMap): Promise<AttributesMap>;
+  static _extendWithCreatedStamps(context: Context, mutation: CreateMutationMap): void;
   static _create(attributes: AttributesMap): Promise<Boolean>;
+  static _extendWithUpdatedStamps(context: Context, mutation: UpdateMutationMap): void;
   static _update(query: QueryMap, mutation: UpdateMutationMap): Promise<AttributesMap>;
 
   static createId(attributes: AttributesMap): string;
@@ -336,3 +340,7 @@ interface Identity {
 export declare function authorize(Operation, Context): Promise<Identity>;
 
 export declare function maskSecrets(object: Record<string, unknown>): Record<string, unknown>;
+
+export declare function getComponentTitle(Component, isCapitalized?: boolean, isPlural?: boolean): string;
+
+export declare function getDefaultSchemaAttributes(Component): SchemaAttributes;
