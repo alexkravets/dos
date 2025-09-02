@@ -104,36 +104,37 @@ export declare class Document<T> {
     mutation: CreateMutationMap
   ): Promise<void>;
 
-  static afterCreate<T, D extends Document<T> = Document<T>>(
-    context: Context,
-    query: QueryMap,
-    mutation: CreateMutationMap,
-    originalDocument: D
-  ): Promise<void>;
-
   static beforeUpdate(
     context: Context,
     query: QueryMap,
     mutation: UpdateMutationMap,
   ): Promise<void>;
 
-  static afterUpdate<T, D extends Document<T> = Document<T>>(
-    context: Context,
-    query: QueryMap,
-    mutation: UpdateMutationMap,
-    originalDocument: D
-  ): Promise<void>;
+  // static beforeDelete<T, D extends Document<T> = Document<T>>(
+  //   context: Context,
+  //   query: QueryMap,
+  //   originalDocument: D
+  // ): Promise<void>;
 
-  static beforeDelete(
-    context: Context,
-    query: QueryMap,
-  ): Promise<void>;
+  // static afterCreate<T, D extends Document<T> = Document<T>>(
+  //   context: Context,
+  //   query: QueryMap,
+  //   mutation: CreateMutationMap,
+  //   originalDocument: D
+  // ): Promise<void>;
 
-  static afterDelete<T, D extends Document<T> = Document<T>>(
-    context: Context,
-    query: QueryMap,
-    originalDocument: D
-  ): Promise<void>;
+  // static afterUpdate<T, D extends Document<T> = Document<T>>(
+  //   context: Context,
+  //   query: QueryMap,
+  //   mutation: UpdateMutationMap,
+  //   originalDocument: D
+  // ): Promise<void>;
+
+  // static afterDelete<T, D extends Document<T> = Document<T>>(
+  //   context: Context,
+  //   query: QueryMap,
+  //   originalDocument: D
+  // ): Promise<void>;
 
   get id(): string;
   get context(): Context;
@@ -172,14 +173,14 @@ export declare class JwtAuthorization {
     tokenVerificationMethod?: Function;
     accessVerificationMethod?: (context: Context, payload: Record<string, unknown>) => [boolean, string?];
   }): Record<string, any>
-};
+}
 
 export declare class SystemAuthorization {
   static createRequirement(options?: {
     name?: string;
     accessVerificationMethod?: (context: Context) => [boolean, string?];
   }): Record<string, any>
-};
+}
 
 export type ComponentConstructor = new (...args: any[]) => any;
 type OperationConstructor = new (...args: any[]) => any;
@@ -306,31 +307,31 @@ export declare class CommonError extends Error {
   constructor(code: string, message: string);
   get code(): string;
   get isCommonError(): boolean;
-};
+}
 
 export declare class UnauthorizedError extends CommonError {
   constructor(message: string);
-};
+}
 
 export declare class AccessDeniedError extends CommonError {
   constructor(message: string);
-};
+}
 
 export declare class InvalidParametersError extends CommonError {
   constructor(message: string)
-};
+}
 
 export declare class UnprocessibleConditionError extends CommonError {
   constructor(message: string)
-};
+}
 
 export declare class DocumentExistsError extends CommonError {
   constructor(Document: { name: string }, parameters: Record<string, unknown>);
-};
+}
 
 export declare class DocumentNotFoundError extends CommonError {
   constructor(Document: { name: string }, parameters: Record<string, unknown>);
-};
+}
 
 interface Identity {
   sub: string;

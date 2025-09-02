@@ -221,13 +221,13 @@ class Document extends Component {
   }
 
   static async delete(context, query) {
-    if (this.beforeDelete) {
-      await this.beforeDelete(context, query)
-    }
-
     /* NOTE: ensure that document to be removed exists and save it in the
              context so can be referenced in the after action helper */
     const originalDocument = await this.read(context, query)
+
+    if (this.beforeDelete) {
+      await this.beforeDelete(context, query, originalDocument)
+    }
 
     this._extendWithPartition(context, query)
 
