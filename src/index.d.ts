@@ -240,6 +240,7 @@ interface HttpRequest {
 
 interface SystemRequest {
   body?: string | Record<string, unknown>;
+  headers?: Headers;
   operationId: string;
   queryStringParameters?: Record<string, unknown>;
   requestContext?: {
