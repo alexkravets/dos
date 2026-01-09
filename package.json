@@ -1,6 +1,6 @@
 {
   "name": "@kravc/dos",
-  "version": "1.12.3",
+  "version": "1.12.4",
   "description": "Convention-based, easy-to-use library for building API-driven serverless services.",
   "keywords": [
     "Service",
