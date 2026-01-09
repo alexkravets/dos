@@ -2,6 +2,251 @@
 
 **DOS** (`D`document `O`peration `S`ervice) — convention-based, easy-to-use library for building API-driven serverless services. Inspired by **Ruby on Rails**.
 
+## Content
+
+- [Usage](#usage)
+  - [1. Define a Document](#1-define-a-document)
+  - [2. Create a Schema](#2-create-a-schema)
+  - [3. Create Operations](#3-create-operations)
+  - [4. Initialize the Service](#4-initialize-the-service)
+  - [5. Making Requests](#5-making-requests)
+  - [6. Accessing the OpenAPI Specification](#6-accessing-the-openapi-specification)
+- [Document](#document)
+  - [Component](#component)
+  - [Schema](#schema)
+  - [Attributes](#attributes)
+  - [Default Attributes](#default-attributes)
+  - [Methods](#methods)
+    - [Static Methods (Class-level operations)](#static-methods-class-level-operations)
+    - [Instance Methods](#instance-methods)
+    - [Lifecycle Hooks](#lifecycle-hooks)
+  - [Storage](#storage)
+- [Operation](#operation)
+  - [Base Operations](#base-operations)
+  - [Query Schema](#query-schema)
+  - [Mutation Schema](#mutation-schema)
+  - [Output Schema](#output-schema)
+  - [Before, Action, After](#before-action-after)
+  - [Errors](#errors)
+  - [Security](#security)
+  - [Default Pagination Interface](#default-pagination-interface)
+  - [Default Update Interface](#default-update-interface)
+  - [Activities](#activities)
+- [Service](#service)
+  - [Specification](#specification)
+  - [Parameters Validation](#parameters-validation)
+  - [Execution Context](#execution-context)
+  - [Identity](#identity)
+  - [Output Validation](#output-validation)
+  - [Errors](#errors-1)
+  - [HTTP](#http)
+  - [Kafka](#kafka)
+
+## Usage
+
+This section provides a complete example of building an API service with DOS. We'll create a Profile service with full CRUD operations.
+
+### 1. Define a Document
+
+First, create a Document class that represents your data model:
+
+```javascript
+// Profile.js
+const { Document } = require('@kravc/dos')
+
+class Profile extends Document {}
+
+module.exports = Profile
+```
+
+### 2. Create a Schema
+
+Define the schema for your document (typically in a YAML file):
+
+```yaml
+# Profile.yaml
+id:
+  required: true
+
+name:
+  type: string
+  required: true
+
+email:
+  type: string
+  format: email
+  required: true
+```
+
+### 3. Create Operations
+
+Define operations for each CRUD action:
+
+```javascript
+// CreateProfile.js
+const { Create } = require('@kravc/dos')
+const Profile = require('./Profile')
+const JwtAuthorization = require('@kravc/dos/security/JwtAuthorization')
+
+class CreateProfile extends Create(Profile) {
+  static get tags() {
+    return ['Profiles']
+  }
+
+  static get security() {
+    return [
+      JwtAuthorization.createRequirement({
+        publicKey: process.env.PUBLIC_KEY,
+        algorithm: 'RS256'
+      })
+    ]
+  }
+}
+
+module.exports = CreateProfile
+```
+
+```javascript
+// ReadProfile.js
+const { Read } = require('@kravc/dos')
+const Profile = require('./Profile')
+
+class ReadProfile extends Read(Profile) {
+  static get query() {
+    return {
+      id: {
+        description: 'Profile ID',
+        required: true,
+        example: 'Profile_01ARZ3NDEKTSV4RRFFQ69G5FAV'
+      }
+    }
+  }
+}
+
+module.exports = ReadProfile
+```
+
+```javascript
+// UpdateProfile.js
+const { Update } = require('@kravc/dos')
+const Profile = require('./Profile')
+
+class UpdateProfile extends Update(Profile) {}
+
+module.exports = UpdateProfile
+```
+
+```javascript
+// DeleteProfile.js
+const { Delete } = require('@kravc/dos')
+const Profile = require('./Profile')
+
+class DeleteProfile extends Delete(Profile) {}
+
+module.exports = DeleteProfile
+```
+
+```javascript
+// IndexProfiles.js
+const { Index } = require('@kravc/dos')
+const Profile = require('./Profile')
+
+class IndexProfiles extends Index(Profile) {}
+
+module.exports = IndexProfiles
+```
+
+### 4. Initialize the Service
+
+Create a Service instance that brings together all your operations:
+
+```javascript
+// index.js
+const { Service, handler } = require('@kravc/dos')
+const Profile = require('./Profile')
+const CreateProfile = require('./CreateProfile')
+const ReadProfile = require('./ReadProfile')
+const UpdateProfile = require('./UpdateProfile')
+const DeleteProfile = require('./DeleteProfile')
+const IndexProfiles = require('./IndexProfiles')
+
+const modules = [
+  Profile,
+  CreateProfile,
+  ReadProfile,
+  UpdateProfile,
+  DeleteProfile,
+  IndexProfiles
+]
+
+const service = new Service(modules, {
+  url: 'https://api.example.com/',
+  path: `${process.cwd()}/src`
+})
+
+// Export handler for serverless platforms
+exports.handler = handler(service)
+```
+
+### 5. Making Requests
+
+Once deployed, you can make HTTP requests to your service:
+
+**Create a Profile:**
+```bash
+POST /CreateProfile
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "mutation": {
+    "name": "John Doe",
+    "email": "john@example.com"
+  }
+}
+```
+
+**Read a Profile:**
+```bash
+GET /ReadProfile?id=Profile_01ARZ3NDEKTSV4RRFFQ69G5FAV
+Authorization: Bearer <token>
+```
+
+**Update a Profile:**
+```bash
+PATCH /UpdateProfile?id=Profile_01ARZ3NDEKTSV4RRFFQ69G5FAV
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "mutation": {
+    "name": "Jane Doe"
+  }
+}
+```
+
+**Delete a Profile:**
+```bash
+DELETE /DeleteProfile?id=Profile_01ARZ3NDEKTSV4RRFFQ69G5FAV
+Authorization: Bearer <token>
+```
+
+**List Profiles:**
+```bash
+GET /IndexProfiles?limit=20&sort=desc
+Authorization: Bearer <token>
+```
+
+### 6. Accessing the OpenAPI Specification
+
+The service automatically generates an OpenAPI 2.0 specification:
+
+```bash
+GET /Spec
+```
+
+This returns the complete API specification that can be used with Swagger UI or other OpenAPI tools.
+
 ## Document
 
 Document is the core class for modeling data entities. It extends Component and provides CRUD operations with automatic validation, timestamps, and identity tracking.
