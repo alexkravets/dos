@@ -180,6 +180,8 @@ export declare class JwtAuthorization {
 export declare class SystemAuthorization {
   static createRequirement(options?: {
     name?: string;
+    description?: string;
+    requirementName?: string;
     accessVerificationMethod?: (context: Context) => [boolean, string?];
   }): Record<string, any>
 }
