@@ -4,6 +4,11 @@ const { get } = require('lodash')
 const AccessDeniedError = require('../errors/AccessDeniedError')
 
 const SYSTEM_NAME = 'System'
+const DESCRIPTION = 'This security definition and a header for system' +
+  ' operations should be ignored. The verification method of system' +
+  ' operations relies on a gateway that adds headers for all' +
+  ' external requests. Request without headers considered to be' +
+  ' internal.'
 
 const verifySystemAccess = (context) => {
   const { headers } = context
@@ -20,19 +25,16 @@ class SystemAuthorization {
   static createRequirement(options = {}) {
     const name = get(options, 'name', 'authorization')
 
-    const requirementName = SYSTEM_NAME
+    const description = get(options, 'description', DESCRIPTION)
+    const requirementName = get(options, 'requirementName', SYSTEM_NAME)
 
     return {
       [requirementName]: {
         definition: {
-          description: 'This security definition and a header for system' +
-            ' operations should be ignored. The verification method of system' +
-            ' operations relies on a gateway that adds headers for all' +
-            ' external requests. Request without headers considered to be' +
-            ' internal.',
           in:   'header',
           type: 'apiKey',
-          name
+          name,
+          description,
         },
         klass: this,
         ...options

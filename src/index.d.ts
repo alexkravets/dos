@@ -169,6 +169,8 @@ export declare class JwtAuthorization {
     name?: string;
     algorithm?: string;
     cookieName?: string;
+    description?: string;
+    requirementName?: string;
     normalizePayload?: Function;
     tokenVerificationMethod?: Function;
     accessVerificationMethod?: (context: Context, payload: Record<string, unknown>) => [boolean, string?];

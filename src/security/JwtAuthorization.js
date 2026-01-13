@@ -17,15 +17,16 @@ class JwtAuthorization {
 
     const name       = get(options, 'name', 'authorization')
     const cookieName = get(options, 'cookieName', name)
-
-    const requirementName = capitalize(name)
+    const description = get(options, 'description')
+    const requirementName = get(options, 'requirementName', capitalize(name))
 
     return {
       [requirementName]: {
         definition: {
           in:   'header',
           type: 'apiKey',
-          name
+          name,
+          description,
         },
         klass: this,
         name,
