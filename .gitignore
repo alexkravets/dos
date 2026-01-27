@@ -1,5 +1,4 @@
-node_modules
-coverage
-.nyc_output
-.editorconfig
 .DS_Store
+dist
+coverage
+node_modules
