@@ -114,7 +114,7 @@ function withSafeAttributes<T>(targetInstance: T): T {
       }
 
       const className = get(targetInstance, 'name', 'NoNameClass');
-      const errorTemplate = `"$PATH" property of method is undefined for ${className}`;
+      const errorTemplate = `"$PATH" property or method is undefined for ${className}`;
 
       return got(target, prop, errorTemplate);
     }

@@ -21,20 +21,11 @@ class Component {
     this._validator = got(context, 'validator', `Validator is undefined for "${this.componentId}:${this.id}"`) as Validator;
     this._attributes = attributes;
 
-    if (!this._validator) {
-      throw new Error();
-    }
-
     return withSafeAttributes<Component>(this);
   }
 
   /** Returns component ID. */
   static get id(): string {
-    return this.name;
-  }
-
-  /** Returns component name. */
-  static get name(): string {
     return this.name;
   }
 
