@@ -1,7 +1,6 @@
-'use strict';
-
-const { get } = require('lodash');
-const AccessDeniedError = require('../errors/AccessDeniedError');
+import { get } from 'lodash';
+import { Context } from '../Context';
+import AccessDeniedError from '../errors/AccessDeniedError';
 
 const SYSTEM_NAME = 'System';
 const DESCRIPTION = 'This security definition and a header for system' +
@@ -10,20 +9,30 @@ const DESCRIPTION = 'This security definition and a header for system' +
   ' external requests. Request without headers considered to be' +
   ' internal.';
 
+const MESSAGE_ACCESS_DENIED = 'Access denied, operation is available only for internal requests';
+
 // eslint-disable-next-line jsdoc/require-jsdoc
-const verifySystemAccess = (context) => {
+const verifySystemAccess = (context: Context) => {
   const { headers } = context;
+
   const isExternalRequest = Object.keys(headers).length > 0;
 
   if (!isExternalRequest) {
     return [ true ];
   }
 
-  return [ false ];
+  return [ false, MESSAGE_ACCESS_DENIED ];
 };
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 class SystemAuthorization {
+  // eslint-disable-next-line jsdoc/require-jsdoc
+  constructor({
+    accessVerificationMethod = verifySystemAccess,
+  }) {
+    this._verifyAccess = accessVerificationMethod;
+  }
+
   // eslint-disable-next-line jsdoc/require-jsdoc
   static createRequirement(options = {}) {
     const name = get(options, 'name', 'authorization');
@@ -34,7 +43,7 @@ class SystemAuthorization {
     return {
       [requirementName]: {
         definition: {
-          in:   'header',
+          in: 'header',
           type: 'apiKey',
           name,
           description,
@@ -50,17 +59,9 @@ class SystemAuthorization {
     return {
       AccessDeniedError: {
         statusCode:  403,
-        description: 'Operation access denied, operation is available only' +
-          ' for internal requests'
+        description: MESSAGE_ACCESS_DENIED
       }
     };
-  }
-
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  constructor({
-    accessVerificationMethod = verifySystemAccess,
-  }) {
-    this._verifyAccess = accessVerificationMethod;
   }
 
   // eslint-disable-next-line jsdoc/require-jsdoc
@@ -76,4 +77,4 @@ class SystemAuthorization {
   }
 }
 
-module.exports = SystemAuthorization;
+export default SystemAuthorization;

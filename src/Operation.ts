@@ -1,56 +1,84 @@
-'use strict';
+import Component from './Component';
+import { Schema } from '@kravc/schema';
+import getOperationId from './helpers/getOperationId';
+import { type Context } from './Context';
+import getOperationTags from './helpers/getOperationTags';
+import withSafeAttributes from './helpers/withSafeAttributes';
+import getOperationSummary from './helpers/getOperationSummary';
+import { isEmpty, cloneDeep } from 'lodash';
 
-const { Schema } = require('@kravc/schema');
-const { isEmpty, cloneDeep } = require('lodash');
 
-const defaultId = require('./helpers/defaultId');
-const defaultTags = require('./helpers/defaultTags');
-const asSafeClass = require('./helpers/asSafeClass');
-const defaultSummary = require('./helpers/defaultSummary');
-
-// eslint-disable-next-line jsdoc/require-jsdoc
+/** Operation */
 class Operation {
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  private _context: Context;
+  private _headers: Record<string, unknown>;
+  private _multiValueHeaders: Record<string, unknown>;
+
+  /** Creates an instance of operation. */
+  constructor(context: Context) {
+    this._context = context;
+    this._headers = {};
+    this._multiValueHeaders = {};
+
+    return withSafeAttributes(this);
+  }
+
+  /** Returns supported operation types. */
   static get types() {
     return {
-      READ:   'read',
+      READ: 'read',
       CREATE: 'create',
       UPDATE: 'update',
       DELETE: 'delete'
     };
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  /** Returns default operation type. */
   static get type() {
     return Operation.types.READ;
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  /** Returns component class the operations is defined for. */
+  static get Component(): typeof Component {
+    throw new Error('Operation.Component must be overridden by a subclass');
+  }
+
+  /** Returns related component name. */
+  static get componentName() {
+    return this.Component!.name;
+  }
+
+  /** Returns component action name for the operation to execute. */
+  static get componentAction() {
+    return this.type;
+  }
+
+  /** Returns operation ID. */
   static get id() {
-    return defaultId(this);
+    return getOperationId(this.name, this.componentName, this.componentAction);
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  /** Returns operation tags. */
   static get tags() {
-    return defaultTags(this.Component);
+    return getOperationTags(this.componentName);
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  /** Returns operation summary. */
   static get summary() {
-    return defaultSummary(this.Component, this.componentAction);
+    return getOperationSummary(this.componentName, this.componentAction);
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  /** Returns operation description. */
   static get description() {
     return '';
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  /** Returns operation security requirements. */
   static get security() {
     return [];
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  /** Returns possible operation errors. */
   static get errors() {
     let errors = {};
 
@@ -64,13 +92,13 @@ class Operation {
 
     if (this.inputSchema) {
       errors.InvalidInputError = {
-        statusCode:  400,
+        statusCode: 400,
         description: 'Invalid operation input, make sure operation parameters' +
           ' do match specification'
       };
 
       errors.InvalidParametersError = {
-        statusCode:  400,
+        statusCode: 400,
         description: 'Invalid operation parameters, input syntax is correct,' +
           ' but input values are not processible'
       };
@@ -78,14 +106,14 @@ class Operation {
 
     if (this.outputSchema) {
       errors.InvalidOutputError = {
-        statusCode:  500,
+        statusCode: 500,
         description: 'Invalid output returned by the operation, this issue' +
           ' to be addressed by service developer'
       };
     }
 
     errors.UnprocessibleConditionError = {
-      statusCode:  422,
+      statusCode: 422,
       description: 'Operation failed to process the request cause of expected' +
         ' exit condition'
     };
@@ -169,16 +197,6 @@ class Operation {
   }
 
   // eslint-disable-next-line jsdoc/require-jsdoc
-  static get Component() {
-    return null;
-  }
-
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  static get componentAction() {
-    return this.type;
-  }
-
-  // eslint-disable-next-line jsdoc/require-jsdoc
   static get componentActionMethod() {
     const { Component, componentAction } = this;
 
@@ -195,16 +213,6 @@ class Operation {
     }
 
     return componentActionMethod.bind(Component);
-  }
-
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  constructor(context) {
-    this._context = context;
-
-    this._headers = {};
-    this._multiValueHeaders = {};
-
-    return asSafeClass(this);
   }
 
   // eslint-disable-next-line jsdoc/require-jsdoc

@@ -75,4 +75,6 @@ class Component {
   }
 }
 
+export type ComponentConstructor = new (context: Context, attributes: Attributes) => Component;
+
 export default Component;
