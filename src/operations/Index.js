@@ -1,42 +1,50 @@
-'use strict'
+'use strict';
 
-const { capitalize }    = require('lodash')
-const Operation         = require('../Operation')
-const getComponentTitle = require('../helpers/getComponentTitle')
+const { capitalize }    = require('lodash');
+const Operation         = require('../Operation');
+const getComponentTitle = require('../helpers/getComponentTitle');
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 const Index = (Component, componentAction = 'index') => {
   if (!Component) {
     throw new Error('Argument "Component" is undefined for "Index" operation' +
-      ' function')
+      ' function');
   }
 
+  // eslint-disable-next-line jsdoc/require-jsdoc
   return class extends Operation {
+    // eslint-disable-next-line jsdoc/require-jsdoc
     static get Component() {
-      return Component
+      return Component;
     }
 
+    // eslint-disable-next-line jsdoc/require-jsdoc
     static get summary() {
-      const { Component, componentAction } = this
-      const documentTitle = getComponentTitle(Component, false, true)
+      const { Component, componentAction } = this;
+      const documentTitle = getComponentTitle(Component, false, true);
 
-      return capitalize(`${componentAction} ${documentTitle}`)
+      return capitalize(`${componentAction} ${documentTitle}`);
     }
 
+    // eslint-disable-next-line jsdoc/require-jsdoc
     static get componentAction() {
-      return componentAction
+      return componentAction;
     }
 
+    // eslint-disable-next-line jsdoc/require-jsdoc
     static get defaultLimit() {
-      return 20
+      return 20;
     }
 
+    // eslint-disable-next-line jsdoc/require-jsdoc
     static get defaultSort() {
-      return 'desc'
+      return 'desc';
     }
 
+    // eslint-disable-next-line jsdoc/require-jsdoc
     static get query() {
-      const { Component, defaultSort, defaultLimit } = this
-      const documentTitle = getComponentTitle(Component, false, true)
+      const { Component, defaultSort, defaultLimit } = this;
+      const documentTitle = getComponentTitle(Component, false, true);
 
       return {
         limit: {
@@ -52,9 +60,10 @@ const Index = (Component, componentAction = 'index') => {
         exclusiveStartKey: {
           description: `Return ${documentTitle} starting from specific key`
         }
-      }
+      };
     }
 
+    // eslint-disable-next-line jsdoc/require-jsdoc
     static get output() {
       return {
         data: {
@@ -84,24 +93,25 @@ const Index = (Component, componentAction = 'index') => {
             }
           }
         }
-      }
+      };
     }
 
+    // eslint-disable-next-line jsdoc/require-jsdoc
     async action(parameters) {
-      const { exclusiveStartKey, limit, sort, index, ...query } = parameters
-      const options = { exclusiveStartKey, limit, sort, index }
+      const { exclusiveStartKey, limit, sort, index, ...query } = parameters;
+      const options = { exclusiveStartKey, limit, sort, index };
 
-      const { componentActionMethod } = this.constructor
-      const result = await componentActionMethod(this.context, query, options)
+      const { componentActionMethod } = this.constructor;
+      const result = await componentActionMethod(this.context, query, options);
 
-      const { objects: data, count, lastEvaluatedKey } = result
+      const { objects: data, count, lastEvaluatedKey } = result;
 
       return {
         pageInfo: { sort, count, limit, lastEvaluatedKey, exclusiveStartKey },
         data
-      }
+      };
     }
-  }
-}
+  };
+};
 
-module.exports = Index
+module.exports = Index;

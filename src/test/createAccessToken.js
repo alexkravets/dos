@@ -1,23 +1,24 @@
-'use strict'
+'use strict';
 
-const JWT = require('jsonwebtoken')
-const { privateKey: PRIVATE_KEY } = require('./keys')
+const JWT = require('jsonwebtoken');
+const { privateKey: PRIVATE_KEY } = require('./keys');
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 const createAccessToken = (options, attributes) => {
   const {
     algorithm = 'RS256',
     privateKey = PRIVATE_KEY,
     ...jwtOptions
-  } = options
+  } = options;
 
   const payload = {
     sub: 'USER_ID',
     ...attributes
-  }
+  };
 
-  const token = JWT.sign(payload, privateKey, { algorithm, ...jwtOptions })
+  const token = JWT.sign(payload, privateKey, { algorithm, ...jwtOptions });
 
-  return `Bearer ${token}`
-}
+  return `Bearer ${token}`;
+};
 
-module.exports = createAccessToken
+module.exports = createAccessToken;

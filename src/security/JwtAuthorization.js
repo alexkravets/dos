@@ -1,24 +1,26 @@
-'use strict'
+'use strict';
 
-const { get, capitalize } = require('lodash')
-const cookie            = require('cookie')
-const { decode }        = require('jsonwebtoken')
-const verifyToken       = require('./verifyToken')
-const AccessDeniedError = require('../errors/AccessDeniedError')
-const UnauthorizedError = require('../errors/UnauthorizedError')
+const { get, capitalize } = require('lodash');
+const cookie            = require('cookie');
+const { decode }        = require('jsonwebtoken');
+const verifyToken       = require('./verifyToken');
+const AccessDeniedError = require('../errors/AccessDeniedError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 class JwtAuthorization {
+  // eslint-disable-next-line jsdoc/require-jsdoc
   static createRequirement(options) {
     /* istanbul ignore next */
     if (!options.publicKey) {
       throw new Error('"JwtAuthorization.createRequirement" requires' +
-        ' "publicKey" to be defined')
+        ' "publicKey" to be defined');
     }
 
-    const name       = get(options, 'name', 'authorization')
-    const cookieName = get(options, 'cookieName', name)
-    const description = get(options, 'description')
-    const requirementName = get(options, 'requirementName', capitalize(name))
+    const name       = get(options, 'name', 'authorization');
+    const cookieName = get(options, 'cookieName', name);
+    const description = get(options, 'description');
+    const requirementName = get(options, 'requirementName', capitalize(name));
 
     return {
       [requirementName]: {
@@ -33,9 +35,10 @@ class JwtAuthorization {
         cookieName,
         ...options
       }
-    }
+    };
   }
 
+  // eslint-disable-next-line jsdoc/require-jsdoc
   static get errors() {
     return {
       UnauthorizedError: {
@@ -46,9 +49,10 @@ class JwtAuthorization {
         statusCode:  403,
         description: 'Operation access denied'
       }
-    }
+    };
   }
 
+  // eslint-disable-next-line jsdoc/require-jsdoc
   constructor({
     name,
     publicKey,
@@ -58,68 +62,69 @@ class JwtAuthorization {
     tokenVerificationMethod = verifyToken,
     accessVerificationMethod = () => [ true ],
   }) {
-    this._name       = name
-    this._publicKey  = publicKey
-    this._algorithm  = algorithm
-    this._cookieName = cookieName
+    this._name       = name;
+    this._publicKey  = publicKey;
+    this._algorithm  = algorithm;
+    this._cookieName = cookieName;
 
-    this._verifyToken  = tokenVerificationMethod
-    this._verifyAccess = accessVerificationMethod
-    this._normalizePayload = normalizePayload
+    this._verifyToken  = tokenVerificationMethod;
+    this._verifyAccess = accessVerificationMethod;
+    this._normalizePayload = normalizePayload;
   }
 
+  // eslint-disable-next-line jsdoc/require-jsdoc
   async verify(context) {
-    let token
+    let token;
 
-    const { headers } = context
+    const { headers } = context;
 
-    const hasCookie = headers['cookie']
+    const hasCookie = headers['cookie'];
 
     if (hasCookie) {
-      const cookies = cookie.parse(headers['cookie'])
-      token = cookies[this._cookieName]
+      const cookies = cookie.parse(headers['cookie']);
+      token = cookies[this._cookieName];
     }
 
     if (!token) {
-      token = headers[this._name]
+      token = headers[this._name];
     }
 
     if (!token) {
-      const error = new UnauthorizedError(`Header "${this._name}" is missing`)
-      return { isAuthorized: false, error }
+      const error = new UnauthorizedError(`Header "${this._name}" is missing`);
+      return { isAuthorized: false, error };
     }
 
-    token = token.replace(/^bearer\s+/i, '')
+    token = token.replace(/^bearer\s+/i, '');
 
-    const object = decode(token, { complete: true })
+    const object = decode(token, { complete: true });
 
     if (!object) {
-      const error = new UnauthorizedError('Invalid authorization token')
-      return { isAuthorized: false, error }
+      const error = new UnauthorizedError('Invalid authorization token');
+      return { isAuthorized: false, error };
     }
 
     const [ isTokenOk, tokenErrorMessage ] =
-      await this._verifyToken(context, token, this._publicKey, this._algorithm)
+      await this._verifyToken(context, token, this._publicKey, this._algorithm);
 
     if (!isTokenOk) {
-      const error = new UnauthorizedError(tokenErrorMessage)
+      const error = new UnauthorizedError(tokenErrorMessage);
 
-      return { isAuthorized: false, error }
+      return { isAuthorized: false, error };
     }
 
-    const { payload } = object
+    const { payload } = object;
     const [ isAccessOk, accessErrorMessage ] =
-      await this._verifyAccess(context, payload)
+      await this._verifyAccess(context, payload);
 
     if (!isAccessOk) {
-      const error = new AccessDeniedError(accessErrorMessage)
-      return { isAuthorized: false, error }
+      const error = new AccessDeniedError(accessErrorMessage);
+      return { isAuthorized: false, error };
     }
 
-    const normalizedPayload = this._normalizePayload(payload)
+    const normalizedPayload = this._normalizePayload(payload);
 
-    return { isAuthorized: true, ...normalizedPayload }
+    return { isAuthorized: true, ...normalizedPayload };
   }
 }
 
-module.exports = JwtAuthorization
+module.exports = JwtAuthorization;

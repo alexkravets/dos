@@ -1,17 +1,17 @@
-'use strict'
+'use strict';
 
 // NOTE: Run service example:
 // $ npm i --save-dev @kravc/http
 // $ ./node_modules/.bin/http ./test/example`
 
-const Health        = require('./Health')
-const ReadProfile   = require('./ReadProfile'  )
-const CreateProfile = require('./CreateProfile')
-const UpdateProfile = require('./UpdateProfile')
-const DeleteProfile = require('./DeleteProfile')
-const IndexProfiles = require('./IndexProfiles')
+const Health        = require('./Health');
+const ReadProfile   = require('./ReadProfile'  );
+const CreateProfile = require('./CreateProfile');
+const UpdateProfile = require('./UpdateProfile');
+const DeleteProfile = require('./DeleteProfile');
+const IndexProfiles = require('./IndexProfiles');
 
-const { Service, handler } = require('../src')
+const { Service, handler } = require('../src');
 
 const modules = [
   Health,
@@ -20,10 +20,10 @@ const modules = [
   UpdateProfile,
   DeleteProfile,
   IndexProfiles
-]
+];
 
-const ROOT_PATH = process.cwd()
+const ROOT_PATH = process.cwd();
 
-const service = new Service(modules, 'http://localhost:3000/', `${ROOT_PATH}/examples`)
+const service = new Service(modules, 'http://localhost:3000/', `${ROOT_PATH}/examples`);
 
-exports.handler = handler(service)
+exports.handler = handler(service);

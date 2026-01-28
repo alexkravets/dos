@@ -1,7 +1,8 @@
-'use strict'
+'use strict';
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 const getIdPrefix = componentName => {
-  return componentName
-}
+  return componentName;
+};
 
-module.exports = getIdPrefix
+module.exports = getIdPrefix;

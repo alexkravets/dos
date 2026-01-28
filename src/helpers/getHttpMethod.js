@@ -1,19 +1,20 @@
-'use strict'
+'use strict';
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 const getHttpMethod = ({ types: TYPES, type }) => {
   switch (type) {
     case TYPES.CREATE:
-      return 'post'
+      return 'post';
 
     case TYPES.DELETE:
-      return 'delete'
+      return 'delete';
 
     case TYPES.UPDATE:
-      return 'patch'
+      return 'patch';
 
     default:
-      return 'get'
+      return 'get';
   }
-}
+};
 
-module.exports = getHttpMethod
+module.exports = getHttpMethod;

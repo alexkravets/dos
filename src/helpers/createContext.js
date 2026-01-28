@@ -1,34 +1,35 @@
-'use strict'
+'use strict';
 
-const { parse } = require('url')
-const { v4: uuid } = require('uuid')
-const { get, isString } = require('lodash')
+const { parse } = require('url');
+const { v4: uuid } = require('uuid');
+const { get, isString } = require('lodash');
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 const createContext = (service, request, extraContext = {}) => {
-  const { logger = console } = extraContext
+  const { logger = console } = extraContext;
 
-  let httpPath
-  let httpMethod
+  let httpPath;
+  let httpMethod;
 
-  let { operationId } = request
+  let { operationId } = request;
 
   if (!operationId) {
-    let { path } = request
+    let { path } = request;
 
     if (!path) {
-      const { url } = request
-      path = parse(url, true).pathname
+      const { url } = request;
+      path = parse(url, true).pathname;
     }
 
-    const { basePath } = service
+    const { basePath } = service;
 
-    httpPath   = path.replace(basePath, '/')
-    httpMethod = (request.method || request.httpMethod).toLowerCase()
+    httpPath   = path.replace(basePath, '/');
+    httpMethod = (request.method || request.httpMethod).toLowerCase();
 
-    operationId = service.getOperationId(httpMethod, httpPath)
+    operationId = service.getOperationId(httpMethod, httpPath);
   }
 
-  const requestId = get(request, 'requestContext.requestId', uuid())
+  const requestId = get(request, 'requestContext.requestId', uuid());
 
   const context = {
     headers:   {},
@@ -41,56 +42,56 @@ const createContext = (service, request, extraContext = {}) => {
     httpMethod,
     operationId,
     ...extraContext,
-  }
+  };
 
   for (const name in request.headers) {
-    context.headers[name.toLowerCase()] = request.headers[name]
+    context.headers[name.toLowerCase()] = request.headers[name];
   }
 
-  const { url, queryStringParameters, body } = request
+  const { url, queryStringParameters, body } = request;
 
-  context.query = {}
+  context.query = {};
 
   if (url) {
-    context.query = parse(url, true).query
+    context.query = parse(url, true).query;
   }
 
   if (queryStringParameters) {
-    const keys = Object.keys(queryStringParameters)
+    const keys = Object.keys(queryStringParameters);
 
     for (const key in keys) {
-      queryStringParameters[key] = decodeURIComponent(queryStringParameters[key])
+      queryStringParameters[key] = decodeURIComponent(queryStringParameters[key]);
     }
 
-    context.query = queryStringParameters
+    context.query = queryStringParameters;
   }
 
-  const queryKeys = Object.keys(context.query)
+  const queryKeys = Object.keys(context.query);
 
   for (const queryKey of queryKeys) {
-    const value = context.query[queryKey]
+    const value = context.query[queryKey];
 
-    const isJsonArray = `${value}`.startsWith('["')
+    const isJsonArray = `${value}`.startsWith('["');
 
     if (isJsonArray) {
-      context.query[queryKey] = JSON.parse(value)
+      context.query[queryKey] = JSON.parse(value);
     }
   }
 
   if (body) {
-    const isJSON = isString(body)
+    const isJSON = isString(body);
 
     if (isJSON) {
-      context.bodyJson = body
-      context.mutation = JSON.parse(body)
+      context.bodyJson = body;
+      context.mutation = JSON.parse(body);
 
     } else {
-      context.mutation = body
+      context.mutation = body;
 
     }
   }
 
-  return context
-}
+  return context;
+};
 
-module.exports = createContext
+module.exports = createContext;

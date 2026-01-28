@@ -1,9 +1,10 @@
-'use strict'
+'use strict';
 
-const JwtAuthorization = require('./JwtAuthorization')
+const JwtAuthorization = require('./JwtAuthorization');
 
 /* istanbul ignore next */
+// eslint-disable-next-line jsdoc/require-jsdoc
 module.exports = (options = {}) => {
-  const requirement = JwtAuthorization.createRequirement(options)
-  return [ requirement ]
-}
+  const requirement = JwtAuthorization.createRequirement(options);
+  return [ requirement ];
+};

@@ -1,6 +1,6 @@
-'use strict'
+'use strict';
 
-const Index   = require('../src/operations/Index')
-const Profile = require('./Profile')
+const Index   = require('../src/operations/Index');
+const Profile = require('./Profile');
 
-module.exports = Index(Profile)
+module.exports = Index(Profile);

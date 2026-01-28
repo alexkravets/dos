@@ -1,6 +1,6 @@
-'use strict'
+'use strict';
 
-const { wait, execute, createAccessToken } = require('./test')
+const { wait, execute, createAccessToken } = require('./test');
 
 module.exports = {
   Document:                    require('./Document'),
@@ -32,4 +32,4 @@ module.exports = {
   wait,
   execute,
   createAccessToken,
-}
+};

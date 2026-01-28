@@ -22,11 +22,8 @@ error:
           code:
             description: Validation error code
 
-          message:
-            description: Validation error message
-
-          schemaId:
-            description: Schema ID
-
           path:
             description: Path of invalid attribute
+
+          message:
+            description: Validation error message

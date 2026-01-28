@@ -1,9 +1,11 @@
-'use strict'
+'use strict';
 
-const Read    = require('../src/operations/Read')
-const Profile = require('./Profile')
+const Read    = require('../src/operations/Read');
+const Profile = require('./Profile');
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 class ReadProfile extends Read(Profile) {
+  // eslint-disable-next-line jsdoc/require-jsdoc
   static get query() {
     return {
       id: {
@@ -11,8 +13,8 @@ class ReadProfile extends Read(Profile) {
         required: true,
         example: 'PRO_1'
       }
-    }
+    };
   }
 }
 
-module.exports = ReadProfile
+module.exports = ReadProfile;

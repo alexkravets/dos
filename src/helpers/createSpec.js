@@ -1,28 +1,30 @@
-'use strict'
+'use strict';
 
-const { omit, uniq } = require('lodash')
-const ZSchema       = require('z-schema')
-const { parse }     = require('url')
-const jsonSchema    = require('../../assets/schemas/oas2.json')
-const getHttpMethod = require('./getHttpMethod')
-const getSuccessStatusCode = require('./getSuccessStatusCode')
+const { omit, uniq } = require('lodash');
+const ZSchema       = require('z-schema');
+const { parse }     = require('url');
+const jsonSchema    = require('../../assets/schemas/oas2.json');
+const getHttpMethod = require('./getHttpMethod');
+const getSuccessStatusCode = require('./getSuccessStatusCode');
 
-const ROOT_PATH = process.cwd()
-const { name: title, version } = require(`${ROOT_PATH}/package.json`)
+const ROOT_PATH = process.cwd();
+const { name: title, version } = require(`${ROOT_PATH}/package.json`);
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 const formatErrorResponseDescription = errors => {
   return errors
     .map(({ code, description }) =>  {
-      if (!description) { return `\`${code}\`` }
+      if (!description) { return `\`${code}\``; }
 
-      return `\`${code}\` — ${description}`
+      return `\`${code}\` — ${description}`;
     })
-    .join('\n')
-}
+    .join('\n');
+};
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 const createSpec = (operations, schemasMap, url) => {
-  const { protocol: _protocol, host, path: basePath } = parse(url)
-  const protocol = _protocol.replace(':', '')
+  const { protocol: _protocol, host, path: basePath } = parse(url);
+  const protocol = _protocol.replace(':', '');
 
   const spec = {
     swagger: '2.0',
@@ -39,22 +41,22 @@ const createSpec = (operations, schemasMap, url) => {
     securityDefinitions: {},
     paths: {},
     definitions: {}
-  }
+  };
 
   for (const schemaId in schemasMap) {
-    const isNotInputSchema = !schemaId.endsWith('Input')
+    const isNotInputSchema = !schemaId.endsWith('Input');
 
     if (isNotInputSchema) {
-      const schema = schemasMap[schemaId]
-      spec.definitions[schemaId] = omit(schema.jsonSchema, [ 'id' ])
+      const schema = schemasMap[schemaId];
+      spec.definitions[schemaId] = omit(schema.jsonSchema, [ 'id' ]);
     }
   }
 
-  let serviceTags = []
+  let serviceTags = [];
   for (const Operation of operations) {
-    const httpPath    = `/${Operation.id}`
-    const httpMethod  = getHttpMethod(Operation)
-    const operationId = Operation.id
+    const httpPath    = `/${Operation.id}`;
+    const httpMethod  = getHttpMethod(Operation);
+    const operationId = Operation.id;
 
     const {
       tags,
@@ -65,28 +67,28 @@ const createSpec = (operations, schemasMap, url) => {
       description,
       outputSchema,
       mutationSchema
-    } = Operation
+    } = Operation;
 
-    serviceTags = serviceTags.concat(tags)
+    serviceTags = serviceTags.concat(tags);
 
     const operationSpec = {
       tags,
       summary,
       description,
       operationId
-    }
+    };
 
-    const parameters = []
+    const parameters = [];
 
     for (const name in query) {
-      const queryParameter = { in: 'query', name, type: 'string', ...query[name] }
+      const queryParameter = { in: 'query', name, type: 'string', ...query[name] };
 
       if (queryParameter.example) {
-        queryParameter['x-example'] = queryParameter.example
-        delete queryParameter.example
+        queryParameter['x-example'] = queryParameter.example;
+        delete queryParameter.example;
       }
 
-      parameters.push(queryParameter)
+      parameters.push(queryParameter);
     }
 
     if (mutationSchema) {
@@ -95,20 +97,20 @@ const createSpec = (operations, schemasMap, url) => {
         name:     'mutation',
         schema:   { $ref: mutationSchema.id },
         required: true
-      })
+      });
     }
 
-    const hasParameters = parameters.length > 0
+    const hasParameters = parameters.length > 0;
 
     if (hasParameters) {
-      operationSpec.parameters = parameters
+      operationSpec.parameters = parameters;
     }
 
-    const successStatusCode = getSuccessStatusCode(Operation)
-    const success = { description: 'Successful operation execution response' }
+    const successStatusCode = getSuccessStatusCode(Operation);
+    const success = { description: 'Successful operation execution response' };
 
     if (outputSchema) {
-      success.schema = { $ref: outputSchema.id }
+      success.schema = { $ref: outputSchema.id };
     }
 
     const responses = {
@@ -117,80 +119,80 @@ const createSpec = (operations, schemasMap, url) => {
         description: '`OperationError` — Default operation error',
         schema: { $ref: 'OperationError' }
       }
-    }
+    };
 
-    const errorsMap = {}
+    const errorsMap = {};
 
     for (const code in errors) {
-      const { statusCode, description } = errors[code]
+      const { statusCode, description } = errors[code];
 
-      errorsMap[`${statusCode}`] = errorsMap[`${statusCode}`] || []
-      errorsMap[`${statusCode}`].push({ code, description })
+      errorsMap[`${statusCode}`] = errorsMap[`${statusCode}`] || [];
+      errorsMap[`${statusCode}`].push({ code, description });
     }
 
     for (const statusCode in errorsMap) {
-      const description = formatErrorResponseDescription(errorsMap[statusCode])
+      const description = formatErrorResponseDescription(errorsMap[statusCode]);
 
       responses[`${statusCode}`] = {
         schema: { $ref: 'OperationError' },
         description
-      }
+      };
     }
 
-    operationSpec.responses = responses
+    operationSpec.responses = responses;
 
-    const hasSecurityRequirements = security.length > 0
+    const hasSecurityRequirements = security.length > 0;
 
     if (hasSecurityRequirements) {
-      operationSpec.security = []
+      operationSpec.security = [];
 
       for (const requirements of security) {
 
-        const config = {}
+        const config = {};
         for (const name in requirements) {
-          const { definition } = requirements[name]
-          spec.securityDefinitions[name] = definition
+          const { definition } = requirements[name];
+          spec.securityDefinitions[name] = definition;
 
-          config[name] = []
+          config[name] = [];
         }
 
-        operationSpec.security.push(config)
+        operationSpec.security.push(config);
       }
     }
 
-    spec.paths[httpPath] = { [httpMethod]: operationSpec }
+    spec.paths[httpPath] = { [httpMethod]: operationSpec };
   }
 
-  serviceTags = uniq(serviceTags)
+  serviceTags = uniq(serviceTags);
   serviceTags.sort((a, b) => {
-    const aStartsWithUpper = /^[A-Z]/.test(a)
-    const bStartsWithUpper = /^[A-Z]/.test(b)
+    const aStartsWithUpper = /^[A-Z]/.test(a);
+    const bStartsWithUpper = /^[A-Z]/.test(b);
 
-    if (aStartsWithUpper && !bStartsWithUpper) { return -1 }
+    if (aStartsWithUpper && !bStartsWithUpper) { return -1; }
 
-    if (!aStartsWithUpper && bStartsWithUpper) { return 1 }
+    if (!aStartsWithUpper && bStartsWithUpper) { return 1; }
 
-    return a.localeCompare(b)
-  })
-  spec.tags = serviceTags.map(name => ({ name }))
+    return a.localeCompare(b);
+  });
+  spec.tags = serviceTags.map(name => ({ name }));
 
   const json = JSON
     .stringify(spec, null, 2)
-    .replace(/"\$ref": "/g, '"$ref": "#/definitions/')
+    .replace(/"\$ref": "/g, '"$ref": "#/definitions/');
 
-  const result = JSON.parse(json)
+  const result = JSON.parse(json);
 
-  const validator = new ZSchema({ ignoreUnknownFormats: true })
-  const isValid = validator.validate(result, { id: 'Spec', ...jsonSchema })
+  const validator = new ZSchema({ ignoreUnknownFormats: true });
+  const isValid = validator.validate(result, { id: 'Spec', ...jsonSchema });
 
   if (!isValid) {
-    const validationErrors = validator.getLastErrors()
+    const validationErrors = validator.getLastErrors();
 
-    const json = JSON.stringify(validationErrors, null, 2)
-    throw new Error(`Service spec validation failed: ${json}`)
+    const json = JSON.stringify(validationErrors, null, 2);
+    throw new Error(`Service spec validation failed: ${json}`);
   }
 
-  return result
-}
+  return result;
+};
 
-module.exports = createSpec
+module.exports = createSpec;

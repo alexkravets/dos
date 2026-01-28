@@ -1,17 +1,18 @@
-'use strict'
+'use strict';
 
-const { verify } = require('jsonwebtoken')
+const { verify } = require('jsonwebtoken');
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 const verifyToken = async (context, token, publicKey, algorithm) => {
   try {
-    await verify(token, publicKey, { algorithms: [ algorithm ] })
+    await verify(token, publicKey, { algorithms: [ algorithm ] });
 
   } catch (verificationError) {
-    return [ false, verificationError.message ]
+    return [ false, verificationError.message ];
 
   }
 
-  return [ true ]
-}
+  return [ true ];
+};
 
-module.exports = verifyToken
+module.exports = verifyToken;

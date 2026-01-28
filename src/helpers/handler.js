@@ -1,21 +1,22 @@
-'use strict'
+'use strict';
 
-const logRequest = require('./logRequest')
-const createContext = require('./createContext')
-const specMiddleware = require('./specMiddleware')
+const logRequest = require('./logRequest');
+const createContext = require('./createContext');
+const specMiddleware = require('./specMiddleware');
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 const handler = (service, _createContext = createContext, _middleware = specMiddleware) => {
   return (request, extraContext) => {
-    const context = _createContext(service, request, extraContext)
+    const context = _createContext(service, request, extraContext);
 
-    const result = _middleware(service, context)
+    const result = _middleware(service, context);
 
-    if (result) { return result }
+    if (result) { return result; }
 
-    logRequest(context)
+    logRequest(context);
 
-    return service.process(context)
-  }
-}
+    return service.process(context);
+  };
+};
 
-module.exports = handler
+module.exports = handler;

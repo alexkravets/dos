@@ -1,10 +1,11 @@
-'use strict'
+'use strict';
 
-const { capitalize } = require('lodash')
-const getComponentTitle = require('./getComponentTitle')
+const { capitalize } = require('lodash');
+const getComponentTitle = require('./getComponentTitle');
 
+// eslint-disable-next-line jsdoc/require-jsdoc
 const getDefaultSchemaAttributes = (Component) => {
-  const documentTitle = getComponentTitle(Component, false)
+  const documentTitle = getComponentTitle(Component, false);
 
   return {
     id: {
@@ -26,7 +27,7 @@ const getDefaultSchemaAttributes = (Component) => {
     updatedBy: {
       description: `ID of a user who updated ${documentTitle}`
     }
-  }
-}
+  };
+};
 
-module.exports = getDefaultSchemaAttributes
+module.exports = getDefaultSchemaAttributes;

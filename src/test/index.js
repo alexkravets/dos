@@ -1,11 +1,11 @@
-'use strict'
+'use strict';
 
-const wait              = require('./wait')
-const execute           = require('./execute')
-const createAccessToken = require('./createAccessToken')
+const wait              = require('./wait');
+const execute           = require('./execute');
+const createAccessToken = require('./createAccessToken');
 
 module.exports = {
   wait,
   execute,
   createAccessToken
-}
+};
