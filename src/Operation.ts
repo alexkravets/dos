@@ -1,12 +1,20 @@
 import Component from './Component';
-import { Schema } from '@kravc/schema';
-import getOperationId from './helpers/getOperationId';
 import { type Context } from './Context';
-import getOperationTags from './helpers/getOperationTags';
 import withSafeAttributes from './helpers/withSafeAttributes';
-import getOperationSummary from './helpers/getOperationSummary';
-import { isEmpty, cloneDeep } from 'lodash';
+import { get, isEmpty, cloneDeep } from 'lodash';
+import { Schema, type SchemaSource } from '@kravc/schema';
+import { type SecurityRequirements, type ErrorResponse } from './helpers/authorize';
+import { getOperationId, getOperationTags, getOperationSummary } from './helpers/operation';
 
+type QueryMap = Record<string, unknown>;
+type MutationMap = Record<string, unknown>;
+type Result = Record<string, unknown>;
+
+type ComponentActionMethod = (
+  context: Context,
+  query: QueryMap,
+  mutation: MutationMap
+) => Promise<Result>;
 
 /** Operation */
 class Operation {
@@ -38,14 +46,24 @@ class Operation {
     return Operation.types.READ;
   }
 
+  /** Flags if operation is of a create type. */
+  static get isCreate() {
+    return this.type === Operation.types.CREATE;
+  }
+
+  /** Flags if operation is of an update type. */
+  static get isUpdate() {
+    return this.type === Operation.types.UPDATE;
+  }
+
   /** Returns component class the operations is defined for. */
-  static get Component(): typeof Component {
-    throw new Error('Operation.Component must be overridden by a subclass');
+  static get Component(): null | typeof Component {
+    return null;
   }
 
   /** Returns related component name. */
   static get componentName() {
-    return this.Component!.name;
+    return this.Component?.name;
   }
 
   /** Returns component action name for the operation to execute. */
@@ -53,9 +71,19 @@ class Operation {
     return this.type;
   }
 
+  /** Returns component schema. */
+  static get componentSchema() {
+    return this.Component?.schema;
+  }
+
+  /** Returns component mutation schema. */
+  static get componentMutationSchema() {
+    return this.Component?.mutationSchema;
+  }
+
   /** Returns operation ID. */
   static get id() {
-    return getOperationId(this.name, this.componentName, this.componentAction);
+    return getOperationId(this.name, this.componentAction, this.componentName);
   }
 
   /** Returns operation tags. */
@@ -65,7 +93,7 @@ class Operation {
 
   /** Returns operation summary. */
   static get summary() {
-    return getOperationSummary(this.componentName, this.componentAction);
+    return getOperationSummary(this.componentAction, this.componentName);
   }
 
   /** Returns operation description. */
@@ -74,19 +102,22 @@ class Operation {
   }
 
   /** Returns operation security requirements. */
-  static get security() {
+  static get security(): SecurityRequirements {
     return [];
   }
 
   /** Returns possible operation errors. */
   static get errors() {
-    let errors = {};
+    let errors = {} as Record<string, ErrorResponse>;
 
     for (const orRequirement of this.security) {
       const andRequirements = Object.values(orRequirement);
 
       for (const andRequirement of andRequirements) {
-        errors = { ...andRequirement.klass.errors, ...errors };
+        errors = {
+          ...andRequirement.errors,
+          ...errors
+        };
       }
     }
 
@@ -121,102 +152,99 @@ class Operation {
     return errors;
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  static get query() {
-    return {};
+  /** Returns operation query schema source. */
+  static get query(): null | SchemaSource {
+    return null;
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  static get mutation() {
-    const { type, Component } = this;
-
-    if (Component) {
-      const { bodySchema, schema } = Component;
-      const mutationSchema = bodySchema || schema;
-
-      if (type === Operation.types.UPDATE) {
-        return mutationSchema.pure();
+  /** Returns operation mutation schema instance or schema source. */
+  static get mutation(): null | Schema | SchemaSource {
+    if (this.componentMutationSchema) {
+      if (this.isUpdate) {
+        return this.componentMutationSchema.pure();
       }
 
-      if (type === Operation.types.CREATE) {
-        return mutationSchema.clone();
+      if (this.isCreate) {
+        return this.componentMutationSchema.clone();
       }
     }
 
     return null;
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  static get mutationSchema() {
-    const { id, mutation: schemaOrSource } = this;
+  /** Returns operation mutation schema. */
+  static get mutationSchema(): null | Schema {
+    if (!this.mutation) {
+      return null;
+    }
 
-    if (!schemaOrSource) { return null; }
-
-    return new Schema(schemaOrSource, `${id}InputMutation`);
+    return new Schema(this.mutation, `${this.id}InputMutation`);
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  static get inputSchema() {
-    const { id } = this;
-    let source = { ...this.query };
+  /** Returns operation input validation schema. */
+  static get inputSchema(): null | Schema {
+    const source = {
+      ...this.query,
+    } as Record<string, unknown>;
 
     if (this.mutationSchema) {
-      source = {
-        ...source,
-        mutation: {
-          $ref:     `${id}InputMutation`,
-          required: true
-        }
+      source.mutation = {
+        $ref: `${this.id}InputMutation`,
+        required: true
       };
     }
 
-    if (isEmpty(source)) { return null; }
+    if (isEmpty(source)) {
+      return null;
+    }
 
-    return new Schema(source, `${id}Input`);
+    return new Schema(source as SchemaSource, `${this.id}Input`);
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  static get output() {
-    if (!this.Component) { return null; }
+  /** Returns operation output schema source. */
+  static get output(): null | SchemaSource {
+    if (!this.componentSchema) {
+      return null;
+    }
 
     return {
       data: {
-        $ref:     this.Component.schema.id,
+        $ref: this.componentSchema.id,
         required: true
       }
     };
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  static get outputSchema() {
-    const { id, output: schemaOrSource } = this;
+  /** Returns operation output validation schema. */
+  static get outputSchema(): null | Schema {
+    if (!this.output) {
+      return null;
+    }
 
-    if (!schemaOrSource) { return null; }
-
-    return new Schema(schemaOrSource, `${id}Output`);
+    return new Schema(this.output, `${this.id}Output`);
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  /** Returns component action method binded to component. */
   static get componentActionMethod() {
     const { Component, componentAction } = this;
 
-    if (!Component) {
-      throw new Error(`Operation "${this.id}" expects component to be defined`);
+    if (Component) {
+      const componentActionMethod = get(Component, componentAction) as ComponentActionMethod;
+
+      if (!componentActionMethod) {
+        throw new Error(`Operation "${this.id}" expects component action` +
+          ` method "${Component.name}.${componentAction}(context, ...)" to be` +
+          ' defined');
+      }
+
+      return componentActionMethod.bind(Component);
     }
 
-    const componentActionMethod = Component[componentAction];
-
-    if (!componentActionMethod) {
-      throw new Error(`Operation "${this.id}" expects component action` +
-        ` method "${Component.name}.${componentAction}(context, ...)" to be` +
-        ' defined');
-    }
-
-    return componentActionMethod.bind(Component);
+    throw new Error(`Operation "${this.id}" expects component to be defined`);
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  setHeader(name, value, isMultiValue = false) {
+  /** Adds header value to context headers. */
+  setHeader(name: string, value: unknown, isMultiValue = false) {
     if (isMultiValue) {
       this._multiValueHeaders[name.toLowerCase()] = value;
 
@@ -226,44 +254,40 @@ class Operation {
     this._headers[name.toLowerCase()] = value;
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  /** Returns operation context. */
   get context() {
     return this._context;
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  before() {
-    return;
+  /** Pre-processes operation parameters before action. */
+  async before(parameters: Record<string, unknown>) {
+    return parameters;
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  async action(parameters) {
-    const { Component } = this.constructor;
+  /** Executes component action. */
+  async action(parameters: Record<string, unknown>) {
+    const { Component } = this.constructor as typeof Operation;
 
     if (!Component) {
       return {};
     }
 
-    const { componentActionMethod } = this.constructor;
+    const { mutation = {}, ...query } = parameters;
+    const { componentActionMethod } = this.constructor as typeof Operation;
 
-    const { mutation, ...query } = parameters;
-
-    const data = await (mutation
-      ? componentActionMethod(this.context, query, mutation)
-      : componentActionMethod(this.context, query)
-    );
+    const data = await componentActionMethod(this.context, query, mutation as MutationMap);
 
     return { data };
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  after() {
-    return;
+  /** Post-processes operation result after action. */
+  async after(_parameters: Record<string, unknown>, result?: Record<string, unknown>) {
+    return result;
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  async exec(_parameters) {
-    let parameters = cloneDeep(_parameters);
+  /** Executes operation for the request input. */
+  async exec(input: Record<string, unknown>) {
+    let parameters = cloneDeep(input);
     let result;
 
     const beforeResult = await this.before(parameters);
@@ -288,4 +312,4 @@ class Operation {
   }
 }
 
-module.exports = Operation;
+export default Operation;

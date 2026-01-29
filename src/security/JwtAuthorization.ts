@@ -90,12 +90,12 @@ class JwtAuthorization {
           name,
           description,
         },
-        // TODO: Revise if we can simplify this and have just verify method exposed here:
-        // verify(context) => { isAuthorized: boolean, error?, ... }
-        klass: this,
-        name,
-        cookieName,
-        ...options
+        errors: JwtAuthorization.errors,
+        /** Verifies context via JWT authorization requirement. */
+        verify: (context: Context) => {
+          const security = new JwtAuthorization({ name, cookieName, ...options });
+          return security.verify(context);
+        }
       }
     };
   }

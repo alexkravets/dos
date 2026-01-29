@@ -39,6 +39,11 @@ class Component {
     return this._schema;
   }
 
+  /** Returns schema for component mutation attributes. */
+  static get mutationSchema(): Schema | undefined {
+    return this.schema;
+  }
+
   /** Returns component instance ID. */
   get id(): string | null {
     return this._id || null;

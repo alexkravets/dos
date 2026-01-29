@@ -11,32 +11,46 @@ const DESCRIPTION = 'This security definition and a header for system' +
 
 const MESSAGE_ACCESS_DENIED = 'Access denied, operation is available only for internal requests';
 
-// eslint-disable-next-line jsdoc/require-jsdoc
-const verifySystemAccess = (context: Context) => {
+const DEFAULT_HEADER_NAME = 'authorization';
+
+type AccessVerificationMethod = (context: Context) => Promise<[ true ] | [ false, string ]>;
+
+type RequirementOptions = {
+  name?: string;
+  description?: string;
+  requirementName?: string;
+  accessVerificationMethod?: AccessVerificationMethod;
+}
+
+/** Ensures no headers are set by the gateway. */
+const verifyAccess = async (context: Context): Promise<[ true ] | [ false, string ]> => {
   const { headers } = context;
 
   const isExternalRequest = Object.keys(headers).length > 0;
 
-  if (!isExternalRequest) {
-    return [ true ];
+  if (isExternalRequest) {
+    return [ false, MESSAGE_ACCESS_DENIED ];
   }
 
-  return [ false, MESSAGE_ACCESS_DENIED ];
+  return [ true ];
 };
 
-// eslint-disable-next-line jsdoc/require-jsdoc
+/** System Authorization */
 class SystemAuthorization {
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  private _verifyAccess: AccessVerificationMethod;
+
+  /** Creates an instance of System authorization security. */
   constructor({
-    accessVerificationMethod = verifySystemAccess,
+    accessVerificationMethod = verifyAccess,
+  }: {
+    accessVerificationMethod?: AccessVerificationMethod;
   }) {
     this._verifyAccess = accessVerificationMethod;
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  static createRequirement(options = {}) {
-    const name = get(options, 'name', 'authorization');
-
+  /** Creates an instance of system authorization security. */
+  static createRequirement(options: RequirementOptions = {}) {
+    const name = get(options, 'name', DEFAULT_HEADER_NAME);
     const description = get(options, 'description', DESCRIPTION);
     const requirementName = get(options, 'requirementName', SYSTEM_NAME);
 
@@ -48,13 +62,17 @@ class SystemAuthorization {
           name,
           description,
         },
-        klass: this,
-        ...options
+        errors: SystemAuthorization.errors,
+        /** Verifies context via JWT authorization requirement. */
+        verify: (context: Context) => {
+          const security = new SystemAuthorization({ ...options });
+          return security.verify(context);
+        }
       }
     };
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  /** Returns security related errors. */
   static get errors() {
     return {
       AccessDeniedError: {
@@ -64,8 +82,8 @@ class SystemAuthorization {
     };
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  async verify(context) {
+  /** Verifies System authorization. */
+  async verify(context: Context) {
     const [ isAccessOk, accessErrorMessage ] = await this._verifyAccess(context);
 
     if (!isAccessOk) {
@@ -73,7 +91,11 @@ class SystemAuthorization {
       return { isAuthorized: false, error };
     }
 
-    return { isAuthorized: true, isSystem: true };
+    const claims = {
+      isSystem: true,
+    };
+
+    return { isAuthorized: true, claims };
   }
 }
 

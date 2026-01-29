@@ -127,7 +127,7 @@ class Service {
       const { httpMethod, httpPath } = context;
       if (!Operation) { throw new OperationNotFoundError({ operationId, httpMethod, httpPath }); }
 
-      context.identity = await authorize(Operation, context);
+      context.identity = await authorize(context, Operation.security);
       const isUpdate = Operation.type === Operation.types.UPDATE;
       const parameters = this._getParameters(Operation.inputSchema, context, isUpdate);
 
