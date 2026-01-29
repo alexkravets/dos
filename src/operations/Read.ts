@@ -2,42 +2,37 @@ import Operation from '../Operation';
 import Component from '../Component';
 import getComponentTitle from '../helpers/getComponentTitle';
 
-/** Returns class for a delete operation. */
-const Delete = (
+/** Returns class for a read operation. */
+const Read = (
   ComponentClass: typeof Component,
-  componentAction: string = Operation.types.DELETE
+  componentAction: string = Operation.types.READ
 ): typeof Operation => {
   if (!ComponentClass) {
-    throw new Error('Argument "ComponentClass" is undefined for "Delete" operation' +
+    throw new Error('Argument "Component" is undefined for "Read" operation' +
       ' function');
   }
 
   const componentTitle = getComponentTitle(ComponentClass);
   const componentTitleLower = componentTitle.toLowerCase();
 
-  /** Delete operation class */
+  /** Read operation class */
   return class extends Operation {
-    /** Returns component class for a delete operation. */
+    /** Returns component class for a read operation. */
     static get Component() {
       return ComponentClass;
     }
 
-    /** Returns component action name for a delete operation. */
+    /** Returns component action name for a read operation. */
     static get componentAction() {
       return componentAction;
     }
 
-    /** Returns delete operation type. */
-    static get type() {
-      return Operation.types.DELETE;
-    }
-
-    /** Returns possible errors for a delete operation. */
+    /** Returns possible errors for a read operation. */
     static get errors() {
       return {
         ...super.errors,
         DocumentNotFoundError: {
-          statusCode: 404,
+          statusCode:  404,
           description: `${componentTitle} is not found`
         }
       };
@@ -47,17 +42,12 @@ const Delete = (
     static get query() {
       return {
         id: {
-          description: `ID of ${componentTitleLower} to be deleted`,
+          description: `ID of ${componentTitleLower} to be returned`,
           required: true
         }
       };
     }
-
-    /** No output for a delete operation. */
-    static get output() {
-      return null;
-    }
   };
 };
 
-export default Delete;
+export default Read;

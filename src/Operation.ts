@@ -8,7 +8,7 @@ import { getOperationId, getOperationTags, getOperationSummary } from './helpers
 
 type QueryMap = Record<string, unknown>;
 type MutationMap = Record<string, unknown>;
-type Result = Record<string, unknown>;
+export type Result = Record<string, unknown>;
 
 type ComponentActionMethod = (
   context: Context,
@@ -277,7 +277,7 @@ class Operation {
 
     const data = await componentActionMethod(this.context, query, mutation as MutationMap);
 
-    return { data };
+    return { data } as { data?: Result };
   }
 
   /** Post-processes operation result after action. */

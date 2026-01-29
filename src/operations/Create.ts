@@ -12,6 +12,8 @@ const Create = (
       ' function');
   }
 
+  const componentTitle = getComponentTitle(ComponentClass);
+
   /** Create operation class */
   return class extends Operation {
     /** Returns component class for a create operation. */
@@ -31,13 +33,11 @@ const Create = (
 
     /** Returns possible errors for a create operation. */
     static get errors() {
-      const documentTitle = getComponentTitle(ComponentClass);
-
       return {
         ...super.errors,
         DocumentExistsError: {
           statusCode: 422,
-          description: `${documentTitle} could not be created, it already exists`
+          description: `${componentTitle} could not be created, it already exists`
         }
       };
     }
