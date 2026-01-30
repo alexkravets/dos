@@ -1,5 +1,5 @@
 import logOperationError, { type ErrorAttributes, type OriginalError } from '../logOperationError';
-import { Context } from '../../Context';
+import { Context } from '../../../Context';
 import { ValidationError } from '@kravc/schema';
 
 // Mock dependencies
@@ -59,10 +59,10 @@ describe('logOperationError', () => {
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
       expect(logCall).toContain('OperationError');
-      
+
       const logMatch = logCall.match(/OperationError\s+({[\s\S]*})/);
       expect(logMatch).toBeTruthy();
-      
+
       const loggedData = JSON.parse(logMatch![1]);
       expect(loggedData.context).toEqual({
         query: { id: '123', password: '[MASKED]' },
@@ -99,7 +99,7 @@ describe('logOperationError', () => {
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
       const logMatch = logCall.match(/OperationError\s+({[\s\S]*})/);
       const loggedData = JSON.parse(logMatch![1]);
-      
+
       expect(loggedData.context).toEqual({
         requestId: 'req_xyz'
       });
@@ -125,7 +125,7 @@ describe('logOperationError', () => {
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
       const logMatch = logCall.match(/OperationError\s+({[\s\S]*})/);
       const loggedData = JSON.parse(logMatch![1]);
-      
+
       expect(loggedData.context).toEqual({});
     });
   });
@@ -151,7 +151,7 @@ describe('logOperationError', () => {
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
       const logMatch = logCall.match(/OperationError\s+({[\s\S]*})/);
       const loggedData = JSON.parse(logMatch![1]);
-      
+
       expect(loggedData.originalError).toEqual({
         code: 'DocumentNotFoundError',
         message: 'Profile not found',
@@ -187,7 +187,7 @@ describe('logOperationError', () => {
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
       const logMatch = logCall.match(/OperationError\s+({[\s\S]*})/);
       const loggedData = JSON.parse(logMatch![1]);
-      
+
       expect(loggedData.validationErrors).toEqual(validationErrors);
       expect(loggedData.originalError.validationErrors).toEqual(validationErrors);
     });
@@ -211,11 +211,11 @@ describe('logOperationError', () => {
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
-      
+
       expect(logCall).toContain('Unexpected');
       expect(logCall).toContain('Cannot read property "id" of undefined');
       expect(logCall).toContain('at test.js:10:5');
-      
+
       const logMatch = logCall.match(/OperationError\s+({[\s\S]*}),\s+Unexpected\s+(.+)/);
       expect(logMatch).toBeTruthy();
       expect(logMatch![2]).toContain('Error: Cannot read property "id" of undefined');
@@ -238,7 +238,7 @@ describe('logOperationError', () => {
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
-      
+
       expect(logCall).toContain('Unexpected');
       expect(logCall).toContain('undefined');
     });
@@ -262,7 +262,7 @@ describe('logOperationError', () => {
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
       const logMatch = logCall.match(/OperationError\s+({[\s\S]*})/);
       const loggedData = JSON.parse(logMatch![1]);
-      
+
       expect(loggedData.originalError).toBeUndefined();
     });
   });
@@ -285,14 +285,14 @@ describe('logOperationError', () => {
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
-      
+
       // Check that it starts with "OperationError "
       expect(logCall).toMatch(/^OperationError\s+/);
-      
+
       // Check that the JSON is properly formatted (contains newlines for 2-space indentation)
       const jsonMatch = logCall.match(/OperationError\s+({[\s\S]*})/);
       expect(jsonMatch).toBeTruthy();
-      
+
       const parsed = JSON.parse(jsonMatch![1]);
       expect(parsed.code).toBe('TestError');
       expect(parsed.message).toBe('Test message');
@@ -321,7 +321,7 @@ describe('logOperationError', () => {
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
       const logMatch = logCall.match(/OperationError\s+({[\s\S]*})/);
       const loggedData = JSON.parse(logMatch![1]);
-      
+
       expect(loggedData).toHaveProperty('code');
       expect(loggedData).toHaveProperty('message');
       expect(loggedData).toHaveProperty('statusCode');
@@ -390,7 +390,7 @@ describe('logOperationError', () => {
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
       const logMatch = logCall.match(/OperationError\s+({[\s\S]*})/);
       const loggedData = JSON.parse(logMatch![1]);
-      
+
       expect(loggedData.context.query.user.password).toBe('[MASKED]');
       expect(loggedData.context.query.user.token).toBe('[MASKED]');
       expect(loggedData.context.query.filters.code).toBe('[MASKED]');
@@ -415,7 +415,7 @@ describe('logOperationError', () => {
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
       const logCall = (mockLogger.error as jest.Mock).mock.calls[0][0];
-      
+
       expect(logCall).toContain('Unexpected');
       const logMatch = logCall.match(/OperationError\s+({[\s\S]*})/);
       const loggedData = JSON.parse(logMatch![1]);

@@ -1,5 +1,5 @@
 import CommonError from './CommonError';
-import getComponentTitle from '../helpers/getComponentTitle';
+import { getComponentTitle } from '../helpers/component';
 
 /**
  * Document Not Found Error

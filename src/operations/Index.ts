@@ -1,7 +1,7 @@
 import Component from '../Component';
 import { capitalize } from 'lodash';
 import { SchemaSource } from '@kravc/schema';
-import getComponentTitle from '../helpers/getComponentTitle';
+import { getComponentTitle } from '../helpers/component';
 import Operation, { type Result } from '../Operation';
 
 const SORT_ORDER = {

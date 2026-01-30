@@ -1,13 +1,12 @@
 import OperationError from '../OperationError';
 import { Context } from '../../Context';
 import { Validator, Schema, loadSync } from '@kravc/schema';
-import { type OriginalError } from '../../helpers/logOperationError';
-import logOperationError from '../../helpers/logOperationError';
+import { logOperationError, type OriginalError } from '../../helpers/error';
 
 // Mock logOperationError
-jest.mock('../../helpers/logOperationError', () => ({
+jest.mock('../../helpers/error', () => ({
   __esModule: true,
-  default: jest.fn()
+  logOperationError: jest.fn()
 }));
 
 const mockedLogOperationError = logOperationError as jest.MockedFunction<typeof logOperationError>;

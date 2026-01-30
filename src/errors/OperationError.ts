@@ -2,7 +2,7 @@ import path from 'path';
 import Component from '../Component';
 import { Context } from '../Context';
 import { loadSync } from '@kravc/schema';
-import logOperationError, { type OriginalError, type ErrorAttributes } from '../helpers/logOperationError';
+import { logOperationError, type OriginalError, type ErrorAttributes } from '../helpers/error';
 
 const SCHEMA_PATH = path.resolve(__dirname) + '/OperationError.yaml';
 const operationErrorSchema = loadSync(SCHEMA_PATH);

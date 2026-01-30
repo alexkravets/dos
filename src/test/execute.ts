@@ -1,13 +1,29 @@
-'use strict';
-
 const SUCCESS_HTTP_CODES = [200, 201, 204];
 const NO_RESPONSE_HTTP_CODE = 204;
+
+// export declare function execute(service: Service, extraContext?: Record<string, unknown>):
+//   {
+//     request: (
+//       operationId: string,
+//       parameters: OperationParameters,
+//       headers: Headers
+//     ) => Promise<Data>;
+//     expectError: (
+//       operationId: string,
+//       parameters: OperationParameters,
+//       headers: Headers,
+//       errorName: string
+//     ) => Promise<OperationError>;
+//   }
 
 // eslint-disable-next-line jsdoc/require-jsdoc
 const execute = (service, extraContext) => {
   // eslint-disable-next-line jsdoc/require-jsdoc
   const exec = async (operationId, input = {}, headers = {}) => {
-    const { mutation: body, ...queryStringParameters } = input;
+    const {
+      mutation: body,
+      ...queryStringParameters
+    } = input;
 
     const request = {
       body,
@@ -85,4 +101,4 @@ const execute = (service, extraContext) => {
   };
 };
 
-module.exports = execute;
+export default execute;

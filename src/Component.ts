@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import { Context } from './Context';
-import withSafeAttributes from './helpers/withSafeAttributes';
+import { withSafeAttributes } from './helpers/component';
 import { Schema, Validator, got } from '@kravc/schema';
 
 type Attributes = Record<string, unknown>;

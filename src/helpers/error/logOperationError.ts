@@ -1,6 +1,6 @@
 import { pick } from 'lodash';
 import maskSecrets from './maskSecrets';
-import { Context, Logger } from '../Context';
+import { Context, Logger } from '../../Context';
 import { got, ValidationError } from '@kravc/schema';
 
 export type OriginalError = {

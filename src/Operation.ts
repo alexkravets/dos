@@ -1,6 +1,6 @@
 import Component from './Component';
 import { type Context } from './Context';
-import withSafeAttributes from './helpers/withSafeAttributes';
+import { withSafeAttributes } from './helpers/component';
 import { get, isEmpty, cloneDeep } from 'lodash';
 import { Schema, type SchemaSource } from '@kravc/schema';
 import { type SecurityRequirements, type ErrorResponse } from './helpers/authorize';

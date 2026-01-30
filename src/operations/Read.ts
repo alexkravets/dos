@@ -1,6 +1,6 @@
 import Operation from '../Operation';
 import Component from '../Component';
-import getComponentTitle from '../helpers/getComponentTitle';
+import { getComponentTitle } from '../helpers/component';
 
 /** Returns class for a read operation. */
 const Read = (
