@@ -1,8 +1,8 @@
 import Component from '../Component';
 import { capitalize } from 'lodash';
-import { SchemaSource } from '@kravc/schema';
 import { getComponentTitle } from '../helpers/component';
 import Operation, { type Result } from '../Operation';
+import { type PropertiesSchemaSource } from '@kravc/schema';
 
 const SORT_ORDER = {
   ASC: 'asc',
@@ -83,7 +83,7 @@ const Index = (
         exclusiveStartKey: {
           description: `Exclusive start key to return next batch of ${documentTitle}`,
         }
-      } as SchemaSource;
+      } as PropertiesSchemaSource;
     }
 
     /** Returns schema source for the operation output with pagination. */

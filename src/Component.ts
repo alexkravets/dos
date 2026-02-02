@@ -24,6 +24,11 @@ class Component {
     return withSafeAttributes<Component>(this);
   }
 
+  /** Flags if a component class. */
+  static get isComponent(): boolean {
+    return true;
+  }
+
   /** Returns component ID. */
   static get id(): string {
     return this.name;

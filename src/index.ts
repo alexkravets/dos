@@ -26,7 +26,6 @@ export {
   // Document:                    require('./Document'),
   // Service:                     require('./Service'),
 
-  // handler:                     require('./helpers/handler'),
   // authorize:                   require('./helpers/authorize'),
   // getDefaultSchemaAttributes:  require('./helpers/getDefaultSchemaAttributes'),
 

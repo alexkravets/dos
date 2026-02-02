@@ -1,9 +1,10 @@
 import Component from './Component';
 import { type Context } from './Context';
+import { OriginalError } from './helpers/error';
 import { withSafeAttributes } from './helpers/component';
 import { get, isEmpty, cloneDeep } from 'lodash';
-import { Schema, type SchemaSource } from '@kravc/schema';
-import { type SecurityRequirements, type ErrorResponse } from './helpers/authorize';
+import { Schema, type PropertiesSchemaSource } from '@kravc/schema';
+import { type SecurityRequirements, type ErrorResponse } from './helpers/service';
 import { getOperationId, getOperationTags, getOperationSummary } from './helpers/operation';
 
 type QueryMap = Record<string, unknown>;
@@ -15,6 +16,12 @@ type ComponentActionMethod = (
   query: QueryMap,
   mutation: MutationMap
 ) => Promise<Result>;
+
+export type OperationResponse = {
+  result: Record<string, unknown>;
+  headers: Record<string, unknown>;
+  multiValueHeaders: Record<string, unknown>;
+}
 
 /** Operation */
 class Operation {
@@ -29,6 +36,11 @@ class Operation {
     this._multiValueHeaders = {};
 
     return withSafeAttributes(this);
+  }
+
+  /** Flags if a component class. */
+  static get isComponent(): boolean {
+    return false;
   }
 
   /** Returns supported operation types. */
@@ -152,13 +164,19 @@ class Operation {
     return errors;
   }
 
+  /** Returns status code for an error. */
+  static getErrorStatusCode(error: OriginalError): number {
+    const { code } = error;
+    return get(this.errors, `${code}.statusCode`, 500) as number;
+  }
+
   /** Returns operation query schema source. */
-  static get query(): null | SchemaSource {
+  static get query(): null | PropertiesSchemaSource {
     return null;
   }
 
   /** Returns operation mutation schema instance or schema source. */
-  static get mutation(): null | Schema | SchemaSource {
+  static get mutation(): null | Schema | PropertiesSchemaSource {
     if (this.componentMutationSchema) {
       if (this.isUpdate) {
         return this.componentMutationSchema.pure();
@@ -198,11 +216,11 @@ class Operation {
       return null;
     }
 
-    return new Schema(source as SchemaSource, `${this.id}Input`);
+    return new Schema(source as PropertiesSchemaSource, `${this.id}Input`);
   }
 
   /** Returns operation output schema source. */
-  static get output(): null | SchemaSource {
+  static get output(): null | PropertiesSchemaSource {
     if (!this.componentSchema) {
       return null;
     }
@@ -222,6 +240,11 @@ class Operation {
     }
 
     return new Schema(this.output, `${this.id}Output`);
+  }
+
+  /** Flags if operation has output. */
+  static get hasOutput(): boolean {
+    return !!this.outputSchema;
   }
 
   /** Returns component action method binded to component. */
@@ -286,7 +309,7 @@ class Operation {
   }
 
   /** Executes operation for the request input. */
-  async exec(input: Record<string, unknown>) {
+  async exec(input: Record<string, unknown>): Promise<OperationResponse> {
     let parameters = cloneDeep(input);
     let result;
 

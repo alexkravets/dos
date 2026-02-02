@@ -22,7 +22,7 @@ const _getHomeBody = () => isDevelopment() ? SWAGGER_UI_HTML : 'healthy';
 const _getSpecBody = (service) => isDevelopment() ? service.spec : { info: { title, version } };
 
 // eslint-disable-next-line jsdoc/require-jsdoc
-const specMiddleware = (service, context) => {
+const useMiddleware = (service, context) => {
   const { httpPath, httpMethod } = context;
 
   if (httpMethod !== 'get') { return null; }
@@ -83,4 +83,4 @@ const specMiddleware = (service, context) => {
   return null;
 };
 
-module.exports = specMiddleware;
+module.exports = useMiddleware;
