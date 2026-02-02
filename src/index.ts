@@ -7,6 +7,7 @@ import Create from './operations/Create';
 import Update from './operations/Update';
 import Delete from './operations/Delete';
 
+import Service from './Service';
 import Component from './Component';
 import Operation from './Operation';
 
@@ -20,11 +21,11 @@ export {
   Create,
   Update,
   Delete,
+  Service,
   Operation,
   Component,
 
   // Document:                    require('./Document'),
-  // Service:                     require('./Service'),
 
   // authorize:                   require('./helpers/authorize'),
   // getDefaultSchemaAttributes:  require('./helpers/getDefaultSchemaAttributes'),

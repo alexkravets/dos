@@ -1,16 +1,23 @@
 import Component from './Component';
 import Operation from './Operation';
-import { Context } from './Context';
 import { OpenAPIV2 } from 'openapi-types';
-import { authorize } from './helpers/service';
 import { createSpec } from './helpers/spec';
-import { get, uniq, compact } from 'lodash';
-import { Schema, Validator, createSchemasMap, type ValidationError } from '@kravc/schema';
 import OperationError from './errors/OperationError';
 import InvalidInputError from './errors/InvalidInputError';
 import InvalidOutputError from './errors/InvalidOutputError';
+import type { OriginalError } from './helpers/error';
+import { get, uniq, compact } from 'lodash';
 import OperationNotFoundError from './errors/OperationNotFoundError';
-import { type OriginalError } from './helpers/error';
+import type { Context, Request } from './Context';
+import { Schema, Validator, createSchemasMap, type ValidationError } from '@kravc/schema';
+import {
+  authorize,
+  logRequest,
+  createContext,
+  useOasMiddleware,
+  useComposerMiddleware,
+  type ExtraContext
+} from './helpers/service';
 
 const ROOT_PATH = process.cwd();
 const DEFAULT_URL = 'http://localhost:3000/';
@@ -128,20 +135,13 @@ class Service {
     return this._spec;
   }
 
-  /** Returns service base path. */
-  get basePath() {
-    return this._spec.basePath;
-  }
-
-  /** Returns operation ID by HTTP method and path. */
-  getOperationId(httpMethod: string, httpPath: string) {
-    return get(this._spec.paths, `${httpPath}.${httpMethod}.operationId`, 'NONE');
-  }
-
   /** Processes incoming request. */
-  async process(context: Context) {
-    const context = createContext(service, request, extraContext);
-    const result = useMiddleware(service, context);
+  async process(request: Request, extraContext: ExtraContext) {
+    const context = createContext(this, request, extraContext);
+
+    const result =
+      useOasMiddleware(this, context) &&
+      useComposerMiddleware(this, context);
 
     if (result) {
       return result;

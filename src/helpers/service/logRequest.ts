@@ -1,10 +1,18 @@
-'use strict';
+import type { Context, QueryMap, MutationMap } from '../../Context';
 
-// eslint-disable-next-line jsdoc/require-jsdoc
+/** Flags if test environment. */
 const isTestEnvironment = () => process.env.NODE_APP_INSTANCE === 'test';
 
-// eslint-disable-next-line jsdoc/require-jsdoc
-const logRequest = context => {
+type RequestMetadata = {
+  host: string;
+  requestId: string;
+  requestReceivedAt: string;
+  query: QueryMap;
+  mutation?: MutationMap;
+};
+
+/** Logs request metadata in the non test environment. */
+const logRequest = (context: Context) => {
   if (isTestEnvironment()) {
     return;
   }
@@ -26,7 +34,7 @@ const logRequest = context => {
     requestId,
     requestReceivedAt,
     query,
-  };
+  } as RequestMetadata;
 
   if (mutation) {
     metadata.mutation = mutation;
@@ -35,4 +43,4 @@ const logRequest = context => {
   logger.info(`${operationId}: ${JSON.stringify(metadata, null, 2)}`);
 };
 
-module.exports = logRequest;
+export default logRequest;

@@ -1,14 +1,12 @@
 import Component from './Component';
-import { type Context } from './Context';
 import { OriginalError } from './helpers/error';
 import { withSafeAttributes } from './helpers/component';
 import { get, isEmpty, cloneDeep } from 'lodash';
 import { Schema, type PropertiesSchemaSource } from '@kravc/schema';
-import { type SecurityRequirements, type ErrorResponse } from './helpers/service';
+import type { Context, QueryMap, MutationMap } from './Context';
+import type { SecurityRequirements, ErrorResponse } from './helpers/service';
 import { getOperationId, getOperationTags, getOperationSummary } from './helpers/operation';
 
-type QueryMap = Record<string, unknown>;
-type MutationMap = Record<string, unknown>;
 export type Result = Record<string, unknown>;
 
 type ComponentActionMethod = (
