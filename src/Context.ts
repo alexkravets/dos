@@ -28,16 +28,29 @@ export type Context = {
   // [index: string]: unknown;
 }
 
-export type Request = {
+export type ExtraContext = {
+  logger?: Logger;
+  [index: string]: unknown;
+}
+
+export type InternalRequest = {
+  body?: MutationMap;
   headers: Headers;
-  url?: string;
+  operationId: string;
+  queryStringParameters?: QueryMap;
+}
+
+export type HttpRequest = {
+  url: string;
   path?: string;
-  body?: string | MutationMap;
+  body?: string;
   method?: string;
+  headers: Headers;
   httpMethod?: string;
-  operationId?: string;
   requestContext?: {
     requestId?: string;
   };
   queryStringParameters?: QueryMap;
-}
+};
+
+export type Request = HttpRequest | InternalRequest;

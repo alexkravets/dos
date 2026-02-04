@@ -1,6 +1,5 @@
 import Operation from '../Operation';
 import Component from '../Component';
-import { getComponentTitle } from '../helpers/component';
 
 /** Returns class for a read operation. */
 const Read = (
@@ -12,7 +11,7 @@ const Read = (
       ' function');
   }
 
-  const componentTitle = getComponentTitle(ComponentClass);
+  const componentTitle = ComponentClass.getTitle();
   const componentTitleLower = componentTitle.toLowerCase();
 
   /** Read operation class */

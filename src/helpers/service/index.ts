@@ -1,7 +1,7 @@
 import logRequest from './logRequest';
+import createContext from './createContext';
 import useOasMiddleware from './useOasMiddleware';
 import useComposerMiddleware from './useComposerMiddleware';
-import createContext, { type ExtraContext } from './createContext';
 import authorize, { type SecurityRequirements, type ErrorResponse } from './authorize';
 
 export {
@@ -13,7 +13,6 @@ export {
 };
 
 export type {
-  ExtraContext,
   ErrorResponse,
   SecurityRequirements,
 };

@@ -1,6 +1,5 @@
 import Component from '../Component';
 import { capitalize } from 'lodash';
-import { getComponentTitle } from '../helpers/component';
 import Operation, { type Result } from '../Operation';
 import { type PropertiesSchemaSource } from '@kravc/schema';
 
@@ -31,7 +30,7 @@ const Index = (
       ' operation function');
   }
 
-  const documentTitle = getComponentTitle(ComponentClass, false, true);
+  const documentTitle = ComponentClass.getTitle(false, true);
 
   /** Index operation class */
   return class extends Operation {

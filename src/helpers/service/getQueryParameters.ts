@@ -1,3 +1,4 @@
+import { get } from 'lodash';
 import { parse } from 'url';
 import type { QueryMap, Request } from '../../Context';
 
@@ -5,11 +6,13 @@ import type { QueryMap, Request } from '../../Context';
 const getQueryParameters = (request: Request): QueryMap => {
   let parameters = {} as QueryMap;
 
-  const { url, queryStringParameters } = request;
+  const url = get(request, 'url');
 
   if (url) {
     parameters = parse(url, true).query;
   }
+
+  const queryStringParameters = get(request, 'queryStringParameters');
 
   if (queryStringParameters) {
     const keys = Object.keys(queryStringParameters);

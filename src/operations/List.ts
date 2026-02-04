@@ -1,7 +1,6 @@
 import Component from '../Component';
 import Operation from '../Operation';
 import { capitalize } from 'lodash';
-import { getComponentTitle } from '../helpers/component';
 
 /** Returns class for an list operation. */
 const List = (
@@ -13,7 +12,7 @@ const List = (
       ' operation function');
   }
 
-  const documentTitle = getComponentTitle(ComponentClass, false, true);
+  const documentTitle = ComponentClass.getTitle(false, true);
 
   /** List operation class */
   return class extends Operation {

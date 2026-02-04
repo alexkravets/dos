@@ -5,17 +5,12 @@ import { v4 as uuid } from 'uuid';
 import getQueryParameters from './getQueryParameters';
 import getMutationParameters from './getMutationParameters';
 import getOperationId, { getHttpPath, getHttpMethod } from './getOperationId';
-import type { Headers, Logger, Context, Request } from '../../Context';
+import type { Headers, ExtraContext, Context, Request } from '../../Context';
 
 type Options = {
   spec: OpenAPIV2.Document;
   baseUrl: string;
   validator: Validator,
-}
-
-export type ExtraContext = {
-  logger?: Logger;
-  [index: string]: unknown;
 }
 
 /** Creates operation execution context object. */

@@ -1,4 +1,4 @@
-import { got as getOrFail } from '@kravc/schema';
+import { got } from '@kravc/schema';
 
 import Read from './operations/Read';
 import List from './operations/List';
@@ -12,7 +12,6 @@ import Component from './Component';
 import Operation from './Operation';
 
 import { maskSecrets } from './helpers/error';
-import { getComponentTitle } from './helpers/component';
 
 export {
   Read,
@@ -30,14 +29,12 @@ export {
   // authorize:                   require('./helpers/authorize'),
   // getDefaultSchemaAttributes:  require('./helpers/getDefaultSchemaAttributes'),
 
-  // wait,
-  // execute,
-  // createAccessToken,
-
-  getOrFail,
+  got,
   maskSecrets,
-  getComponentTitle,
 };
 
+export * from './test';
 export * from './errors';
 export * from './security';
+
+export type * from './Context';

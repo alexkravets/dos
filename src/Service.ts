@@ -8,7 +8,7 @@ import InvalidOutputError from './errors/InvalidOutputError';
 import type { OriginalError } from './helpers/error';
 import { get, uniq, compact } from 'lodash';
 import OperationNotFoundError from './errors/OperationNotFoundError';
-import type { Context, Request } from './Context';
+import type { Context, Request, ExtraContext } from './Context';
 import { Schema, Validator, createSchemasMap, type ValidationError } from '@kravc/schema';
 import {
   authorize,
@@ -16,7 +16,6 @@ import {
   createContext,
   useOasMiddleware,
   useComposerMiddleware,
-  type ExtraContext
 } from './helpers/service';
 
 const ROOT_PATH = process.cwd();

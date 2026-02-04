@@ -1,6 +1,8 @@
 import { get } from 'lodash';
+import pluralize from 'pluralize';
 import { Context } from './Context';
 import { withSafeAttributes } from './helpers/component';
+import { startCase, capitalize } from 'lodash';
 import { Schema, Validator, got } from '@kravc/schema';
 
 type Attributes = Record<string, unknown>;
@@ -48,6 +50,44 @@ class Component {
   static get mutationSchema(): Schema | undefined {
     return this.schema;
   }
+
+  /**
+   * Converts a component name into a human-readable title for use in API documentation,
+   * error messages, operation summaries, and other user-facing text.
+   *
+   * **Intent:**
+   * This function transforms camelCase or PascalCase component names (e.g., "UserProfile",
+   * "orderItem") into properly formatted, readable titles that can be used throughout the
+   * API specification and error messages. It handles pluralization and capitalization
+   * according to the context where the title will be displayed.
+   *
+   * **Use Cases:**
+   * - Generating error messages: "User profile is not found" or "Order item could not be created"
+   * - Creating operation summaries: "Index user profiles" or "Create order item"
+   * - Building query parameter descriptions: "User profile ID" or "Order item ID"
+   * - Generating OpenAPI tags and documentation strings
+   * - Creating consistent, human-readable labels from component class names
+   *
+   * @param Component - An object with a `name` property containing the component name
+   * @param isCapitalized - Whether to capitalize the first letter (default: true)
+   * @param isPlural - Whether to pluralize the title (default: false)
+   * @returns A formatted, human-readable title string
+   */
+  static getTitle = (isCapitalized: boolean = true, isPlural: boolean = false): string => {
+    const { name } = this;
+
+    let componentTitle = startCase(name).toLowerCase();
+
+    if (isPlural) {
+      componentTitle = pluralize(componentTitle);
+    }
+
+    if (isCapitalized) {
+      componentTitle = capitalize(componentTitle);
+    }
+
+    return componentTitle;
+  };
 
   /** Returns component instance ID. */
   get id(): string | null {

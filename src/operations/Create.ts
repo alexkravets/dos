@@ -1,6 +1,5 @@
 import Operation from '../Operation';
 import Component from '../Component';
-import { getComponentTitle } from '../helpers/component';
 
 /** Returns class for a create operation. */
 const Create = (
@@ -12,7 +11,7 @@ const Create = (
       ' function');
   }
 
-  const componentTitle = getComponentTitle(ComponentClass);
+  const componentTitle = ComponentClass.getTitle();
 
   /** Create operation class */
   return class extends Operation {

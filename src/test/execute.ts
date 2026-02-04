@@ -1,65 +1,63 @@
-const SUCCESS_HTTP_CODES = [200, 201, 204];
+import Service from '../Service';
+import { type ErrorAttributes } from '../helpers/error';
+import type { ExtraContext, Headers, MutationMap, InternalRequest } from '../Context';
+
+const SUCCESS_HTTP_CODES = [ 200, 201, 204 ];
 const NO_RESPONSE_HTTP_CODE = 204;
 
-// export declare function execute(service: Service, extraContext?: Record<string, unknown>):
-//   {
-//     request: (
-//       operationId: string,
-//       parameters: OperationParameters,
-//       headers: Headers
-//     ) => Promise<Data>;
-//     expectError: (
-//       operationId: string,
-//       parameters: OperationParameters,
-//       headers: Headers,
-//       errorName: string
-//     ) => Promise<OperationError>;
-//   }
+type Parameters = {
+  mutation?: MutationMap;
+  [index: string]: unknown;
+}
 
-// eslint-disable-next-line jsdoc/require-jsdoc
-const execute = (service, extraContext) => {
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  const exec = async (operationId, input = {}, headers = {}) => {
-    const {
-      mutation: body,
-      ...queryStringParameters
-    } = input;
+type SuccessResult = { data: Record<string, unknown>; };
+type ErrorResult = { error: ErrorAttributes; };
+type Result = SuccessResult | ErrorResult;
+
+/** Returns helpers to process requests successfully or expect an error. */
+const execute = (service: Service, extraContext: ExtraContext) => {
+  /** Processes an operation parameters via service. */
+  const exec = async (operationId: string, parameters: Parameters = {}, headers: Headers = {}) => {
+    const { mutation: body, ...queryStringParameters } = parameters;
 
     const request = {
       body,
       headers,
       operationId,
       queryStringParameters
-    };
+    } as InternalRequest;
 
-    const response = await service.handler(request, extraContext);
+    const response = await service.process(request, extraContext);
 
     let result;
 
     if (response.body) {
-      result = JSON.parse(response.body);
+      result = JSON.parse(response.body) as Result;
     }
 
     return { ...response, result };
   };
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  const request = async (operationId, parameters, headers) => {
-    const { statusCode, result } = await exec(operationId, parameters, headers);
+  /** Processes an operation parameters via service, expects successfull response. */
+  const request = async (operationId: string, parameters: Parameters = {}, headers: Headers = {}) => {
+    const {
+      result,
+      statusCode,
+    } = await exec(operationId, parameters, headers);
 
-    let error;
     let data;
 
     const isResultExpected = statusCode !== NO_RESPONSE_HTTP_CODE;
 
     if (isResultExpected) {
-      error = result.error;
-      data = result.data;
+      data = (result as SuccessResult).data;
     }
 
     const isSuccess = SUCCESS_HTTP_CODES.includes(statusCode);
 
     if (!isSuccess) {
+       const { error } = (result as ErrorResult);
+
       console.error(`\x1b[31mRequestError for "${operationId}"\x1b[37m`);
       console.dir({ operationId, parameters, error }, { depth: null });
 
@@ -69,21 +67,25 @@ const execute = (service, extraContext) => {
     return data;
   };
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
-  const expectError = async (operationId, parameters, headers, errorCode) => {
-    const { statusCode, result } = await exec(operationId, parameters, headers);
-
-    const error = result.error;
-    const data = result.data;
+  /** Processes an operation parameters via service, expects an error with a specific code. */
+  const expectError = async (errorCode: string, operationId: string, parameters: Parameters = {}, headers: Headers = {}) => {
+    const {
+      result,
+      statusCode,
+    } = await exec(operationId, parameters, headers);
 
     const isSuccess = SUCCESS_HTTP_CODES.includes(statusCode);
 
     if (isSuccess) {
+      const { data } = (result as SuccessResult);
+
       console.error(`\x1b[31mSuccess NOT expected for "${operationId}"\x1b[37m`);
       console.dir({ operationId, statusCode, parameters, data }, { depth: null });
 
       throw Error(`Success NOT expected for "${operationId}"`);
     }
+
+    const { error } = (result as ErrorResult);
 
     const isExpectedCode = error.code === errorCode;
 

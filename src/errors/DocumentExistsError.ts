@@ -1,5 +1,5 @@
+import Component from '../Component';
 import CommonError from './CommonError';
-import { getComponentTitle } from '../helpers/component';
 
 /**
  * Document Exists Error
@@ -49,8 +49,8 @@ class DocumentExistsError extends CommonError {
    *                    `{ email: 'user@example.com' }`). These are included in the error message
    *                    as formatted JSON for debugging.
    */
-  constructor(Document: { name: string }, parameters: Record<string, unknown>) {
-    const documentTitle = getComponentTitle(Document);
+  constructor(Document: typeof Component, parameters: Record<string, unknown>) {
+    const documentTitle = Document.getTitle();
     const jsonParameters = JSON.stringify(parameters, null, 2);
 
     super('DocumentExistsError', `${documentTitle} already exists ${jsonParameters}`);
