@@ -5,11 +5,9 @@ import { withSafeAttributes } from './helpers/component';
 import { startCase, capitalize } from 'lodash';
 import { Schema, Validator, got } from '@kravc/schema';
 
-type Attributes = Record<string, unknown>;
-
 /** Component */
-class Component {
-  private static _schema?: Schema;
+class Component<Attributes> {
+  protected static _schema?: Schema;
 
   private _id?: string;
   private _context: Context;
@@ -23,7 +21,7 @@ class Component {
     this._validator = got(context, 'validator', `Validator is undefined for "${this.componentId}:${this.id}"`) as Validator;
     this._attributes = attributes;
 
-    return withSafeAttributes<Component>(this);
+    return withSafeAttributes<Component<Attributes>>(this);
   }
 
   /** Flags if a component class. */
@@ -124,7 +122,5 @@ class Component {
     return this._validator.validate(this.json, this.componentId);
   }
 }
-
-export type ComponentConstructor = new (context: Context, attributes: Attributes) => Component;
 
 export default Component;

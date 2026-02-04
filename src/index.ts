@@ -8,6 +8,7 @@ import Update from './operations/Update';
 import Delete from './operations/Delete';
 
 import Service from './Service';
+import Document from './Document';
 import Component from './Component';
 import Operation from './Operation';
 
@@ -21,6 +22,7 @@ export {
   Update,
   Delete,
   Service,
+  Document,
   Operation,
   Component,
 

@@ -3,17 +3,17 @@ error:
 
   properties:
     code:
+      required: true
       description: Error code
-      required:    true
 
     message:
+      required: true
       description: Error message
-      required:    true
 
     statusCode:
+      type: integer
+      required: true
       description: HTTP error status code
-      type:        integer
-      required:    true
 
     validationErrors:
       description: Validation errors
