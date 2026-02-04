@@ -12,9 +12,8 @@ import Document from './Document';
 import Component from './Component';
 import Operation from './Operation';
 
-import { maskSecrets } from './helpers/error';
-
 export {
+  got,
   Read,
   List,
   Index,
@@ -25,14 +24,6 @@ export {
   Document,
   Operation,
   Component,
-
-  // Document:                    require('./Document'),
-
-  // authorize:                   require('./helpers/authorize'),
-  // getDefaultSchemaAttributes:  require('./helpers/getDefaultSchemaAttributes'),
-
-  got,
-  maskSecrets,
 };
 
 export * from './test';

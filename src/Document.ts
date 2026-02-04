@@ -1,48 +1,53 @@
 import { ulid } from 'ulid';
 import Component from './Component';
-import { Schema } from '@kravc/schema';
 import type { Context, QueryMap } from './Context';
-import { get, capitalize, cloneDeep } from 'lodash';
-import { type PropertiesSchemaSource } from '@kravc/schema';
+import { get, set, omit, capitalize } from 'lodash';
+import { Schema, type PropertiesSchemaSource } from '@kravc/schema';
+import { DocumentExistsError, DocumentNotFoundError } from './errors/';
 
-// import { get, omit,  } from 'lodash';
-// import { DocumentExistsError, DocumentNotFoundError } from './errors/';
-
-const DEFAULT_ID_KEY = 'id';
+const DEFAULT_PARTITION_KEY = 'partition';
 
 // const SYSTEM = 'SYSTEM';
 // const IDENTITY_SUBJECT_PATH = 'identity.sub';
 
-type Item = {
-  id: string;
-  [index: string]: unknown;
-};
-
-const _MEMORY_STORE = {} as Record<string, Record<string, Item>>;
-
 type Constructor<T, D extends Document<T> = Document<T>> = {
   new(context: Context, attributes: T): D;
+
+  _extendWithPartition(context: Context, parameters: Record<string, unknown>): void;
+
+  _index(query: QueryMap, options: IndexOptions): Promise<{
+    count: number;
+    items: T[];
+    lastEvaluatedKey?: string;
+  }>;
+
+  _indexAll(query: QueryMap, options: IndexAllOptions): Promise<{
+    count: number;
+    items: T[];
+  }>;
+
+  _read(query: QueryMap, options: unknown): Promise<T>;
 };
 
-type IndexOptions = {
+export type IndexOptions = {
   sort?: 'asc' | 'desc';
   limit?: number;
   index?: string;
   exclusiveStartKey?: string;
 }
 
-type IndexAllOptions = {
+export type IndexAllOptions = {
   sort?: 'asc' | 'desc';
   index?: string;
 }
 
-/** Document store in memory storage. */
+/** Abstract document class. */
 class Document<Attributes> extends Component<Attributes> {
   private static _bodySchema: Schema;
 
-  /** Returns ID key of a document. */
-  static get idKey(): string {
-    return DEFAULT_ID_KEY;
+  /** Returns partition key of a document. */
+  static get partitionKey(): string {
+    return DEFAULT_PARTITION_KEY;
   }
 
   /** Returns prefix for new IDs. */
@@ -106,35 +111,23 @@ class Document<Attributes> extends Component<Attributes> {
     return this._bodySchema;
   }
 
-  /** Implements storage interface to get documents in batches. */
+  /** Returns partition to save document based on context and parameters. */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static async _index(query: QueryMap, _options: IndexOptions | IndexAllOptions) {
-    const collectionName = this.name;
-    const collection = _MEMORY_STORE[collectionName] || {};
-
-    /** Filters result item to match query. */
-    const filter = (item: Item) =>
-      Object
-        .keys(query)
-        .every(key => item[key] === query[key]);
-
-    const items = Object
-      .values(collection)
-      .filter(filter)
-      .map(cloneDeep);
-
-    const count = items.length;
-
-    return {
-      items,
-      count,
-      lastEvaluatedKey: undefined,
-    };
+  static getPartition(_context: Context, _parameters: Record<string, unknown>): string | undefined {
+    return undefined;
   }
 
-  /** Implements storage interface to get all documents. */
-  static async _indexAll(query: QueryMap, options: IndexAllOptions = {}) {
-    return this._index(query, options);
+  /** Extends parameters with partition of a document. */
+  static _extendWithPartition(context: Context, parameters: Record<string, unknown>): void {
+    const klass = (this as unknown as typeof Document);
+
+    const partition = klass.getPartition(context, parameters);
+
+    if (!partition) {
+      return;
+    }
+
+    set(parameters, klass.partitionKey, partition);
   }
 
   /** Returns documents in batches. */
@@ -148,12 +141,12 @@ class Document<Attributes> extends Component<Attributes> {
     objects: D[];
     lastEvaluatedKey?: string;
   }> {
-    // this._extendWithPartition(context, query);
+    this._extendWithPartition(context, query);
 
-    const { items, ...rest } = await (this as unknown as typeof Document)._index(query, options);
-    const objects = (items as T[]).map(attributes => new this(context, attributes));
+    const { items, count, lastEvaluatedKey, ...otherPagination } = await this._index(query, options);
+    const objects = items.map(attributes => new this(context, attributes));
 
-    return { objects, ...rest };
+    return { objects, count, lastEvaluatedKey, ...otherPagination };
   }
 
   /** Returns all documents. */
@@ -166,22 +159,33 @@ class Document<Attributes> extends Component<Attributes> {
     count: number;
     objects: D[];
   }> {
-    // this._extendWithPartition(context, query);
+    this._extendWithPartition(context, query);
 
-    const { items, ...rest } = await (this as unknown as typeof Document)._index(query, options);
-    const objects = (items as T[]).map(attributes => new this(context, attributes));
+    const { items, count } = await this._indexAll(query, options);
+    const objects = items.map(attributes => new this(context, attributes));
 
-    return { objects, ...rest };
+    return { objects, count };
   }
 
-  // // eslint-disable-next-line jsdoc/require-jsdoc
-  // static _extendWithPartition(context, parameters) {
-  //   if (!this.getPartition) {
-  //     return;
-  //   }
+  /** Returns a document by ID attribute. */
+  static async read<T, D extends Document<T> = Document<T>>(
+    this: Constructor<T, D>,
+    context: Context,
+    query: QueryMap,
+    options?: unknown
+  ): Promise<D> {
+    this._extendWithPartition(context, query);
 
-  //   parameters.partition = this.getPartition(context, parameters);
-  // }
+    const item = await this._read(query, options);
+
+    if (!item) {
+      throw new DocumentNotFoundError((this as unknown as typeof Document), { query, options });
+    }
+
+    const object = new this(context, item);
+
+    return object;
+  }
 
   // // eslint-disable-next-line jsdoc/require-jsdoc
   // static _extendWithCreatedStamps(context, mutation) {
@@ -248,26 +252,6 @@ class Document<Attributes> extends Component<Attributes> {
   //   }
 
   //   return false;
-  // }
-
-  // // eslint-disable-next-line jsdoc/require-jsdoc
-  // static async read(context, query, options) {
-  //   this._extendWithPartition(context, query);
-
-  //   const item = await this._read(query, options);
-
-  //   if (!item) {
-  //     throw new DocumentNotFoundError(this, { query, options });
-  //   }
-
-  //   const document = new this(context, item);
-
-  //   return document;
-  // }
-
-  // // eslint-disable-next-line jsdoc/require-jsdoc
-  // static _read({ id = 'NONE' }) {
-  //   return cloneDeep(get(STORE, `${this.name}.${id}`));
   // }
 
   // // eslint-disable-next-line jsdoc/require-jsdoc
@@ -367,6 +351,17 @@ class Document<Attributes> extends Component<Attributes> {
   // static _reset() {
   //   STORE[this.name] = null;
   // }
+
+
+
+
+
+
+
+
+
+
+
 
   // // eslint-disable-next-line jsdoc/require-jsdoc
   // delete() {

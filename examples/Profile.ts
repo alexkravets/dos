@@ -40,8 +40,18 @@ const indexAllProfiles = async () => {
   }
 };
 
+// eslint-disable-next-line jsdoc/require-jsdoc
+const readProfile = async () => {
+  const query = { id: 'PRO_1' };
+  const profile = await Profile.read(context, query);
+
+  const name = profile.id;
+  console.log({ name });
+};
+
 createProfile();
 indexProfiles();
 indexAllProfiles();
+readProfile();
 
 export default Profile;

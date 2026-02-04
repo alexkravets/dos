@@ -5,23 +5,32 @@ import { withSafeAttributes } from './helpers/component';
 import { startCase, capitalize } from 'lodash';
 import { Schema, Validator, got } from '@kravc/schema';
 
+const DEFAULT_ID_KEY = 'id';
+
 /** Component */
 class Component<Attributes> {
   protected static _schema?: Schema;
 
-  private _id?: string;
+  private _id: string | null;
   private _context: Context;
   private _validator: Validator;
   private _attributes: Attributes;
 
   /** Creates an instance of the component in the context with specified attributes. */
   constructor(context: Context, attributes: Attributes) {
-    this._id = get(attributes, 'id') as string;
+    const idKey = get(this.constructor, 'idKey')!;
+
+    this._id = get(attributes, idKey, null) as string;
     this._context = context;
     this._validator = got(context, 'validator', `Validator is undefined for "${this.componentId}:${this.id}"`) as Validator;
     this._attributes = attributes;
 
     return withSafeAttributes<Component<Attributes>>(this);
+  }
+
+  /** Returns ID key of a component. */
+  static get idKey(): string {
+    return DEFAULT_ID_KEY;
   }
 
   /** Flags if a component class. */
@@ -88,8 +97,8 @@ class Component<Attributes> {
   };
 
   /** Returns component instance ID. */
-  get id(): string | null {
-    return this._id || null;
+  get id() {
+    return this._id;
   }
 
   /** Returns context of the component instance. */
