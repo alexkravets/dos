@@ -1,8 +1,8 @@
-import { type Context, Document } from '../src';
+import { type Context, MemoryDocument } from '../src';
 import { ProfileAttributes } from './ProfileAttributes';
 
 /** Profile document */
-class Profile extends Document<ProfileAttributes> {
+class Profile extends MemoryDocument<ProfileAttributes> {
   /** Returns profile name. */
   get name() {
     return this.attributes.name;
