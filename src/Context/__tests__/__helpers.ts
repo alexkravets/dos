@@ -10,14 +10,14 @@ const DEFAULT_LAMBDA_REQUEST = {
   operationId,
 } as LambdaRequest;
 
-export const profileAttributesSchema = new Schema({
+export const profileSchema = new Schema({
   id: { required: true },
   name: {}
-}, 'ProfileAttributes');
+}, 'Profile');
 
 /** Creates an instace of an operation context. */
 export const createContext = (request: Request = DEFAULT_LAMBDA_REQUEST): Context => {
-  const validator = new Validator([ profileAttributesSchema ]);
+  const validator = new Validator([ profileSchema ]);
 
   const spec = {
     basePath: '/api',

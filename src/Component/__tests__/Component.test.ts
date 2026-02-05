@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import Component from '../';
-import { createContext, profileAttributesSchema } from '../../Context/__tests__/__helpers';
+import { createContext, profileSchema } from '../../Context/__tests__/__helpers';
 
 export type ProfileAttributes = {
   id: string;
@@ -26,10 +26,18 @@ describe('Component', () => {
       expect(() => get(profile, 'undefinedAttribute'))
         .toThrow('"undefinedAttribute" property or method is undefined for Profile instance');
     });
+
+    it('creates component when ID is missing', () => {
+      const profile = new Profile(context, { name: 'John Doe' } as ProfileAttributes);
+
+      expect(profile.id).toBeNull();
+      expect(profile.attributes).toEqual({ name: 'John Doe' });
+    });
   });
 
   describe('Component.idKey', () => {
     it('returns default ID attribute key', () => {
+      expect(Profile.idKey).toEqual('id');
     });
   });
 
@@ -54,7 +62,7 @@ describe('Component', () => {
 
   describe('Component.schema =', () => {
     it('sets component schema', () => {
-      Profile.schema = profileAttributesSchema;
+      Profile.schema = profileSchema;
 
       expect(Profile.schema).toBeDefined();
       expect(Profile.mutationSchema).toBeDefined();
@@ -73,18 +81,30 @@ describe('Component', () => {
     it('returns plural component title', () => {
       expect(Profile.getTitle(false, true)).toEqual('profiles');
     });
+
+    it('returns capitalized plural component title', () => {
+      expect(Profile.getTitle(true, true)).toEqual('Profiles');
+    });
   });
 
   describe('.id', () => {
     it('returns ID', () => {
       const profile = new Profile(context, attributes);
+
       expect(profile.id).toEqual('PRO_1');
+    });
+
+    it('returns null when ID attribute is missing', () => {
+      const profile = new Profile(context, { name: 'John Doe' } as ProfileAttributes);
+
+      expect(profile.id).toBeNull();
     });
   });
 
   describe('.context', () => {
     it('returns context', () => {
       const profile = new Profile(context, attributes);
+
       expect(profile.context).toBeDefined();
     });
   });
@@ -92,20 +112,31 @@ describe('Component', () => {
   describe('.attributes', () => {
     it('returns component attributes', () => {
       const profile = new Profile(context, attributes);
-      expect(profile.context).toBeDefined();
+
+      expect(profile.attributes).toBeDefined();
     });
   });
 
   describe('.componentId', () => {
     it('returns component class ID', () => {
       const profile = new Profile(context, attributes);
+
       expect(profile.componentId).toEqual('Profile');
+    });
+  });
+
+  describe('.toJSON()', () => {
+    it('returns component attributes for JSON serialization', () => {
+      const profile = new Profile(context, attributes);
+
+      expect(profile.toJSON()).toEqual(attributes);
     });
   });
 
   describe('.json', () => {
     it('returns normalized component attributes', () => {
       const profile = new Profile(context, attributes);
+
       expect(profile.json).toEqual({
         id: 'PRO_1',
         name: 'John Doe'
@@ -116,8 +147,15 @@ describe('Component', () => {
   describe('.validate()', () => {
     it('throws validation error if invalid attributes', () => {
       const profile = new Profile(context, {} as ProfileAttributes);
+
       expect(() => profile.validate())
-        .toThrow('"ProfileAttributes" validation failed');
+        .toThrow('"Profile" validation failed');
+    });
+
+    it('validates successfully if attributes are valid', () => {
+      const profile = new Profile(context, attributes);
+
+      expect(() => profile.validate()).not.toThrow();
     });
   });
 });
