@@ -109,6 +109,15 @@ class Document<Attributes> extends Component<Attributes> {
     this._bodySchema = schema.clone(`${this.id}Body`);
   }
 
+  /** Returns schema to validate document attributes. */
+  static get schema(): Schema {
+    if (!this._schema) {
+      throw new Error(`Schema is not set for ${this.name}`);
+    }
+
+    return this._schema;
+  }
+
   /** Returns body schema to validate attributes for the update method. */
   static get bodySchema() {
     return this._bodySchema;
