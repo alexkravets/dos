@@ -2,13 +2,13 @@ import { get } from 'lodash';
 import getHttpPath from './getHttpPath';
 import getHttpMethod from './getHttpMethod';
 import { OpenAPIV2 } from 'openapi-types';
-import type { Request, InternalRequest } from './Request';
+import type { Request, LambdaRequest } from './Request';
 
 const UNDEFINED_VALUE = 'undefined';
 
 /** Returns operation ID for a request. */
 const getOperationId = (spec: OpenAPIV2.Document, request: Request): string => {
-  const { operationId } = request as InternalRequest;
+  const { operationId } = request as LambdaRequest;
 
   if (operationId) {
     return operationId;

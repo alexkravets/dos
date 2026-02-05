@@ -1,6 +1,6 @@
 import Service from '../Service';
 import { type ErrorAttributes } from '../errors';
-import type { ExtraContext, Headers, MutationMap, InternalRequest } from '../../Context';
+import type { ExtraContext, Headers, MutationMap, LambdaRequest } from '../../Context';
 
 const SUCCESS_HTTP_CODES = [ 200, 201, 204 ];
 const NO_RESPONSE_HTTP_CODE = 204;
@@ -25,7 +25,7 @@ const execute = (service: Service, extraContext: ExtraContext) => {
       headers,
       operationId,
       queryStringParameters
-    } as InternalRequest;
+    } as LambdaRequest;
 
     const response = await service.process(request, extraContext);
 

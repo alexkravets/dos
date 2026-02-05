@@ -4,11 +4,11 @@ import type { MutationMap, Request } from './Request';
 /** Returns mutation parameters of a request. */
 const getMutationParameters = (request: Request) => {
   const result = {
-    bodyJson: undefined,
-    mutation: undefined,
+    bodyJson: null,
+    mutation: null,
   } as {
-    bodyJson?: string;
-    mutation?: MutationMap;
+    bodyJson: string | null;
+    mutation: MutationMap | null;
   };
 
   const { body } = request;

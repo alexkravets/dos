@@ -4,13 +4,16 @@ import { capitalize } from 'lodash';
 
 /** Returns class for an list operation. */
 const List = (
-  ComponentClass: typeof Component,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ComponentClass: any,
   componentAction: string = 'indexAll'
 ): typeof Operation => {
   if (!ComponentClass) {
     throw new Error('Argument "ComponentClass" is undefined for "List"' +
       ' operation function');
   }
+
+  ComponentClass = ComponentClass as unknown as typeof Component;
 
   const documentTitle = ComponentClass.getTitle(false, true);
 

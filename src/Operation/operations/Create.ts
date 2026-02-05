@@ -3,13 +3,16 @@ import Component from '../../Component';
 
 /** Returns class for a create operation. */
 const Create = (
-  ComponentClass: typeof Component,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ComponentClass: any,
   componentAction: string = Operation.types.CREATE
 ): typeof Operation => {
-  if (!ComponentClass) {
+  if (!Component) {
     throw new Error('Argument "ComponentClass" is undefined for "Create" operation' +
       ' function');
   }
+
+  ComponentClass = ComponentClass as unknown as typeof Component;
 
   const componentTitle = ComponentClass.getTitle();
 

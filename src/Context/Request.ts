@@ -13,8 +13,8 @@ export type Headers = Record<string, unknown>;
 export type QueryMap = Record<string, unknown>;
 export type MutationMap = Record<string, unknown>;
 
-export type InternalRequest = {
-  body?: MutationMap;
+export type LambdaRequest = {
+  body?: string | MutationMap;
   headers: Headers;
   operationId: string;
   queryStringParameters?: QueryMap;
@@ -30,7 +30,6 @@ export type HttpRequest = {
   requestContext?: {
     requestId?: string;
   };
-  queryStringParameters?: QueryMap;
 };
 
-export type Request = HttpRequest | InternalRequest;
+export type Request = HttpRequest | LambdaRequest;

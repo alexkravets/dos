@@ -1,4 +1,4 @@
-import { type Context, MemoryDocument } from '../src';
+import { type Context, MemoryDocument } from '../../../src';
 import { ProfileAttributes } from './ProfileAttributes';
 
 /** Profile document */

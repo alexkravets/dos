@@ -1,4 +1,3 @@
-import { get } from 'lodash';
 import { got } from '@kravc/schema';
 
 /**
@@ -21,7 +20,7 @@ import { got } from '@kravc/schema';
  * 3. **Promise Prevention**: Prevent objects from being accidentally treated as Promises in async contexts
  * 4. **Type Safety**: Provide runtime validation complementing TypeScript's compile-time checks
  */
-function withSafeAttributes<T>(targetInstance: T): T {
+function withSafeAttributes<T>(targetInstance: T, className: string): T {
   return new Proxy(targetInstance as object, {
     /** Ensures attribute is defined as property or method of the instance. */
     get(target: Record<string, unknown>, prop: string) {
@@ -31,9 +30,7 @@ function withSafeAttributes<T>(targetInstance: T): T {
         return undefined;
       }
 
-      const className = get(targetInstance, 'name', 'NoNameClass');
-      const errorTemplate = `"$PATH" property or method is undefined for ${className}`;
-
+      const errorTemplate = `"$PATH" property or method is undefined for ${className} instance`;
       return got(target, prop, errorTemplate);
     }
   }) as T;

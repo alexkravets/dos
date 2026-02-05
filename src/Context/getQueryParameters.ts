@@ -17,7 +17,7 @@ const getQueryParameters = (request: Request): QueryMap => {
   if (queryStringParameters) {
     const keys = Object.keys(queryStringParameters);
 
-    for (const key in keys) {
+    for (const key of keys) {
       const value = queryStringParameters[key] as string;
       queryStringParameters[key] = decodeURIComponent(value);
     }
@@ -27,12 +27,13 @@ const getQueryParameters = (request: Request): QueryMap => {
 
   const queryKeys = Object.keys(parameters);
 
+
   for (const queryKey of queryKeys) {
     const value = parameters[queryKey] as string;
-    const isJsonArray = `${value}`.startsWith('["');
+    const isArrayOfStrings = `${value}`.startsWith('["');
 
-    if (isJsonArray) {
-      parameters[queryKey] = JSON.parse(value);
+    if (isArrayOfStrings) {
+      parameters[queryKey] = JSON.parse(`${value}`);
     }
   }
 

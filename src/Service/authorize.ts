@@ -1,5 +1,5 @@
+import Context from '../Context';
 import { OpenAPIV2 } from 'openapi-types';
-import type { Context } from '../Context';
 import { UnauthorizedError, AccessDeniedError } from '../Operation';
 
 export type ErrorResponse = {
@@ -17,9 +17,11 @@ type VerificationResultError = {
   error: UnauthorizedError | AccessDeniedError;
 }
 
-type Requirement = {
+export type VerificationResult = VerificationResultSuccess| VerificationResultError;
+
+export type Requirement = {
   errors: Record<string, ErrorResponse>;
-  verify: (context: Context) => Promise<VerificationResultSuccess| VerificationResultError>;
+  verify: (context: Context) => Promise<VerificationResult>;
   definition: OpenAPIV2.SecuritySchemeApiKey;
 }
 

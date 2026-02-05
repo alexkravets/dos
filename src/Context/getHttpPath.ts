@@ -1,11 +1,11 @@
 import { parse } from 'url';
 import { OpenAPIV2 } from 'openapi-types';
-import type { Request, InternalRequest, HttpRequest } from './Request';
+import type { Request, LambdaRequest, HttpRequest } from './Request';
 
 /** Returns HTTP path of a request. */
 const getHttpPath = (spec: OpenAPIV2.Document, request: Request): string => {
   const { basePath } = spec;
-  const { operationId } = request as InternalRequest;
+  const { operationId } = request as LambdaRequest;
 
   if (operationId) {
     return `/${operationId}`;
@@ -19,7 +19,9 @@ const getHttpPath = (spec: OpenAPIV2.Document, request: Request): string => {
     path = parse(httpRequest.url!, true).pathname!;
   }
 
-  const httpPath = path.replace(basePath!, '/');
+  const httpPath = path
+    .replace(basePath!, '/')
+    .replace('//', '/');
 
   return httpPath;
 };

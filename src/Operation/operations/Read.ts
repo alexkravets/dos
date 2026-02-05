@@ -3,13 +3,16 @@ import Component from '../../Component';
 
 /** Returns class for a read operation. */
 const Read = (
-  ComponentClass: typeof Component,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ComponentClass: any,
   componentAction: string = Operation.types.READ
 ): typeof Operation => {
   if (!ComponentClass) {
     throw new Error('Argument "Component" is undefined for "Read" operation' +
       ' function');
   }
+
+  ComponentClass = ComponentClass as unknown as typeof Component;
 
   const componentTitle = ComponentClass.getTitle();
   const componentTitleLower = componentTitle.toLowerCase();

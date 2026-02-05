@@ -1,6 +1,7 @@
 import { get } from 'lodash';
 import Context from '../../Context';
 import AccessDeniedError from '../errors/AccessDeniedError';
+import type { Requirement, VerificationResult } from '../../Service/authorize';
 
 const SYSTEM_NAME = 'System';
 const DESCRIPTION = 'This security definition and a header for system' +
@@ -49,7 +50,7 @@ class SystemAuthorization {
   }
 
   /** Creates an instance of system authorization security. */
-  static createRequirement(options: RequirementOptions = {}) {
+  static createRequirement(options: RequirementOptions = {}): Record<string, Requirement> {
     const name = get(options, 'name', DEFAULT_HEADER_NAME);
     const description = get(options, 'description', DESCRIPTION);
     const requirementName = get(options, 'requirementName', SYSTEM_NAME);
@@ -83,7 +84,7 @@ class SystemAuthorization {
   }
 
   /** Verifies System authorization. */
-  async verify(context: Context) {
+  async verify(context: Context): Promise<VerificationResult> {
     const [ isAccessOk, accessErrorMessage ] = await this._verifyAccess(context);
 
     if (!isAccessOk) {

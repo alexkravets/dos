@@ -7,3 +7,5 @@ export {
   JwtAuthorization,
   SystemAuthorization
 };
+
+export type * from './JwtAuthorization';

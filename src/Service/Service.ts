@@ -3,8 +3,8 @@ import Operation from '../Operation';
 import { OpenAPIV2 } from 'openapi-types';
 import { createSpec } from './spec';
 import { get, uniq, compact } from 'lodash';
-import { Schema, Validator, createSchemasMap, type ValidationError } from '@kravc/schema';
 import Context, { type Request, type ExtraContext } from '../Context';
+import { Schema, Validator, createSchemasMap, type ValidationError } from '@kravc/schema';
 
 import {
   type OriginalError,
@@ -136,7 +136,7 @@ class Service {
   }
 
   /** Processes incoming request. */
-  async process(request: Request, extraContext: ExtraContext) {
+  async process(request: Request, extraContext: ExtraContext = {}) {
     const context = new Context(this, request, extraContext);
 
     const result =

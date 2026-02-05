@@ -22,13 +22,16 @@ type PageInfo = {
 
 /** Returns class for an index operation. */
 const Index = (
-  ComponentClass: typeof Component,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ComponentClass: any,
   componentAction: string = 'index'
 ): typeof Operation => {
   if (!ComponentClass) {
     throw new Error('Argument "ComponentClass" is undefined for "Index"' +
       ' operation function');
   }
+
+  ComponentClass = ComponentClass as unknown as typeof Component;
 
   const documentTitle = ComponentClass.getTitle(false, true);
 

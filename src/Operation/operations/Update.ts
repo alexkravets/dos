@@ -3,13 +3,16 @@ import Component from '../../Component';
 
 /** Returns class for an update operation. */
 const Update = (
-  ComponentClass: typeof Component,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ComponentClass: any,
   componentAction: string = Operation.types.UPDATE
 ): typeof Operation => {
   if (!ComponentClass) {
     throw new Error('Argument "ComponentClass" is undefined for "Update" operation' +
       ' function');
   }
+
+  ComponentClass = ComponentClass as unknown as typeof Component;
 
   const componentTitle = ComponentClass.getTitle();
   const componentTitleLower = componentTitle.toLowerCase();

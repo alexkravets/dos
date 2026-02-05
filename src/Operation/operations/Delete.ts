@@ -3,13 +3,16 @@ import Component from '../../Component';
 
 /** Returns class for a delete operation. */
 const Delete = (
-  ComponentClass: typeof Component,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ComponentClass: any,
   componentAction: string = Operation.types.DELETE
 ): typeof Operation => {
   if (!ComponentClass) {
     throw new Error('Argument "ComponentClass" is undefined for "Delete" operation' +
       ' function');
   }
+
+  ComponentClass = ComponentClass as unknown as typeof Component;
 
   const componentTitle = ComponentClass.getTitle();
   const componentTitleLower = componentTitle.toLowerCase();

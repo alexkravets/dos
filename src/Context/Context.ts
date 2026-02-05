@@ -3,7 +3,7 @@ import getHttpPath from './getHttpPath';
 import { Validator } from '@kravc/schema';
 import { OpenAPIV2 } from 'openapi-types';
 import getHttpMethod from './getHttpMethod';
-import { v4 as uuid } from 'uuid';
+import { randomUUID } from 'crypto';
 import getOperationId from './getOperationId';
 import withSafeAttributes from './withSafeAttributes';
 import getQueryParameters from './getQueryParameters';
@@ -30,9 +30,9 @@ class Context {
   public logger: Logger;
   public headers: Headers;
   public httpPath: string;
-  public bodyJson?: string;
-  public mutation?: MutationMap;
-  public identity?: Identity;
+  public bodyJson: string | null;
+  public mutation: MutationMap | null;
+  public identity: Identity;
   public requestId: string;
   public validator: Validator;
   public httpMethod: string;
@@ -54,9 +54,10 @@ class Context {
     this.query = getQueryParameters(request);
     this.logger = logger;
     this.headers = headers;
+    this.identity = {};
     this.httpPath = getHttpPath(spec, request);
     this.validator = validator;
-    this.requestId = get(request, 'requestContext.requestId', uuid());
+    this.requestId = get(request, 'requestContext.requestId', randomUUID());
     this.httpMethod = getHttpMethod(spec, request);
     this.operationId = getOperationId(spec, request);
     this.requestReceivedAt = new Date().toISOString();
@@ -66,7 +67,7 @@ class Context {
     this.bodyJson = bodyJson;
     this.mutation = mutation;
 
-    return withSafeAttributes<Context>(this);
+    return withSafeAttributes<Context>(this, 'Context');
   }
 };
 

@@ -14,15 +14,16 @@ class Component<Attributes> {
   private _context: Context;
   private _attributes: Attributes;
 
-  /** Creates an instance of the component in the context with specified attributes. */
+  /** Creates an instance of the component with execution context and attributes. */
   constructor(context: Context, attributes: Attributes) {
     const idKey = get(this.constructor, 'idKey')!;
+    const className = get(this.constructor, 'name')!;
 
     this._id = get(attributes, idKey, null) as string;
     this._context = context;
     this._attributes = attributes;
 
-    return withSafeAttributes<Component<Attributes>>(this);
+    return withSafeAttributes<Component<Attributes>>(this, className);
   }
 
   /** Returns ID key of a component. */

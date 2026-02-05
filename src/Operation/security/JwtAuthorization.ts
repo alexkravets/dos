@@ -5,6 +5,7 @@ import AccessDeniedError from '../errors/AccessDeniedError';
 import UnauthorizedError from '../errors/UnauthorizedError';
 import { get, capitalize } from 'lodash';
 import { decode, type Algorithm } from 'jsonwebtoken';
+import type { VerificationResult, Requirement } from '../../Service/authorize';
 
 type Claims = Record<string, unknown>;
 
@@ -76,7 +77,7 @@ class JwtAuthorization {
   }
 
   /** Returns specification for JWT authorization security requirement. */
-  static createRequirement(options: RequirementOptions) {
+  static createRequirement(options: RequirementOptions): Record<string, Requirement> {
     const name = get(options, 'name', DEFAULT_HEADER_NAME);
     const cookieName = get(options, 'cookieName', name);
     const description = get(options, 'description');
@@ -115,7 +116,7 @@ class JwtAuthorization {
   }
 
   /** Verifies JWT authorization. */
-  async verify(context: Context) {
+  async verify(context: Context): Promise<VerificationResult> {
     let token: string | undefined;
 
     const { headers } = context;
@@ -183,7 +184,7 @@ class JwtAuthorization {
 
     return {
       isAuthorized: true,
-      ...normalizedClaims
+      claims: normalizedClaims
     };
   }
 }

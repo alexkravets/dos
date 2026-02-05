@@ -28,11 +28,13 @@ class Operation {
 
   /** Creates an instance of operation. */
   constructor(context: Context) {
+    const className = get(this.constructor, 'id')!;
+
     this._context = context;
     this._headers = {};
     this._multiValueHeaders = {};
 
-    return withSafeAttributes(this);
+    return withSafeAttributes(this, className);
   }
 
   /** Flags if a component class. */
