@@ -78,7 +78,7 @@ class Component<Attributes> {
    * @param isPlural - Whether to pluralize the title (default: false)
    * @returns A formatted, human-readable title string
    */
-  static getTitle = (isCapitalized: boolean = true, isPlural: boolean = false): string => {
+  static getTitle(isCapitalized: boolean = true, isPlural: boolean = false): string {
     const { name } = this;
 
     let componentTitle = startCase(name).toLowerCase();
@@ -114,7 +114,7 @@ class Component<Attributes> {
     return get(this.constructor, 'id')!;
   }
 
-  /** Returns JSON stringified component attributes. */
+  /** Returns normalized component attributes. */
   get json() {
     return JSON.parse(JSON.stringify(this));
   }
@@ -126,7 +126,7 @@ class Component<Attributes> {
 
   /** Validates component JSON stringified attributes. */
   validate() {
-    return this._context.validator.validate(this.json, this.componentId);
+    return this._context.validator.validate(this.json, `${this.componentId}Attributes`);
   }
 }
 

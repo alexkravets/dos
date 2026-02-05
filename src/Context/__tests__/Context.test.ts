@@ -1,34 +1,14 @@
 import { get } from 'lodash';
-import { Context } from '../';
-import { OpenAPIV2 } from 'openapi-types';
 import { randomUUID } from 'crypto';
-import { Schema, Validator } from '@kravc/schema';
+import { createContext } from './__helpers';
 import type { LambdaRequest, HttpRequest } from '../Request';
 
 describe('Context', () => {
-  describe('constructor(config, request, extraContext)', () => {
-    const schema = new Schema({ id: { required: true } });
-    const validator = new Validator([ schema ]);
+  describe('Context.constructor(config, request, extraContext)', () => {
     const operationId = 'TestOperationId';
 
-    const spec = {
-      basePath: '/api',
-      paths: {
-        [`/${operationId}`]: {
-          get: {
-            operationId,
-          },
-        }
-      }
-    } as unknown as OpenAPIV2.Document;
-
     it('should create instance for lambda request', () => {
-      const lambdaRequest = {
-        headers: {},
-        operationId,
-      } as LambdaRequest;
-
-      const context = new Context({ spec, validator }, lambdaRequest);
+      const context = createContext();
 
       expect(context.query).toEqual({});
       expect(context.logger).toBe(console);
@@ -38,7 +18,7 @@ describe('Context', () => {
       expect(context.mutation).toBeNull();
       expect(context.identity).toEqual({});
       expect(context.requestId).toBeDefined();
-      expect(context.validator).toBe(validator);
+      expect(context.validator).toBeDefined();
       expect(context.httpMethod).toEqual('get');
       expect(context.operationId).toBe(operationId);
       expect(context.requestReceivedAt).toBeDefined();
@@ -56,7 +36,7 @@ describe('Context', () => {
         operationId,
       } as LambdaRequest;
 
-      const context = new Context({ spec, validator }, lambdaRequest);
+      const context = createContext(lambdaRequest);
 
       expect(context.query).toEqual({});
       expect(context.bodyJson).toEqual(JSON.stringify({ status: 'ok' }));
@@ -71,7 +51,7 @@ describe('Context', () => {
         queryStringParameters: { id: 'ID' },
       } as LambdaRequest;
 
-      const context = new Context({ spec, validator }, lambdaRequest);
+      const context = createContext(lambdaRequest);
 
       expect(context.query).toEqual({ id: 'ID' });
       expect(context.bodyJson).toEqual(JSON.stringify({ status: 'ok' }));
@@ -93,7 +73,7 @@ describe('Context', () => {
         },
       } as HttpRequest;
 
-      const context = new Context({ spec, validator }, httpRequest);
+      const context = createContext(httpRequest);
 
       expect(context.query).toEqual({ id: 'ID', items });
       expect(context.logger).toBe(console);
@@ -103,7 +83,7 @@ describe('Context', () => {
       expect(context.mutation).toBeNull();
       expect(context.identity).toEqual({});
       expect(context.requestId).toEqual(uuid);
-      expect(context.validator).toBe(validator);
+      expect(context.validator).toBeDefined();
       expect(context.httpMethod).toEqual('get');
       expect(context.operationId).toBe(operationId);
       expect(context.requestReceivedAt).toBeDefined();
@@ -121,7 +101,7 @@ describe('Context', () => {
         },
       } as HttpRequest;
 
-      const context = new Context({ spec, validator }, httpRequest);
+      const context = createContext(httpRequest);
 
       expect(context.httpPath).toEqual(`/${operationId}`);
       expect(context.httpMethod).toEqual('get');

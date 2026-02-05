@@ -24,7 +24,10 @@ const DEFAULT_URL = 'http://localhost:3000/';
 const DEFAULT_SERVICE_PATH = `${ROOT_PATH}/src`;
 const DEFAULT_SKIP_OPERATIONS = [] as string[];
 
-type Module = typeof Operation | typeof Component;
+type Module = {
+  id: string;
+  get isComponent(): boolean;
+};
 
 type Options = {
   url?: string;
