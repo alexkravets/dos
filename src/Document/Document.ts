@@ -226,8 +226,8 @@ class Document<Attributes> extends Component<Attributes> {
     //       checks existence of the document via before hooks. If it does
     //       exist, they add it to the context. Then the operation's action
     //       method would do nothing and just return the document from the context.
-    const createdDocument = get(context, 'createdDocument') as unknown as D;
-    const shouldNotCreate = !!createdDocument && createdDocument.constructor.name === this.name;
+    const createdDocument = context.createdDocument as unknown as D;
+    const shouldNotCreate = !!createdDocument && createdDocument.componentId === this.name;
 
     if (shouldNotCreate) {
       return createdDocument;

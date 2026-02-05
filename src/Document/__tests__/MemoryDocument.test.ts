@@ -1,10 +1,9 @@
-import { get } from 'lodash';
 import { MemoryDocument } from '../';
+import { DocumentExistsError, DocumentNotFoundError } from '../../Operation';
 import { createContext, profileSchema } from '../../Context/__tests__/__helpers';
 
 export type ProfileAttributes = {
-  id: string;
-  name?: string;
+  name: string;
 };
 
 /** Profile document. */
@@ -21,21 +20,8 @@ describe('MemoryDocument', () => {
   const context = createContext();
 
   const attributes = {
-    id: 'PRO_1',
     name: 'John Doe'
   };
-
-  describe('MemoryDocument.constructor(context = {}, attributes = {})', () => {
-    it('creates component with valid context and attributes', () => {
-      const profile = new Profile(context, attributes);
-
-      expect(profile.id).toEqual('PRO_1');
-      expect(profile.name).toEqual('John Doe');
-
-      expect(() => get(profile, 'undefinedAttribute'))
-        .toThrow('"undefinedAttribute" property or method is undefined for Profile instance');
-    });
-  });
 
   describe('MemoryDocument.partitionKey', () => {
     it('returns default partition key', () => {
@@ -80,41 +66,116 @@ describe('MemoryDocument', () => {
     });
   });
 
-  // // eslint-disable-next-line jsdoc/require-jsdoc
-  // const createProfile = () => {
-  //   const attributes = { id: 'PRO_1' };
-  //   const profile = new Profile(context, attributes);
+  describe('MemoryDocument.collection', () => {
+    it('initializes collection for documents', () => {
+      expect(Profile.collection).toEqual({});
+    });
+  });
 
-  //   const name = profile.name;
-  //   console.log({ name });
-  // };
+  describe('MemoryDocument.create(context, query, mutation)', () => {
+    beforeEach(async () => {
+      await Profile.reset();
+      context.createdDocument = null;
+    });
 
-  // // eslint-disable-next-line jsdoc/require-jsdoc
-  // const indexProfiles = async () => {
-  //   const { objects: profiles } = await Profile.index(context);
-  //   const [ _profile ] = profiles;
+    it('creates a document from mutation', async () => {
+      const profile = await Profile.create(context, {}, attributes);
 
-  //   if (_profile) {
-  //     console.log(_profile.name);
-  //   }
-  // };
+      expect(profile.id).toBeDefined();
+      expect(profile.name).toEqual('John Doe');
+    });
 
-  // // eslint-disable-next-line jsdoc/require-jsdoc
-  // const indexAllProfiles = async () => {
-  //   const { objects: profiles } = await Profile.indexAll(context);
-  //   const [ _profile ] = profiles;
+    it('creates a document from query', async () => {
+      const profile = await Profile.create(context, attributes);
 
-  //   if (_profile) {
-  //     console.log(_profile.name);
-  //   }
-  // };
+      expect(profile.id).toBeDefined();
+      expect(profile.name).toEqual('John Doe');
+    });
 
-  // // eslint-disable-next-line jsdoc/require-jsdoc
-  // const readProfile = async () => {
-  //   const query = { id: 'PRO_1' };
-  //   const profile = await Profile.read(context, query);
+    it('returns created document from the context', async () => {
+      const createdProfile = await Profile.create(context, attributes);
+      context.createdDocument = createdProfile;
 
-  //   const name = profile.id;
-  //   console.log({ name });
-  // };
+      const profile = await Profile.create(context, attributes);
+
+      expect(profile.id).toEqual(createdProfile.id);
+    });
+
+    it('throws DocumentExistsError if document with specified ID already exists', async () => {
+      const createdProfile = await Profile.create(context, attributes);
+
+      const { id } = createdProfile;
+      const mutation = { id };
+
+      await expect(Profile.create(context, mutation))
+        .rejects
+        .toThrow(DocumentExistsError);
+    });
+  });
+
+  describe('MemoryDocument.read(context, query, options)', () => {
+    it('returns document by ID', async () => {
+      const createdProfile = await Profile.create(context, attributes);
+      const { id } = createdProfile;
+
+      const profile = await Profile.read(context, { id });
+
+      expect(profile.id).toEqual(createdProfile.id);
+    });
+
+    it('throws DocumentNotFoundError if document not found by ID', async () => {
+      await expect(Profile.read(context, { id: 'BAD_ID' }))
+        .rejects
+        .toThrow(DocumentNotFoundError);
+    });
+  });
+
+  describe('MemoryDocument.update(context, query, mutation)', () => {
+    it('updates a document', async () => {
+      const createdProfile = await Profile.create(context, attributes);
+      const { id } = createdProfile;
+
+      const mutation = { name: 'Jane Doe' };
+      const profile = await Profile.update(context, { id }, mutation);
+
+      expect(profile.name).toEqual('Jane Doe');
+    });
+
+    it.skip('throws DocumentNotFoundError if document not found by ID', async () => {
+      const mutation = { name: 'Jane Doe' };
+      await expect(Profile.update(context, { id: 'BAD_ID' }, mutation))
+        .rejects
+        .toThrow(DocumentNotFoundError);
+    });
+  });
+
+  describe('MemoryDocument.delete(context, query)', () => {
+    it('deletes a document', async () => {
+      const createdProfile = await Profile.create(context, attributes);
+      const { id } = createdProfile;
+
+      const deletedProfile = await Profile.delete(context, { id });
+
+      expect(deletedProfile.id).toEqual(id);
+      await expect(Profile.read(context, { id }))
+        .rejects
+        .toThrow(DocumentNotFoundError);
+    });
+
+    it('throws DocumentNotFoundError if document not found by ID', async () => {
+      await expect(Profile.delete(context, { id: 'BAD_ID' }))
+        .rejects
+        .toThrow(DocumentNotFoundError);
+    });
+  });
+
+  // describe('MemoryDocument.index()', () => {
+  //   it('returns documents in batches', () => {
+  //   });
+  // });
+
+  // describe('MemoryDocument.indexAll()', () => {
+  //   it('returns all documents', () => {
+  //   });
+  // });
 });

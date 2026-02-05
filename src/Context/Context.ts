@@ -39,6 +39,8 @@ class Context {
   public operationId: string;
   public requestReceivedAt: string;
 
+  private _createdDocument: unknown | null;
+
   /** Creates an instance of the context. */
   constructor(config: Config, request: Request, extraContext: ExtraContext = {}) {
     const { spec, validator } = config;
@@ -68,6 +70,16 @@ class Context {
     this.mutation = mutation;
 
     return withSafeAttributes<Context>(this, 'Context');
+  }
+
+  /** Returns created document. */
+  get createdDocument() {
+    return this._createdDocument || null;
+  }
+
+  /** Sets created document. */
+  set createdDocument(createdDocument: unknown) {
+    this._createdDocument = createdDocument;
   }
 };
 

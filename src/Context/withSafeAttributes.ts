@@ -24,9 +24,9 @@ function withSafeAttributes<T>(targetInstance: T, className: string): T {
   return new Proxy(targetInstance as object, {
     /** Ensures attribute is defined as property or method of the instance. */
     get(target: Record<string, unknown>, prop: string) {
-      const isThenProp = prop === 'then';
+      const shouldSkip = ['then'].includes(prop);
 
-      if (isThenProp) {
+      if (shouldSkip) {
         return undefined;
       }
 
