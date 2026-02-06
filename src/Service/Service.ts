@@ -3,8 +3,8 @@ import Operation from '../Operation';
 import { OpenAPIV2 } from 'openapi-types';
 import { createSpec } from './spec';
 import { get, uniq, compact } from 'lodash';
-import Context, { type Request, type ExtraContext } from '../Context';
 import { Schema, Validator, createSchemasMap, type ValidationError } from '@kravc/schema';
+import Context, { type ContextConfig, type Request, type ExtraContext } from '../Context';
 
 import {
   type OriginalError,
@@ -24,6 +24,13 @@ const DEFAULT_URL = 'http://localhost:3000/';
 const DEFAULT_SERVICE_PATH = `${ROOT_PATH}/src`;
 const DEFAULT_SKIP_OPERATIONS = [] as string[];
 
+/** Creates operation context using default Context class. */
+const createDefaultContext = (
+  config: ContextConfig,
+  request: Request,
+  extraContext: ExtraContext
+) => new Context(config, request, extraContext);
+
 type Module = {
   id: string;
   get isComponent(): boolean;
@@ -32,6 +39,7 @@ type Module = {
 type Options = {
   url?: string;
   path?: string;
+  createContext?: typeof createDefaultContext;
   skipOperations?: string[];
 };
 
@@ -40,6 +48,7 @@ class Service {
   private _url: string;
   private _spec: OpenAPIV2.Document;
   private _validator: Validator;
+  private _createContext: typeof createDefaultContext;
   private _operationsMap: Record<string, typeof Operation>;
 
   /** Creates service instance. */
@@ -54,6 +63,7 @@ class Service {
 
     const {
       path = DEFAULT_SERVICE_PATH,
+      createContext = createDefaultContext,
       skipOperations = DEFAULT_SKIP_OPERATIONS,
     } = options;
 
@@ -120,6 +130,7 @@ class Service {
     this._url = url;
     this._spec = spec;
     this._validator = validator;
+    this._createContext = createContext;
     this._operationsMap = operationsMap;
   }
 
@@ -140,7 +151,7 @@ class Service {
 
   /** Processes incoming request. */
   async process(request: Request, extraContext: ExtraContext = {}) {
-    const context = new Context(this, request, extraContext);
+    const context = this._createContext(this, request, extraContext);
 
     const result =
       useOasMiddleware(this, context) &&

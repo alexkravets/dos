@@ -88,8 +88,8 @@ describe('MemoryDocument', () => {
       expect(profile.id).toBeDefined();
       expect(profile.name).toEqual('John Doe');
       expect(profile.attributes.createdAt).toBeDefined();
-      expect(profile.attributes.createdBy).toBeDefined();
-      expect(profile.attributes.createdByUserFullname).toBeDefined();
+      expect(profile.attributes.createdBy).toEqual('SYSTEM');
+      expect(profile.attributes.createdByUserName).toBeNull();
     });
 
     it('creates a document from query', async () => {
@@ -97,6 +97,19 @@ describe('MemoryDocument', () => {
 
       expect(profile.id).toBeDefined();
       expect(profile.name).toEqual('John Doe');
+    });
+
+    it('creates a document with context identity', async () => {
+      const identity = { sub: 'TEST_USER_ID', name: 'John Doe' };
+      const context = createContext({ identity });
+
+      const profile = await Profile.create(context, attributes);
+
+      expect(profile.id).toBeDefined();
+      expect(profile.name).toEqual('John Doe');
+      expect(profile.attributes.createdAt).toBeDefined();
+      expect(profile.attributes.createdBy).toEqual('TEST_USER_ID');
+      expect(profile.attributes.createdByUserName).toEqual('John Doe');
     });
 
     it('returns created document from the context', async () => {
@@ -156,8 +169,24 @@ describe('MemoryDocument', () => {
 
       expect(profile.name).toEqual('Jane Doe');
       expect(profile.attributes.updatedAt).toBeDefined();
-      expect(profile.attributes.updatedBy).toBeDefined();
-      expect(profile.attributes.updatedByUserFullname).toBeDefined();
+      expect(profile.attributes.updatedBy).toEqual('SYSTEM');
+      expect(profile.attributes.updatedByUserName).toBeNull();
+    });
+
+    it('updates a document with context identity', async () => {
+      const identity = { sub: 'TEST_USER_ID', name: 'John Doe' };
+      const context = createContext({ identity });
+
+      const createdProfile = await Profile.create(context, attributes);
+      const { id } = createdProfile;
+
+      const mutation = { name: 'Jane Doe' };
+      const profile = await Profile.update(context, { id }, mutation);
+
+      expect(profile.name).toEqual('Jane Doe');
+      expect(profile.attributes.updatedAt).toBeDefined();
+      expect(profile.attributes.updatedBy).toEqual('TEST_USER_ID');
+      expect(profile.attributes.updatedByUserName).toEqual('John Doe');
     });
 
     it('throws DocumentNotFoundError if document not found by ID', async () => {
@@ -326,7 +355,7 @@ describe('MemoryDocument', () => {
         .not.toThrow();
     });
 
-    it('validates the document', async () => {
+    it('throws ValidationError for invalid document attributes', async () => {
       const profile = await Profile.create(context, { name: 'John Doe' });
       unset(profile, '_attributes.name');
 

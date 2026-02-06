@@ -2,7 +2,7 @@
 
 // NOTE: Run service example:
 // $ npm i --save-dev @kravc/http
-// $ ./node_modules/.bin/http ./test/example`
+// $ ./node_modules/.bin/http ./examples`
 
 import { Service, type Request } from '../src';
 import modules from './operations';

@@ -161,4 +161,55 @@ describe('Context', () => {
       expect(context.get('example')).toBeNull();
     });
   });
+
+  describe('.identityId)', () => {
+    it('returns users ID from context identity', () => {
+      const identity = { sub: 'TEST_USER_ID' };
+      const context = createContext({ identity });
+
+      expect(context.identityId).toEqual('TEST_USER_ID');
+    });
+
+    it('returns SYSTEM if context has no identity', () => {
+      const context = createContext();
+
+      expect(context.identityId).toEqual('SYSTEM');
+    });
+
+    it('returns SYSTEM if context identity has no subject claim', () => {
+      const identity = {};
+      const context = createContext({ identity });
+
+      expect(context.identityId).toEqual('SYSTEM');
+    });
+  });
+
+  describe('.identityName', () => {
+    it('returns users name from context identity name claim', () => {
+      const identity = { name: 'John Doe' };
+      const context = createContext({ identity });
+
+      expect(context.identityName).toEqual('John Doe');
+    });
+
+    it('returns users name from context identity first and last name claims', () => {
+      const identity = { firstName: 'John', lastName: 'Doe' };
+      const context = createContext({ identity });
+
+      expect(context.identityName).toEqual('John Doe');
+    });
+
+    it('returns null if context has no identity', () => {
+      const context = createContext();
+
+      expect(context.identityName).toBeNull();
+    });
+
+    it('returns null if context identity has no name related claims', () => {
+      const identity = {};
+      const context = createContext({ identity });
+
+      expect(context.identityName).toBeNull();
+    });
+  });
 });

@@ -1,6 +1,6 @@
-import { Context } from '../';
 import { OpenAPIV2 } from 'openapi-types';
 import { Schema, Validator } from '@kravc/schema';
+import { Context, type Identity } from '../../';
 import type { Request, LambdaRequest } from '../Request';
 
 const operationId = 'TestOperationId';
@@ -16,8 +16,9 @@ export const profileSchema = new Schema({
 }, 'Profile');
 
 type Props = {
-  request?: Request,
-  schemas?: Schema[],
+  request?: Request;
+  schemas?: Schema[];
+  identity?: Identity;
 };
 
 /** Creates an instace of an operation context. */
@@ -25,6 +26,7 @@ export const createContext = (props: Props = {}): Context => {
   const {
     request = DEFAULT_LAMBDA_REQUEST,
     schemas = [ profileSchema ],
+    identity = {},
   } = props;
 
   const validator = new Validator(schemas);
@@ -41,6 +43,7 @@ export const createContext = (props: Props = {}): Context => {
   } as unknown as OpenAPIV2.Document;
 
   const context = new Context({ spec, validator }, request);
+  context.identity = identity;
 
   return context;
 };

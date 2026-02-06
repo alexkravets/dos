@@ -17,13 +17,27 @@ import type {
   ExtraContext
 } from './Request';
 
-export type Runtime = Record<string, unknown>;
-export type Identity = Record<string, unknown>;
+type Runtime = Record<string, unknown>;
 
-type Config = {
+export type Identity = {
+  sub?: string;
+  name?: string;
+  email?: string;
+  lastName?: string;
+  firstName?: string;
+  [x: string]: unknown;
+}
+
+export type ContextConfig = {
   spec: OpenAPIV2.Document;
   validator: Validator,
 }
+
+const SYSTEM = 'SYSTEM';
+const IDENTITY_NAME_CLAIM = 'name';
+const IDENTITY_SUBJECT_CLAIM = 'sub';
+const IDENTITY_LAST_NAME_CLAIM = 'lastName';
+const IDENTITY_FIRST_NAME_CLAIM = 'firstName';
 
 /** Service request context. */
 class Context {
@@ -43,7 +57,7 @@ class Context {
   private _runtime: Runtime;
 
   /** Creates an instance of the context. */
-  constructor(config: Config, request: Request, extraContext: ExtraContext = {}) {
+  constructor(config: ContextConfig, request: Request, extraContext: ExtraContext = {}) {
     const { spec, validator } = config;
 
     const { logger = console, ...runtime } = extraContext;
@@ -96,6 +110,35 @@ class Context {
   /** Resets context runtime. */
   runtimeReset() {
     this._runtime = {};
+  }
+
+  /** Returns authenticated identity ID, or SYSTEM if missing. */
+  get identityId(): string {
+    return get(this.identity, IDENTITY_SUBJECT_CLAIM, SYSTEM);
+  }
+
+  /** Returns authenticated identity full name if present in claims. */
+  get identityName(): string | null {
+    let name = get(this.identity, IDENTITY_NAME_CLAIM);
+
+    if (name) {
+      return name;
+    }
+
+    const lastName = get(this.identity, IDENTITY_LAST_NAME_CLAIM, '');
+    const firstName = get(this.identity, IDENTITY_FIRST_NAME_CLAIM, '');
+
+    name = [ firstName, lastName ]
+      .map(item => item.trim())
+      .join(' ');
+
+    const isEmpty = name === ' ';
+
+    if (!isEmpty) {
+      return name;
+    }
+
+    return null;
   }
 };
 

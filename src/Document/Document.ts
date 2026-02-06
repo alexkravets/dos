@@ -8,9 +8,6 @@ const DEFAULT_INDEX_SORT = 'desc';
 const DEFAULT_INDEX_LIMIT = 300;
 const DEFAULT_PARTITION_KEY = 'partition';
 
-const SYSTEM = 'SYSTEM';
-const IDENTITY_SUBJECT_PATH = 'identity.sub';
-
 type Constructor<T, D extends Document<T> = Document<T>> = {
   new(context: Context, attributes: T): D;
 
@@ -49,11 +46,11 @@ export type IndexAllOptions = {
 export type DefaultAttributes = {
   id: string;
   createdAt: string;
-  createdBy?: string;
-  createdByUserFullname?: string;
+  createdBy: string;
+  createdByUserName?: string;
   updatedAt?: string;
   updatedBy?: string;
-  updatedByUserFullname?: string;
+  updatedByUserName?: string;
 };
 
 /** Abstract document class. */
@@ -114,9 +111,10 @@ class Document<Attributes> extends Component<Attributes> {
         required: true
       },
       createdBy: {
-        description: `ID of a user who created ${documentTitle}`
+        description: `ID of a user who created ${documentTitle}`,
+        required: true
       },
-      createdByUserFullname: {
+      createdByUserName: {
         description: `Name of a user who created ${documentTitle}`
       },
       updatedAt: {
@@ -126,7 +124,7 @@ class Document<Attributes> extends Component<Attributes> {
       updatedBy: {
         description: `ID of a user who updated ${documentTitle}`
       },
-      updatedByUserFullname: {
+      updatedByUserName: {
         description: `Name of a user who updated ${documentTitle}`
       }
     };
@@ -180,8 +178,8 @@ class Document<Attributes> extends Component<Attributes> {
     const timestamp = new Date().toJSON();
 
     mutation.createdAt = timestamp;
-    mutation.createdBy = get(context, IDENTITY_SUBJECT_PATH, SYSTEM);
-    mutation.createdByUserFullname = 'USER_FULL_NAME';
+    mutation.createdBy = context.identityId;
+    mutation.createdByUserName = context.identityName;
   }
 
   /** Extends mutation with updated stamps. */
@@ -189,8 +187,8 @@ class Document<Attributes> extends Component<Attributes> {
     const timestamp = new Date().toJSON();
 
     mutation.updatedAt = timestamp;
-    mutation.updatedBy = get(context, IDENTITY_SUBJECT_PATH, SYSTEM);
-    mutation.updatedByUserFullname = 'USER_FULL_NAME';
+    mutation.updatedBy = context.identityId;
+    mutation.updatedByUserName = context.identityName;
   }
 
   /** Returns documents in batches. */

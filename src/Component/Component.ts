@@ -104,8 +104,11 @@ class Component<Attributes> {
   }
 
   /** Validates component JSON stringified attributes. */
-  validate(): void {
-    return this._context.validator.validate(this.json, this.componentId);
+  validate() {
+    const shouldNullifyEmptyValues = false;
+    const shouldCleanupNulls = true;
+
+    return this._context.validator.validate(this.json, this.componentId, shouldNullifyEmptyValues, shouldCleanupNulls);
   }
 }
 
