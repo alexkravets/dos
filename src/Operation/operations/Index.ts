@@ -12,12 +12,11 @@ const DEFAULT_LIMIT = 20;
 const DEFAULT_LIMIT_MAX = 999;
 const DEFAULT_SORT_ORDER = SORT_ORDER.DESC;
 
-type PageInfo = {
+export type PageInfo = {
   sort: 'asc' | 'desc';
   count: number;
   limit: number;
-  lastEvaluatedKey: string;
-  exclusiveStartKey: string;
+  lastEvaluatedKey?: string;
 }
 
 /** Returns class for an index operation. */
@@ -26,7 +25,7 @@ const Index = (
   ComponentClass: any,
   componentAction: string = 'index'
 ): typeof Operation => {
-  if (!ComponentClass) {
+  if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "Index"' +
       ' operation function');
   }
@@ -100,24 +99,21 @@ const Index = (
         pageInfo: {
           required: true,
           properties: {
-            exclusiveStartKey: {
-              description: 'Exclusive start key specified for the request',
+            sort: {
+              enum: Object.values(SORT_ORDER),
+              description: 'Sort direction',
             },
-            lastEvaluatedKey: {
-              description: `Last evaluated key to get next batch of ${documentTitle}`,
+            count: {
+              type: 'integer',
+              description: `Number of ${documentTitle}`,
             },
             limit: {
               type: 'integer',
               description: `Limit number of ${documentTitle} to be returned`,
             },
-            count: {
-              type: 'integer',
-              description: `Number of of ${documentTitle}`,
+            lastEvaluatedKey: {
+              description: `Last evaluated key to get next batch of ${documentTitle}`,
             },
-            sort: {
-              enum: Object.values(SORT_ORDER),
-              description: 'Sort direction',
-            }
           }
         }
       };
@@ -145,21 +141,19 @@ const Index = (
       const result = await componentActionMethod(this.context, query, options);
 
       const {
+        objects: data,
         count,
-        objects,
         lastEvaluatedKey,
       } = result;
 
-      return {
-        data: objects,
-        pageInfo: {
-          sort,
-          count,
-          limit,
-          lastEvaluatedKey,
-          exclusiveStartKey
-        },
-      } as { data: Result, pageInfo: PageInfo };
+      const pageInfo = {
+        sort,
+        count,
+        limit,
+        lastEvaluatedKey,
+      } as PageInfo;
+
+      return { data, pageInfo } as { data: Result, pageInfo: PageInfo };
     }
   };
 };

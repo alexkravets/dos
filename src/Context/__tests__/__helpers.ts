@@ -49,6 +49,26 @@ export const createContext = (props: Props = {}): Context => {
           operationId: 'UpdateProfile',
         },
       },
+      ['/DeleteProfile']: {
+        delete: {
+          operationId: 'DeleteProfile',
+        },
+      },
+      ['/ReadProfile']: {
+        get: {
+          operationId: 'ReadProfile',
+        },
+      },
+      ['/IndexProfiles']: {
+        get: {
+          operationId: 'IndexProfiles',
+        },
+      },
+      ['/ListProfiles']: {
+        get: {
+          operationId: 'ListProfiles',
+        },
+      }
     }
   } as unknown as OpenAPIV2.Document;
 

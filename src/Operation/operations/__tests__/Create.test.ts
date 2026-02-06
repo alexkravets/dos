@@ -145,6 +145,7 @@ describe('Create(Document, actionMethod)', () => {
 
         expect(headers).toEqual({});
         expect(multiValueHeaders).toEqual({});
+
         expect((result.data as Profile).attributes.name).toEqual('John Doe');
       });
     });

@@ -1,6 +1,6 @@
 import Component from '../../Component';
-import Operation from '../Operation';
 import { capitalize } from 'lodash';
+import Operation, { type Result } from '../Operation';
 
 /** Returns class for an list operation. */
 const List = (
@@ -8,7 +8,7 @@ const List = (
   ComponentClass: any,
   componentAction: string = 'indexAll'
 ): typeof Operation => {
-  if (!ComponentClass) {
+  if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "List"' +
       ' operation function');
   }
@@ -21,7 +21,8 @@ const List = (
   return class extends Operation {
     /** Returns summary for an index operation. */
     static get summary() {
-      return capitalize(`${componentAction} ${documentTitle}`);
+      const action = componentAction.replace('indexAll', 'list');
+      return capitalize(`${action} ${documentTitle}`);
     }
 
     /** Returns component class for an index operation. */
@@ -32,6 +33,28 @@ const List = (
     /** Returns component action name for an index operation. */
     static get componentAction() {
       return componentAction;
+    }
+
+    /** Executes components list action. */
+    async action(parameters: Record<string, unknown>) {
+      const {
+        sort,
+        index,
+        ...query
+      } = parameters;
+
+      const options = {
+        sort,
+        index,
+      };
+
+      const { componentActionMethod } = this.constructor as typeof Operation;
+
+      const result = await componentActionMethod(this.context, query, options);
+
+      const { objects } = result;
+
+      return { data: objects } as { data: Result };
     }
   };
 };

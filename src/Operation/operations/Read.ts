@@ -7,8 +7,8 @@ const Read = (
   ComponentClass: any,
   componentAction: string = Operation.types.READ
 ): typeof Operation => {
-  if (!ComponentClass) {
-    throw new Error('Argument "Component" is undefined for "Read" operation' +
+  if (!ComponentClass?.isComponent) {
+    throw new Error('Argument "ComponentClass" is undefined for "Read" operation' +
       ' function');
   }
 

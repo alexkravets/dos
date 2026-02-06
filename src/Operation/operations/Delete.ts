@@ -7,7 +7,7 @@ const Delete = (
   ComponentClass: any,
   componentAction: string = Operation.types.DELETE
 ): typeof Operation => {
-  if (!ComponentClass) {
+  if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "Delete" operation' +
       ' function');
   }

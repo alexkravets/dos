@@ -106,8 +106,13 @@ class Operation {
       throw new Error('Operation ID is undefined');
     }
 
-    const isIndex = this.componentAction === 'index';
-    const actionName = startCase(this.componentAction);
+    const isIndex = [
+      'index',
+      'indexAll'
+    ].includes(this.componentAction);
+
+    const componentAction = this.componentAction.replace('indexAll', 'list');
+    const actionName = startCase(componentAction);
 
     if (isIndex) {
       const componentTitlePlural = pluralize(startCase(this.componentName));
@@ -177,6 +182,12 @@ class Operation {
       };
     }
 
+    errors.UnprocessibleConditionError = {
+      statusCode: 422,
+      description: 'Operation failed to process the request cause of expected' +
+        ' exit condition'
+    };
+
     if (this.outputSchema) {
       errors.InvalidOutputError = {
         statusCode: 500,
@@ -184,12 +195,6 @@ class Operation {
           ' to be addressed by service developer'
       };
     }
-
-    errors.UnprocessibleConditionError = {
-      statusCode: 422,
-      description: 'Operation failed to process the request cause of expected' +
-        ' exit condition'
-    };
 
     return errors;
   }
