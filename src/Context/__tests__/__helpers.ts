@@ -15,9 +15,19 @@ export const profileSchema = new Schema({
   name: {}
 }, 'Profile');
 
+type Props = {
+  request?: Request,
+  schemas?: Schema[],
+};
+
 /** Creates an instace of an operation context. */
-export const createContext = (request: Request = DEFAULT_LAMBDA_REQUEST): Context => {
-  const validator = new Validator([ profileSchema ]);
+export const createContext = (props: Props = {}): Context => {
+  const {
+    request = DEFAULT_LAMBDA_REQUEST,
+    schemas = [ profileSchema ],
+  } = props;
+
+  const validator = new Validator(schemas);
 
   const spec = {
     basePath: '/api',

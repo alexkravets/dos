@@ -1,14 +1,16 @@
+import { got } from '@kravc/schema';
 import { MemoryDocument } from '../';
-import { DocumentExistsError, DocumentNotFoundError } from '../../Operation';
+import Context, { type MutationMap } from '../../Context';
 import { createContext, profileSchema } from '../../Context/__tests__/__helpers';
+import { DocumentExistsError, DocumentNotFoundError } from '../../Operation';
 
 export type ProfileAttributes = {
   name: string;
 };
 
-/** Profile document. */
+/** Example of a default document. */
 class Profile extends MemoryDocument<ProfileAttributes> {
-  /** Returns name. */
+  /** Returns a profile name. */
   get name() {
     return this.attributes.name;
   }
@@ -16,12 +18,30 @@ class Profile extends MemoryDocument<ProfileAttributes> {
 
 Profile.schema = profileSchema;
 
+/** Example of a document with custom getPartition method. */
+class User extends MemoryDocument<ProfileAttributes> {
+  /** Returns custom partition based off parameters. */
+  static getPartition(_context: Context, parameters: MutationMap) {
+    const name = got(parameters, 'name') as string;
+    const partition = name[0].toUpperCase();
+
+    return partition;
+  }
+}
+
+User.schema = profileSchema;
+
 describe('MemoryDocument', () => {
-  const context = createContext();
+  const context = createContext({ schemas: [ Profile.schema, User.schema ] });
 
   const attributes = {
     name: 'John Doe'
   };
+
+  beforeEach(async () => {
+    await Profile.reset();
+    context.createdDocument = null;
+  });
 
   describe('MemoryDocument.partitionKey', () => {
     it('returns default partition key', () => {
@@ -52,17 +72,20 @@ describe('MemoryDocument', () => {
       const schema = profileSchema.extend(Profile.defaultAttributesSchemaSource, 'Profile');
       expect(Profile.schema).toEqual(schema);
     });
+
+    it('throws exception if document schema is not defined', () => {
+      /** No schema document example. */
+      class NoSchemaProfile extends MemoryDocument<ProfileAttributes> {
+      }
+
+      expect(() => NoSchemaProfile.schema)
+        .toThrow('Schema is not set for "NoSchemaProfile"');
+    });
   });
 
   describe('MemoryDocument.bodySchema', () => {
     it('returns document body schema', () => {
       expect(Profile.bodySchema.source).toEqual(profileSchema.source);
-    });
-  });
-
-  describe('MemoryDocument.getPartition(context, parameters)', () => {
-    it('returns default partition', () => {
-      expect(Profile.getPartition(context, {})).toBeUndefined();
     });
   });
 
@@ -73,11 +96,6 @@ describe('MemoryDocument', () => {
   });
 
   describe('MemoryDocument.create(context, query, mutation)', () => {
-    beforeEach(async () => {
-      await Profile.reset();
-      context.createdDocument = null;
-    });
-
     it('creates a document from mutation', async () => {
       const profile = await Profile.create(context, {}, attributes);
 
@@ -141,7 +159,7 @@ describe('MemoryDocument', () => {
       expect(profile.name).toEqual('Jane Doe');
     });
 
-    it.skip('throws DocumentNotFoundError if document not found by ID', async () => {
+    it('throws DocumentNotFoundError if document not found by ID', async () => {
       const mutation = { name: 'Jane Doe' };
       await expect(Profile.update(context, { id: 'BAD_ID' }, mutation))
         .rejects
@@ -169,13 +187,47 @@ describe('MemoryDocument', () => {
     });
   });
 
-  // describe('MemoryDocument.index()', () => {
-  //   it('returns documents in batches', () => {
-  //   });
-  // });
+  describe('MemoryDocument.indexAll(context, query, options)', () => {
+    it('returns all documents', async () => {
+      const createdProfile = await Profile.create(context, attributes);
 
-  // describe('MemoryDocument.indexAll()', () => {
-  //   it('returns all documents', () => {
-  //   });
-  // });
+      const { count, objects } = await Profile.indexAll(context);
+
+      expect(count).toEqual(1);
+
+      const [ profile ] = objects;
+      expect(profile.id).toEqual(createdProfile.id);
+    });
+  });
+
+  describe('MemoryDocument.index(context, query, options)', () => {
+    it('returns documents in batches', async () => {
+      await Profile.create(context, { name: 'John Doe' });
+      await Profile.create(context, { name: 'Josh Doe' });
+      await Profile.create(context, { name: 'Jenn Doe' });
+      await Profile.create(context, { name: 'James Doe' });
+
+      const { count, objects, lastEvaluatedKey } = await Profile.index(context);
+
+      expect(count).toEqual(4);
+      expect(objects.length).toEqual(4);
+      expect(lastEvaluatedKey).toBeUndefined();
+    });
+  });
+
+  describe('MemoryDocument.getPartition(context, parameters)', () => {
+    it('returns default partition', () => {
+      expect(Profile.getPartition(context, {})).toBeUndefined();
+    });
+
+    it('supports custom method', async () => {
+      await User.create(context, { name: 'John Doe' });
+
+      const { count: count0 } = await User.index(context, { partition: 'A' });
+      const { count: count1 } = await User.index(context, { partition: 'J' });
+
+      expect(count0).toEqual(0);
+      expect(count1).toEqual(1);
+    });
+  });
 });

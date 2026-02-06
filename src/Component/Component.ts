@@ -43,7 +43,7 @@ class Component<Attributes> {
 
   /** Attaches schema to validate component attributes. */
   static set schema(schema: Schema) {
-    this._schema = schema;
+    this._schema = schema.clone(this.id);
   }
 
   /** Returns schema to validate component attributes. */
@@ -56,28 +56,7 @@ class Component<Attributes> {
     return this.schema;
   }
 
-  /**
-   * Converts a component name into a human-readable title for use in API documentation,
-   * error messages, operation summaries, and other user-facing text.
-   *
-   * **Intent:**
-   * This function transforms camelCase or PascalCase component names (e.g., "UserProfile",
-   * "orderItem") into properly formatted, readable titles that can be used throughout the
-   * API specification and error messages. It handles pluralization and capitalization
-   * according to the context where the title will be displayed.
-   *
-   * **Use Cases:**
-   * - Generating error messages: "User profile is not found" or "Order item could not be created"
-   * - Creating operation summaries: "Index user profiles" or "Create order item"
-   * - Building query parameter descriptions: "User profile ID" or "Order item ID"
-   * - Generating OpenAPI tags and documentation strings
-   * - Creating consistent, human-readable labels from component class names
-   *
-   * @param Component - An object with a `name` property containing the component name
-   * @param isCapitalized - Whether to capitalize the first letter (default: true)
-   * @param isPlural - Whether to pluralize the title (default: false)
-   * @returns A formatted, human-readable title string
-   */
+  /** Converts a component name into a human-readable title. */
   static getTitle(isCapitalized: boolean = true, isPlural: boolean = false): string {
     const { name } = this;
 

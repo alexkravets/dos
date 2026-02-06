@@ -7,3 +7,5 @@ export * from './Document';
 export * from './Operation';
 export * from './Service';
 export * from './Context';
+
+export type * from './Context';

@@ -45,12 +45,24 @@ class MemoryDocument<T> extends Document<T> {
         .keys(query)
         .every(key => item[key] === query[key]);
 
+    // TODO: Add sorted collection.
+
+    // TODO: Add support for limit.
+
+    // TODO: Add support for exclusiveStartKey.
+
     const items = Object
       .values(this.collection)
       .filter(filter)
       .map(cloneDeep) as T[];
 
     const count = items.length;
+
+    // TODO: Add support for lastEvaluatedKey.
+
+    if (count > 1000) {
+      console.log('TODO');
+    }
 
     return {
       items,
@@ -102,8 +114,11 @@ class MemoryDocument<T> extends Document<T> {
   static async _update<T>(query: QueryMap, mutation: MutationMap): Promise<T> {
     const idValue = got(query, this.idKey, 'Query parameter "$PATH" is required') as string;
 
-    const componentTitle = this.getTitle();
-    const item = got(this.collection, idValue, `${componentTitle} with ID "$PATH" is not found`) as T;
+    const item = get(this.collection, idValue) as T;
+
+    if (!item) {
+      throw new DocumentNotFoundError(this, query);
+    }
 
     set(this.collection, idValue, { ...item, ...mutation });
 
@@ -114,11 +129,8 @@ class MemoryDocument<T> extends Document<T> {
   static async _delete<T>(query: QueryMap): Promise<void> {
     const idValue = got(query, this.idKey, 'Query parameter "$PATH" is required') as string;
 
-    const item = get(this.collection, idValue) as T;
-
-    if (!item) {
-      throw new DocumentNotFoundError(this, query);
-    }
+    const componentTitle = this.getTitle();
+    got(this.collection, idValue, `${componentTitle} with ID "$PATH" is not found`) as T;
 
     unset(this.collection, idValue);
   }

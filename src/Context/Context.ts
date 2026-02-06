@@ -1,6 +1,6 @@
-import { get } from 'lodash';
 import getHttpPath from './getHttpPath';
-import { Validator } from '@kravc/schema';
+import { get, set } from 'lodash';
+import { got, Validator } from '@kravc/schema';
 import { OpenAPIV2 } from 'openapi-types';
 import getHttpMethod from './getHttpMethod';
 import { randomUUID } from 'crypto';
@@ -17,6 +17,7 @@ import type {
   ExtraContext
 } from './Request';
 
+export type Runtime = Record<string, unknown>;
 export type Identity = Record<string, unknown>;
 
 type Config = {
@@ -39,13 +40,13 @@ class Context {
   public operationId: string;
   public requestReceivedAt: string;
 
-  private _createdDocument: unknown | null;
+  private _runtime: Runtime;
 
   /** Creates an instance of the context. */
   constructor(config: Config, request: Request, extraContext: ExtraContext = {}) {
     const { spec, validator } = config;
 
-    const { logger = console } = extraContext;
+    const { logger = console, ...runtime } = extraContext;
 
     const headers = {} as Headers;
 
@@ -69,17 +70,24 @@ class Context {
     this.bodyJson = bodyJson;
     this.mutation = mutation;
 
+    this._runtime = runtime;
+
     return withSafeAttributes<Context>(this, 'Context');
   }
 
-  /** Returns created document. */
-  get createdDocument() {
-    return this._createdDocument || null;
+  /** Adds variable to the context runtime. */
+  set(path: string, value: unknown) {
+    set(this._runtime, path, value);
   }
 
-  /** Sets created document. */
-  set createdDocument(createdDocument: unknown) {
-    this._createdDocument = createdDocument;
+  /** Returns variable from the context runtime. */
+  get(path: string): unknown | null {
+    return get(this._runtime, path, null);
+  }
+
+  /** Returns variable from the context runtime if exists, otherwise throws exception. */
+  got<T>(path: string): T {
+    return got(this._runtime, path) as T;
   }
 };
 

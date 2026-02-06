@@ -112,7 +112,7 @@ class Document<Attributes> extends Component<Attributes> {
   /** Returns schema to validate document attributes. */
   static get schema(): Schema {
     if (!this._schema) {
-      throw new Error(`Schema is not set for ${this.name}`);
+      throw new Error(`Schema is not set for "${this.id}"`);
     }
 
     return this._schema;
@@ -131,6 +131,12 @@ class Document<Attributes> extends Component<Attributes> {
 
   /** Extends parameters with partition of a document. */
   static _extendWithPartition(context: Context, parameters: Record<string, unknown>): void {
+    const hasPartition = !!get(parameters, this.partitionKey);
+
+    if (hasPartition) {
+      return;
+    }
+
     const partition = this.getPartition(context, parameters);
 
     if (!partition) {
@@ -226,7 +232,7 @@ class Document<Attributes> extends Component<Attributes> {
     //       checks existence of the document via before hooks. If it does
     //       exist, they add it to the context. Then the operation's action
     //       method would do nothing and just return the document from the context.
-    const createdDocument = context.createdDocument as unknown as D;
+    const createdDocument = context.createdDocument as D;
     const shouldNotCreate = !!createdDocument && createdDocument.componentId === this.name;
 
     if (shouldNotCreate) {
@@ -285,11 +291,25 @@ class Document<Attributes> extends Component<Attributes> {
 
     await _this.beforeUpdate(context, query, mutation);
 
-    /* NOTE: ensure that document to be updated exists and save it in the
-             context so can be referenced in the after action helper */
-    // if (!originalDocument) {
-    //   originalDocument = await _this.read(context, query);
-    // }
+    /* NOTE: In some workflows operation before action helper may be doing
+             some verifications with the document to be updated. Here we
+             allow to cache it in the context. */
+    let previousDocument
+
+    const hasPreviousDocument =
+
+    if (context.previousDocument) {
+
+    } as T;
+
+    !!createdDocument && createdDocument.componentId === this.name;
+
+    /* NOTE: Ensure that document to be updated exists and save it in the
+             context so can be referenced in the after action helper. */
+    if (!previousDocument) {
+      const previousAttributes = await this._read(query, {});
+      previousDocument = new this(context, previousAttributes);
+    }
 
     const updatedAttributes = await this._update(query, mutation) as T;
     const object = new this(context, updatedAttributes);

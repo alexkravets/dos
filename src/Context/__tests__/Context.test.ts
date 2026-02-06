@@ -30,13 +30,13 @@ describe('Context', () => {
     });
 
     it('should create instance for lambda request with body JSON', () => {
-      const lambdaRequest = {
+      const request = {
         body: JSON.stringify({ status: 'ok' }),
         headers: {},
         operationId,
       } as LambdaRequest;
 
-      const context = createContext(lambdaRequest);
+      const context = createContext({ request });
 
       expect(context.query).toEqual({});
       expect(context.bodyJson).toEqual(JSON.stringify({ status: 'ok' }));
@@ -44,14 +44,14 @@ describe('Context', () => {
     });
 
     it('should create instance for lambda request with body object and query string parameters', () => {
-      const lambdaRequest = {
+      const request = {
         body: { status: 'ok' },
         headers: {},
         operationId,
         queryStringParameters: { id: 'ID' },
       } as LambdaRequest;
 
-      const context = createContext(lambdaRequest);
+      const context = createContext({ request });
 
       expect(context.query).toEqual({ id: 'ID' });
       expect(context.bodyJson).toEqual(JSON.stringify({ status: 'ok' }));
@@ -63,7 +63,7 @@ describe('Context', () => {
       const items = ['a', 'b', 'c'];
       const itemsJson = JSON.stringify(items);
 
-      const httpRequest = {
+      const request = {
         url: `http://localhost/api/${operationId}?id=ID&items=${itemsJson}`,
         path: `/api/${operationId}`,
         method: 'get',
@@ -73,7 +73,7 @@ describe('Context', () => {
         },
       } as HttpRequest;
 
-      const context = createContext(httpRequest);
+      const context = createContext({ request });
 
       expect(context.query).toEqual({ id: 'ID', items });
       expect(context.logger).toBe(console);
@@ -92,7 +92,7 @@ describe('Context', () => {
     it('should create instance for HTTP request with httpMethod and without path', () => {
       const uuid = randomUUID();
 
-      const httpRequest = {
+      const request = {
         url: `http://localhost/api/${operationId}?id=ID`,
         headers: { Accept: 'application/json' },
         httpMethod: 'get',
@@ -101,7 +101,7 @@ describe('Context', () => {
         },
       } as HttpRequest;
 
-      const context = createContext(httpRequest);
+      const context = createContext({ request });
 
       expect(context.httpPath).toEqual(`/${operationId}`);
       expect(context.httpMethod).toEqual('get');
