@@ -39,8 +39,10 @@ describe('MemoryDocument', () => {
   };
 
   beforeEach(async () => {
+    await User.reset();
     await Profile.reset();
-    context.createdDocument = null;
+
+    context.runtimeReset();
   });
 
   describe('MemoryDocument.partitionKey', () => {
@@ -89,12 +91,6 @@ describe('MemoryDocument', () => {
     });
   });
 
-  describe('MemoryDocument.collection', () => {
-    it('initializes collection for documents', () => {
-      expect(Profile.collection).toEqual({});
-    });
-  });
-
   describe('MemoryDocument.create(context, query, mutation)', () => {
     it('creates a document from mutation', async () => {
       const profile = await Profile.create(context, {}, attributes);
@@ -112,11 +108,20 @@ describe('MemoryDocument', () => {
 
     it('returns created document from the context', async () => {
       const createdProfile = await Profile.create(context, attributes);
-      context.createdDocument = createdProfile;
+      context.set('createdDocument', createdProfile);
 
       const profile = await Profile.create(context, attributes);
 
       expect(profile.id).toEqual(createdProfile.id);
+    });
+
+    it('skips context created document if of other type', async () => {
+      const createdProfile = await Profile.create(context, attributes);
+      context.set('createdDocument', createdProfile);
+
+      const user = await User.create(context, attributes);
+
+      expect(user.id).not.toEqual(createdProfile.id);
     });
 
     it('throws DocumentExistsError if document with specified ID already exists', async () => {
@@ -228,6 +233,65 @@ describe('MemoryDocument', () => {
 
       expect(count0).toEqual(0);
       expect(count1).toEqual(1);
+    });
+  });
+
+  describe('.hasAttributeChanged(path)', () => {
+    it('returns true if attribute has been updated', async () => {
+      const profile = await Profile.create(context, attributes);
+      const { id } = profile;
+
+      const updatedProfile = await Profile.update(context, { id }, { name: 'Josh Doe' });
+
+      const hasIdChanged = updatedProfile.hasAttributeChanged('id');
+      const hasNameChanged = updatedProfile.hasAttributeChanged('name');
+
+      expect(hasIdChanged).toBeFalsy();
+      expect(hasNameChanged).toBeTruthy();
+    });
+
+    it('uses document from the context runtime instead of a read', async () => {
+      const profile = await Profile.create(context, attributes);
+
+      const { id } = profile;
+      context.set(id, profile);
+
+      const updatedProfile = await Profile.update(context, { id }, { name: 'Josh Doe' });
+
+      const hasIdChanged = updatedProfile.hasAttributeChanged('id');
+      const hasNameChanged = updatedProfile.hasAttributeChanged('name');
+
+      expect(hasIdChanged).toBeFalsy();
+      expect(hasNameChanged).toBeTruthy();
+    });
+
+    it('throws exception if document has not been updated', async () => {
+      const profile = await Profile.create(context, attributes);
+
+      expect(() => profile.hasAttributeChanged('name'))
+        .toThrow(`Profile ${profile.id} has not been updated`);
+    });
+  });
+
+  describe('.update(mutation)', () => {
+    it('updates document and document instance attributes', async () => {
+      const profile = await Profile.create(context, attributes);
+
+      await profile.update({ name: 'Josh Doe' });
+      const hasNameChanged = profile.hasAttributeChanged('name');
+
+      expect(hasNameChanged).toBeTruthy();
+      expect(profile.name).toEqual('Josh Doe');
+    });
+
+    it('supports document with partition defined', async () => {
+      const user = await User.create(context, attributes);
+
+      await user.update({ name: 'Josh Doe' });
+      const hasNameChanged = user.hasAttributeChanged('name');
+
+      expect(hasNameChanged).toBeTruthy();
+      expect(user.attributes.name).toEqual('Josh Doe');
     });
   });
 });

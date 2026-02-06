@@ -30,7 +30,7 @@ class MemoryDocument<T> extends Document<T> {
   static async reset() {
     const collectionName = this.name;
 
-    _MEMORY_STORE[collectionName] = {};
+    delete _MEMORY_STORE[collectionName];
   }
 
   /** Implements interface to get documents in batches. */
@@ -114,11 +114,8 @@ class MemoryDocument<T> extends Document<T> {
   static async _update<T>(query: QueryMap, mutation: MutationMap): Promise<T> {
     const idValue = got(query, this.idKey, 'Query parameter "$PATH" is required') as string;
 
-    const item = get(this.collection, idValue) as T;
-
-    if (!item) {
-      throw new DocumentNotFoundError(this, query);
-    }
+    const componentTitle = this.getTitle();
+    const item = got(this.collection, idValue, `${componentTitle} with ID "$PATH" is not found`) as T;
 
     set(this.collection, idValue, { ...item, ...mutation });
 

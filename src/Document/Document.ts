@@ -1,8 +1,8 @@
 import { ulid } from 'ulid';
 import Component from '../Component';
-import { get, set, omit, capitalize } from 'lodash';
-import { Schema, type PropertiesSchemaSource } from '@kravc/schema';
+import { Schema, type PropertiesSchemaSource, got } from '@kravc/schema';
 import Context, { type QueryMap, type MutationMap } from '../Context';
+import { get, set, omit, pick, cloneDeep, capitalize } from 'lodash';
 
 const DEFAULT_PARTITION_KEY = 'partition';
 
@@ -47,6 +47,8 @@ export type IndexAllOptions = {
 /** Abstract document class. */
 class Document<Attributes> extends Component<Attributes> {
   private static _bodySchema: Schema;
+
+  private _previousAttributes: Attributes | undefined;
 
   /** Returns partition key of a document. */
   static get partitionKey(): string {
@@ -232,8 +234,8 @@ class Document<Attributes> extends Component<Attributes> {
     //       checks existence of the document via before hooks. If it does
     //       exist, they add it to the context. Then the operation's action
     //       method would do nothing and just return the document from the context.
-    const createdDocument = context.createdDocument as D;
-    const shouldNotCreate = !!createdDocument && createdDocument.componentId === this.name;
+    const createdDocument = context.get('createdDocument') as D;
+    const shouldNotCreate = createdDocument?.componentId === this.name;
 
     if (shouldNotCreate) {
       return createdDocument;
@@ -294,27 +296,21 @@ class Document<Attributes> extends Component<Attributes> {
     /* NOTE: In some workflows operation before action helper may be doing
              some verifications with the document to be updated. Here we
              allow to cache it in the context. */
-    let previousDocument
+    const idValue = got(query, _this.idKey, 'Query parameter "$PATH" is required') as string;
 
-    const hasPreviousDocument =
-
-    if (context.previousDocument) {
-
-    } as T;
-
-    !!createdDocument && createdDocument.componentId === this.name;
+    const previousDocument = context.get(idValue) as D;
+    let previousAttributes = previousDocument?.attributes;
 
     /* NOTE: Ensure that document to be updated exists and save it in the
              context so can be referenced in the after action helper. */
-    if (!previousDocument) {
-      const previousAttributes = await this._read(query, {});
-      previousDocument = new this(context, previousAttributes);
+    if (!previousAttributes) {
+      previousAttributes = await this._read(query, {});
     }
 
     const updatedAttributes = await this._update(query, mutation) as T;
     const object = new this(context, updatedAttributes);
 
-    // document._originalDocument = originalDocument;
+    object._previousAttributes = previousAttributes;
 
     await _this.afterUpdate(context, query, mutation, object);
 
@@ -367,49 +363,44 @@ class Document<Attributes> extends Component<Attributes> {
     return;
   }
 
-  // // eslint-disable-next-line jsdoc/require-jsdoc
-  // get _query() {
-  //   const { idKey } = this.constructor;
+  /** Returns document ID. */
+  get id(): string {
+    const klass = this.constructor as unknown as typeof Document;
+    return got(this.attributes as Record<string, string>, klass.idKey);
+  }
 
-  //   return {
-  //     [idKey]: this._attributes[idKey]
-  //   };
-  // }
+  /** Returns previous attributes after update action. */
+  get previousAttributes() {
+    return this._previousAttributes || null;
+  }
 
-  // // eslint-disable-next-line jsdoc/require-jsdoc
-  // async update(mutation, shouldMutate = false) {
-  //   const originalDocument = new this.constructor(this.context, { ...this._attributes });
+  /** Flags if document attribute has been changed via update action. */
+  hasAttributeChanged(path: string): boolean {
+    if (!this.previousAttributes) {
+      throw Error(`${this.componentId} ${this.id} has not been updated`);
+    }
 
-  //   const document = await this.constructor.update(this.context, this._query, mutation, originalDocument);
+    const currentValue = get(this.attributes, path);
+    const previousValue = get(this.previousAttributes, path);
 
-  //   if (shouldMutate) {
-  //     this._attributes = document._attributes;
-  //     this._originalDocument = document._originalDocument;
-  //   }
+    const hasChanged = previousValue !== currentValue;
 
-  //   return document;
-  // }
+    return hasChanged;
+  }
 
-  // // eslint-disable-next-line jsdoc/require-jsdoc
-  // get originalDocument() {
-  //   if (!this._originalDocument) {
-  //     throw new Error('Original document is undefined');
-  //   }
+  /** Updates document attributes. */
+  async update(mutation: MutationMap): Promise<void> {
+    const klass = this.constructor as unknown as Constructor<Attributes, Document<Attributes>> & typeof Document;
 
-  //   return this._originalDocument;
-  // }
+    this.context.set(this.id, this);
 
-  // // eslint-disable-next-line jsdoc/require-jsdoc
-  // hasAttributeChanged(attributePath) {
-  //   const { originalDocument } = this;
+    const query = pick(this.attributes, [ klass.idKey, klass.partitionKey ]);
+    const object = await klass.update(this.context, query, mutation);
 
-  //   const originalValue = get(originalDocument.attributes, attributePath);
-  //   const updatedValue = get(this.attributes, attributePath);
+    this._previousAttributes = cloneDeep(this.attributes) as Attributes;
 
-  //   const hasChanged = originalValue !== updatedValue;
-
-  //   return hasChanged;
-  // }
+    set(this, '_attributes', object.attributes);
+  }
 }
 
 export default Document;

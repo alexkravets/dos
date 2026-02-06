@@ -108,4 +108,57 @@ describe('Context', () => {
       expect(context.operationId).toBe(operationId);
     });
   });
+
+  describe('.set(name, value)', () => {
+    it('add value to the context runtime', () => {
+      const context = createContext();
+      context.set('example', 'test');
+
+      expect(context.get('example')).toEqual('test');
+    });
+  });
+
+  describe('.get(name)', () => {
+    it('returns value if variable is set', () => {
+      const context = createContext();
+      context.set('example', 'test');
+
+      expect(context.get('example')).toEqual('test');
+    });
+
+    it('returns null value if variable is not set', () => {
+      const context = createContext();
+
+      expect(context.get('example')).toBeNull();
+    });
+  });
+
+  describe('.got(name)', () => {
+    it('returns value if variable is set', () => {
+      const context = createContext();
+      context.set('example', 'test');
+
+      expect(context.got('example')).toEqual('test');
+    });
+
+    it('throws exception if variable is not set', () => {
+      const context = createContext();
+
+      expect(() => context.got('example'))
+        .toThrow('Context runtime is missing "example" value, runtime: {}');
+    });
+  });
+
+  describe('.runtimeReset(name)', () => {
+    it('resets context runtime', () => {
+      const context = createContext();
+      context.set('example', 'test');
+
+      expect(context.get('example')).toEqual('test');
+
+      context.runtimeReset();
+
+      expect(context.get('example')).toBeNull();
+    });
+  });
 });

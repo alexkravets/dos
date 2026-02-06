@@ -87,7 +87,15 @@ class Context {
 
   /** Returns variable from the context runtime if exists, otherwise throws exception. */
   got<T>(path: string): T {
-    return got(this._runtime, path) as T;
+    const runtimeJson = JSON.stringify(this._runtime, null, 2);
+    const errorTemplate = `Context runtime is missing "$PATH" value, runtime: ${runtimeJson}`;
+
+    return got(this._runtime, path, errorTemplate) as T;
+  }
+
+  /** Resets context runtime. */
+  runtimeReset() {
+    this._runtime = {};
   }
 };
 
