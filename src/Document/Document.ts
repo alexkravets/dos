@@ -4,6 +4,8 @@ import { Schema, type PropertiesSchemaSource, got } from '@kravc/schema';
 import Context, { type QueryMap, type MutationMap } from '../Context';
 import { get, set, omit, pick, cloneDeep, capitalize } from 'lodash';
 
+const DEFAULT_INDEX_SORT = 'desc';
+const DEFAULT_INDEX_LIMIT = 300;
 const DEFAULT_PARTITION_KEY = 'partition';
 
 const SYSTEM = 'SYSTEM';
@@ -68,6 +70,21 @@ class Document<Attributes> extends Component<Attributes> {
   /** Returns prefix for new IDs. */
   static get idPrefix(): string {
     return this.name;
+  }
+
+  /** Returns attribute name to sort index action results by. */
+  static get indexSortBy(): string {
+    return this.idKey;
+  }
+
+  /** Defines default sort direction for index action results. */
+  static get indexDefaultSort(): 'asc' | 'desc' {
+    return DEFAULT_INDEX_SORT;
+  }
+
+  /** Defines default limit for index action. */
+  static get indexDefaultLimit(): number {
+    return DEFAULT_INDEX_LIMIT;
   }
 
   /** Generates ID for new document unless it's defined in parameters. */
@@ -190,6 +207,14 @@ class Document<Attributes> extends Component<Attributes> {
     const _this = this as unknown as typeof Document;
     _this._extendWithPartition(context, query);
 
+    if (!options.limit) {
+      options.limit = _this.indexDefaultLimit;
+    }
+
+    if (!options.sort) {
+      options.sort = _this.indexDefaultSort;
+    }
+
     const { items, count, lastEvaluatedKey, ...otherPagination } = await this._index(query, options);
     const objects = items.map(attributes => new this(context, attributes));
 
@@ -208,6 +233,10 @@ class Document<Attributes> extends Component<Attributes> {
   }> {
     const _this = this as unknown as typeof Document;
     _this._extendWithPartition(context, query);
+
+    if (!options.sort) {
+      options.sort = _this.indexDefaultSort;
+    }
 
     const { items, count } = await this._indexAll(query, options);
     const objects = items.map(attributes => new this(context, attributes));

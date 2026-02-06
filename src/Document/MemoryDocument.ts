@@ -1,8 +1,8 @@
 import { got } from '@kravc/schema';
-import Document from './Document';
-import { get, set, unset, cloneDeep } from 'lodash';
 import type { QueryMap, MutationMap } from '../Context';
+import { get, set,  last, unset, cloneDeep, sortBy } from 'lodash';
 import { DocumentExistsError, DocumentNotFoundError } from '../Operation';
+import Document, { type IndexOptions, type IndexAllOptions } from './Document';
 
 type Item = {
   id: string;
@@ -34,49 +34,65 @@ class MemoryDocument<T> extends Document<T> {
   }
 
   /** Implements interface to get documents in batches. */
-  static async _index<T>(query: QueryMap): Promise<{
+  static async _index<T>(query: QueryMap, options: IndexOptions): Promise<{
     count: number;
     items: T[];
     lastEvaluatedKey?: string;
   }> {
+    const {
+      sort,
+      limit,
+      exclusiveStartKey
+    } = options;
+
     /** Filters result item to match query. */
     const filter = (item: Item) =>
       Object
         .keys(query)
         .every(key => item[key] === query[key]);
 
-    // TODO: Add sorted collection.
+    const sortedItems = sort === 'desc'
+      ? sortBy(Object.values(this.collection), this.indexSortBy).reverse()
+      : sortBy(Object.values(this.collection), this.indexSortBy);
 
-    // TODO: Add support for limit.
-
-    // TODO: Add support for exclusiveStartKey.
-
-    const items = Object
-      .values(this.collection)
+    const filteredItems = sortedItems
       .filter(filter)
       .map(cloneDeep) as T[];
 
+    let exclusiveStartKeyIndex = -1;
+
+    if (exclusiveStartKey) {
+      exclusiveStartKeyIndex = filteredItems
+        .findIndex(item => got(item, this.idKey) === exclusiveStartKey);
+    }
+
+    const items = limit
+      ? filteredItems.slice(exclusiveStartKeyIndex + 1, exclusiveStartKeyIndex + 1 + limit)
+      : filteredItems.slice(exclusiveStartKeyIndex + 1, filteredItems.length);
+
     const count = items.length;
 
-    // TODO: Add support for lastEvaluatedKey.
+    let lastEvaluatedKey = get(last(items), this.idKey);
 
-    if (count > 1000) {
-      console.log('TODO');
+    const isLastItemIncluded = get(last(sortedItems), this.idKey) === lastEvaluatedKey;
+
+    if (isLastItemIncluded) {
+      lastEvaluatedKey = undefined;
     }
 
     return {
       items,
       count,
-      lastEvaluatedKey: undefined,
+      lastEvaluatedKey,
     };
   }
 
   /** Implements interface to get all documents. */
-  static async _indexAll<T>(query: QueryMap): Promise<{
+  static async _indexAll<T>(query: QueryMap, options: IndexAllOptions): Promise<{
     count: number;
     items: T[];
   }> {
-    const { items, count } = await this._index<T>(query);
+    const { items, count } = await this._index<T>(query, options);
 
     return {
       items,
@@ -99,7 +115,7 @@ class MemoryDocument<T> extends Document<T> {
 
   /** Implements interface to save a document, returns false if document is not created. */
   static async _create<T>(attributes: T): Promise<void> {
-    const idValue = got(attributes as Record<string, string>, this.idKey, 'Attribute "$PATH" is required');
+    const idValue = got(attributes, this.idKey, 'Attribute "$PATH" is required') as string;
 
     const item = get(this.collection, idValue) as T;
 

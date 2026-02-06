@@ -1,9 +1,9 @@
 import { got } from '@kravc/schema';
 import { unset } from 'lodash';
-import { MemoryDocument, type DefaultAttributes } from '../';
 import Context, { type MutationMap } from '../../Context';
 import { createContext, profileSchema } from '../../Context/__tests__/__helpers';
 import { DocumentExistsError, DocumentNotFoundError } from '../../Operation';
+import { wait, MemoryDocument, type DefaultAttributes } from '../../';
 
 export interface ProfileAttributes extends DefaultAttributes {
   name: string;
@@ -189,23 +189,102 @@ describe('MemoryDocument', () => {
   });
 
   describe('MemoryDocument.indexAll(context, query, options)', () => {
-    it('returns all documents', async () => {
-      const createdProfile = await Profile.create(context, attributes);
+    it('returns all documents in default sort order', async () => {
+      await Profile.create(context, { name: 'John Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'Josh Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'Jenn Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'James Doe' });
 
       const { count, objects } = await Profile.indexAll(context);
 
-      expect(count).toEqual(1);
+      expect(count).toEqual(4);
 
       const [ profile ] = objects;
-      expect(profile.id).toEqual(createdProfile.id);
+      expect(profile.name).toEqual('James Doe');
+    });
+
+    it('returns all documents in ascending sort order', async () => {
+      await Profile.create(context, { name: 'John Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'Josh Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'Jenn Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'James Doe' });
+
+      const sort = 'asc';
+      const { count, objects } = await Profile.indexAll(context, {}, { sort });
+
+      expect(count).toEqual(4);
+
+      const [ profile ] = objects;
+      expect(profile.name).toEqual('John Doe');
     });
   });
 
   describe('MemoryDocument.index(context, query, options)', () => {
     it('returns documents in batches', async () => {
       await Profile.create(context, { name: 'John Doe' });
+      await wait(10);
       await Profile.create(context, { name: 'Josh Doe' });
+      await wait(10);
       await Profile.create(context, { name: 'Jenn Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'James Doe' });
+
+      const limit = 2;
+
+      const {
+        count: count1,
+        objects: objects1,
+        lastEvaluatedKey: exclusiveStartKey
+      } = await Profile.index(context, {}, { limit });
+
+      expect(count1).toEqual(2);
+      expect(objects1.length).toEqual(2);
+      expect(exclusiveStartKey).toEqual(objects1[1].id);
+
+      const {
+        count: count2,
+        objects: objects2,
+        lastEvaluatedKey: lastEvaluatedKey1
+      } = await Profile.index(context, {}, { limit, exclusiveStartKey });
+
+      expect(count2).toEqual(2);
+      expect(objects2.length).toEqual(2);
+      expect(lastEvaluatedKey1).toBeUndefined();
+    });
+
+    it('supports descending sort option', async () => {
+      await Profile.create(context, { name: 'John Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'Josh Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'Jenn Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'James Doe' });
+
+      const sort = 'desc';
+      const limit = 1;
+
+      const { count, objects, lastEvaluatedKey } = await Profile.index(context, {}, { sort, limit });
+
+      expect(count).toEqual(1);
+      expect(objects.length).toEqual(1);
+      expect(objects[0].id).toEqual(lastEvaluatedKey);
+      expect(objects[0].name).toEqual('James Doe');
+    });
+
+    it('supports default options', async () => {
+      await Profile.create(context, { name: 'John Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'Josh Doe' });
+      await wait(10);
+      await Profile.create(context, { name: 'Jenn Doe' });
+      await wait(10);
       await Profile.create(context, { name: 'James Doe' });
 
       const { count, objects, lastEvaluatedKey } = await Profile.index(context);
@@ -213,6 +292,7 @@ describe('MemoryDocument', () => {
       expect(count).toEqual(4);
       expect(objects.length).toEqual(4);
       expect(lastEvaluatedKey).toBeUndefined();
+      expect(objects[0].name).toEqual('James Doe');
     });
   });
 
