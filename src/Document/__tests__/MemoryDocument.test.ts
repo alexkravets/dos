@@ -1,10 +1,11 @@
 import { got } from '@kravc/schema';
-import { MemoryDocument } from '../';
+import { unset } from 'lodash';
+import { MemoryDocument, type DefaultAttributes } from '../';
 import Context, { type MutationMap } from '../../Context';
 import { createContext, profileSchema } from '../../Context/__tests__/__helpers';
 import { DocumentExistsError, DocumentNotFoundError } from '../../Operation';
 
-export type ProfileAttributes = {
+export interface ProfileAttributes extends DefaultAttributes {
   name: string;
 };
 
@@ -61,27 +62,16 @@ describe('MemoryDocument', () => {
     it('returns ID for a new document', () => {
       expect(Profile.createId({})).toBeDefined();
     });
+
+    it('returns existing ID when predefined', () => {
+      const id = Profile.createId({ id: 'TEST_ID' });
+      expect(id).toEqual('TEST_ID');
+    });
   });
 
   describe('MemoryDocument.defaultAttributesSchemaSource', () => {
     it('returns default attributes schema source', () => {
       expect(Profile.defaultAttributesSchemaSource).toBeDefined();
-    });
-  });
-
-  describe('MemoryDocument.schema', () => {
-    it('returns document schema', () => {
-      const schema = profileSchema.extend(Profile.defaultAttributesSchemaSource, 'Profile');
-      expect(Profile.schema).toEqual(schema);
-    });
-
-    it('throws exception if document schema is not defined', () => {
-      /** No schema document example. */
-      class NoSchemaProfile extends MemoryDocument<ProfileAttributes> {
-      }
-
-      expect(() => NoSchemaProfile.schema)
-        .toThrow('Schema is not set for "NoSchemaProfile"');
     });
   });
 
@@ -97,6 +87,9 @@ describe('MemoryDocument', () => {
 
       expect(profile.id).toBeDefined();
       expect(profile.name).toEqual('John Doe');
+      expect(profile.attributes.createdAt).toBeDefined();
+      expect(profile.attributes.createdBy).toBeDefined();
+      expect(profile.attributes.createdByUserFullname).toBeDefined();
     });
 
     it('creates a document from query', async () => {
@@ -162,6 +155,9 @@ describe('MemoryDocument', () => {
       const profile = await Profile.update(context, { id }, mutation);
 
       expect(profile.name).toEqual('Jane Doe');
+      expect(profile.attributes.updatedAt).toBeDefined();
+      expect(profile.attributes.updatedBy).toBeDefined();
+      expect(profile.attributes.updatedByUserFullname).toBeDefined();
     });
 
     it('throws DocumentNotFoundError if document not found by ID', async () => {
@@ -233,6 +229,38 @@ describe('MemoryDocument', () => {
 
       expect(count0).toEqual(0);
       expect(count1).toEqual(1);
+    });
+  });
+
+  describe('MemoryDocument.schema', () => {
+    it('returns document schema', () => {
+      const schema = profileSchema.extend(Profile.defaultAttributesSchemaSource, 'Profile');
+
+      expect(Profile.schema).toEqual(schema);
+    });
+
+    it('validates the document', async () => {
+      const profile = await Profile.create(context, { name: 'John Doe' });
+
+      expect(() => profile.validate())
+        .not.toThrow();
+    });
+
+    it('validates the document', async () => {
+      const profile = await Profile.create(context, { name: 'John Doe' });
+      unset(profile, '_attributes.name');
+
+      expect(() => profile.validate())
+        .toThrow('"Profile" validation failed');
+    });
+
+    it('throws exception if document schema is not defined', () => {
+      /** No schema document example. */
+      class NoSchemaProfile extends MemoryDocument<ProfileAttributes> {
+      }
+
+      expect(() => NoSchemaProfile.schema)
+        .toThrow('Schema is not set for "NoSchemaProfile"');
     });
   });
 

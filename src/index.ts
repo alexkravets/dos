@@ -9,3 +9,4 @@ export * from './Service';
 export * from './Context';
 
 export type * from './Context';
+export type * from './Document';

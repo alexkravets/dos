@@ -44,6 +44,16 @@ export type IndexAllOptions = {
   index?: string;
 }
 
+export type DefaultAttributes = {
+  id: string;
+  createdAt: string;
+  createdBy?: string;
+  createdByUserFullname?: string;
+  updatedAt?: string;
+  updatedBy?: string;
+  updatedByUserFullname?: string;
+};
+
 /** Abstract document class. */
 class Document<Attributes> extends Component<Attributes> {
   private static _bodySchema: Schema;

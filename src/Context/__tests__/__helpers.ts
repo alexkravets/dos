@@ -11,8 +11,8 @@ const DEFAULT_LAMBDA_REQUEST = {
 } as LambdaRequest;
 
 export const profileSchema = new Schema({
-  id: { required: true },
-  name: {}
+  id: {},
+  name: { required: true },
 }, 'Profile');
 
 type Props = {
