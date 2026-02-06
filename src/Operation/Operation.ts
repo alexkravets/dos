@@ -37,11 +37,6 @@ class Operation {
     return withSafeAttributes(this, className);
   }
 
-  /** Flags if a component class. */
-  static get isComponent(): boolean {
-    return false;
-  }
-
   /** Returns supported operation types. */
   static get types() {
     return {
@@ -50,6 +45,11 @@ class Operation {
       UPDATE: 'update',
       DELETE: 'delete'
     };
+  }
+
+  /** Flags if a component class. */
+  static get isComponent(): boolean {
+    return false;
   }
 
   /** Returns default operation type. */

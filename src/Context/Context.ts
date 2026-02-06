@@ -1,3 +1,4 @@
+import { inspect } from 'util';
 import getHttpPath from './getHttpPath';
 import { get, set } from 'lodash';
 import { got, Validator } from '@kravc/schema';
@@ -139,6 +140,42 @@ class Context {
     }
 
     return null;
+  }
+
+  /** Serializes context to JSON object. */
+  toJSON() {
+    const {
+      _runtime: runtime,
+      query,
+      headers,
+      identity,
+      httpPath,
+      requestId,
+      httpMethod,
+      operationId,
+      requestReceivedAt,
+      bodyJson,
+      mutation,
+    } = this;
+
+    return {
+      operationId,
+      httpPath,
+      httpMethod,
+      requestId,
+      requestReceivedAt,
+      headers,
+      query,
+      mutation,
+      bodyJson,
+      identity,
+      runtime,
+    };
+  }
+
+  /** Serializes context for console.log and util.inspect. */
+  [inspect.custom]() {
+    return this.toJSON();
   }
 };
 

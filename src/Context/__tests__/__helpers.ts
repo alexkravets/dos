@@ -38,7 +38,17 @@ export const createContext = (props: Props = {}): Context => {
         get: {
           operationId,
         },
-      }
+      },
+      ['/CreateProfile']: {
+        post: {
+          operationId: 'CreateProfile',
+        },
+      },
+      ['/UpdateProfile']: {
+        post: {
+          operationId: 'UpdateProfile',
+        },
+      },
     }
   } as unknown as OpenAPIV2.Document;
 

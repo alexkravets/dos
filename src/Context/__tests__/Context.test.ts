@@ -162,7 +162,7 @@ describe('Context', () => {
     });
   });
 
-  describe('.identityId)', () => {
+  describe('.identityId', () => {
     it('returns users ID from context identity', () => {
       const identity = { sub: 'TEST_USER_ID' };
       const context = createContext({ identity });

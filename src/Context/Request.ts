@@ -15,7 +15,7 @@ export type MutationMap = Record<string, unknown>;
 
 export type LambdaRequest = {
   body?: string | MutationMap;
-  headers: Headers;
+  headers?: Headers;
   operationId: string;
   queryStringParameters?: QueryMap;
 }

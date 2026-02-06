@@ -7,7 +7,7 @@ const Update = (
   ComponentClass: any,
   componentAction: string = Operation.types.UPDATE
 ): typeof Operation => {
-  if (!ComponentClass) {
+  if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "Update" operation' +
       ' function');
   }

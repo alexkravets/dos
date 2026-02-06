@@ -1,36 +1,8 @@
-import { got } from '@kravc/schema';
 import { unset } from 'lodash';
-import Context, { type MutationMap } from '../../Context';
+import { wait, MemoryDocument } from '../../';
 import { createContext, profileSchema } from '../../Context/__tests__/__helpers';
+import { User, Profile, type ProfileAttributes } from './__helpers';
 import { DocumentExistsError, DocumentNotFoundError } from '../../Operation';
-import { wait, MemoryDocument, type DefaultAttributes } from '../../';
-
-export interface ProfileAttributes extends DefaultAttributes {
-  name: string;
-};
-
-/** Example of a default document. */
-class Profile extends MemoryDocument<ProfileAttributes> {
-  /** Returns a profile name. */
-  get name() {
-    return this.attributes.name;
-  }
-}
-
-Profile.schema = profileSchema;
-
-/** Example of a document with custom getPartition method. */
-class User extends MemoryDocument<ProfileAttributes> {
-  /** Returns custom partition based off parameters. */
-  static getPartition(_context: Context, parameters: MutationMap) {
-    const name = got(parameters, 'name') as string;
-    const partition = name[0].toUpperCase();
-
-    return partition;
-  }
-}
-
-User.schema = profileSchema;
 
 describe('MemoryDocument', () => {
   const context = createContext({ schemas: [ Profile.schema, User.schema ] });

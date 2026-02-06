@@ -7,7 +7,7 @@ const Create = (
   ComponentClass: any,
   componentAction: string = Operation.types.CREATE
 ): typeof Operation => {
-  if (!Component) {
+  if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "Create" operation' +
       ' function');
   }
