@@ -73,7 +73,7 @@ describe('Create(Document, actionMethod)', () => {
 
     describe('CreateOperation.tags', () => {
       it('returns operation tags', () => {
-        expect(CreateProfile.tags).toEqual([ 'Profiles' ]);
+        expect(CreateProfile.tags).toEqual([ 'Profile' ]);
       });
     });
 

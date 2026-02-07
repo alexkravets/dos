@@ -67,7 +67,7 @@ describe('Read(Document, actionMethod)', () => {
 
     describe('ReadOperation.tags', () => {
       it('returns operation tags', () => {
-        expect(ReadProfile.tags).toEqual([ 'Profiles' ]);
+        expect(ReadProfile.tags).toEqual([ 'Profile' ]);
       });
     });
 

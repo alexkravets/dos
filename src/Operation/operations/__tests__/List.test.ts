@@ -67,7 +67,7 @@ describe('List(Document, actionMethod)', () => {
 
     describe('ListOperation.tags', () => {
       it('returns operation tags', () => {
-        expect(ListProfiles.tags).toEqual([ 'Profiles' ]);
+        expect(ListProfiles.tags).toEqual([ 'Profile' ]);
       });
     });
 

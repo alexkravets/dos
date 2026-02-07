@@ -73,7 +73,7 @@ describe('Delete(Document, actionMethod)', () => {
 
     describe('DeleteOperation.tags', () => {
       it('returns operation tags', () => {
-        expect(DeleteProfile.tags).toEqual([ 'Profiles' ]);
+        expect(DeleteProfile.tags).toEqual([ 'Profile' ]);
       });
     });
 

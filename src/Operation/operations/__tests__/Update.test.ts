@@ -73,7 +73,7 @@ describe('Update(Document, actionMethod)', () => {
 
     describe('UpdateOperation.tags', () => {
       it('returns operation tags', () => {
-        expect(UpdateProfile.tags).toEqual([ 'Profiles' ]);
+        expect(UpdateProfile.tags).toEqual([ 'Profile' ]);
       });
     });
 

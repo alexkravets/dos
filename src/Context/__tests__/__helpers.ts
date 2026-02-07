@@ -68,6 +68,11 @@ export const createContext = (props: Props = {}): Context => {
         get: {
           operationId: 'ListProfiles',
         },
+      },
+      ['/Health']: {
+        get: {
+          operationId: 'Health',
+        },
       }
     }
   } as unknown as OpenAPIV2.Document;

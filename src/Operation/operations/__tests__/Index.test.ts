@@ -68,7 +68,7 @@ describe('Index(Document, actionMethod)', () => {
 
     describe('IndexOperation.tags', () => {
       it('returns operation tags', () => {
-        expect(IndexProfiles.tags).toEqual([ 'Profiles' ]);
+        expect(IndexProfiles.tags).toEqual([ 'Profile' ]);
       });
     });
 

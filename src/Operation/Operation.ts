@@ -102,7 +102,7 @@ class Operation {
       return this.name;
     }
 
-    if (!this.componentName) {
+    if (!this.Component) {
       throw new Error('Operation ID is undefined');
     }
 
@@ -123,24 +123,25 @@ class Operation {
   }
 
   /** Returns operation tags. */
-  static get tags() {
+  static get tags(): string[] {
     if (!this.componentName) {
       return [];
     }
 
-    const componentTitlePlural = pluralize(startCase(this.componentName));
-    return [ componentTitlePlural ];
+    const tag = this.componentName;
+
+    return [ tag ];
   }
 
   /** Returns operation summary. */
   static get summary(): string {
-    if (!this.componentName) {
+    if (!this.Component) {
       return '';
     }
 
-    const componentTitle = startCase(this.componentName).toLowerCase();
+    const componentName = this.Component.getTitle(false);
 
-    return capitalize(`${this.componentAction} ${componentTitle}`);
+    return capitalize(`${this.componentAction} ${componentName}`);
   }
 
   /** Returns operation description. */
@@ -318,7 +319,9 @@ class Operation {
   }
 
   /** Pre-processes operation parameters before action. */
-  async before(parameters: Record<string, unknown>) {
+  async before(
+    parameters: Record<string, unknown>
+  ): Promise<Record<string, unknown> | void> {
     return parameters;
   }
 
@@ -339,7 +342,10 @@ class Operation {
   }
 
   /** Post-processes operation result after action. */
-  async after(_parameters: Record<string, unknown>, result?: Record<string, unknown>) {
+  async after(
+    _parameters: Record<string, unknown>,
+    result?: Record<string, unknown>
+  ): Promise<Record<string, unknown> | void> {
     return result;
   }
 
@@ -359,7 +365,11 @@ class Operation {
     const afterResult = await this.after(parameters, result.data || result);
 
     result = afterResult
-      ? ( result.data ? { ...result, data: afterResult } : afterResult )
+      ? (
+          result.data
+            ? { ...result, data: afterResult }
+            : afterResult
+        )
       : result;
 
     return {
