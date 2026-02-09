@@ -212,4 +212,36 @@ describe('Context', () => {
       expect(context.identityName).toBeNull();
     });
   });
+
+  describe('.toJSON()', () => {
+    it('returns JSON serializable object', () => {
+      const identity = { name: 'John Doe' };
+      const context = createContext({ identity });
+
+      expect(context.toJSON()).toEqual({
+        bodyJson: null,
+        headers: {},
+        httpMethod: 'get',
+        httpPath: '/TestOperationId',
+        identity: {
+          name: 'John Doe',
+        },
+        mutation: null,
+        operationId: 'TestOperationId',
+        query: {},
+        requestId: context.requestId,
+        requestReceivedAt: context.requestReceivedAt,
+        runtime: {},
+      });
+    });
+  });
+
+  describe('.[inspect.custom]()', () => {
+    it('returns object serializable for logging', () => {
+      const identity = { name: 'John Doe' };
+      const context = createContext({ identity });
+
+      console.log(context);
+    });
+  });
 });

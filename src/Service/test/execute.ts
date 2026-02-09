@@ -1,6 +1,6 @@
 import Service from '../Service';
 import { type ErrorAttributes } from '../errors';
-import type { ExtraContext, Headers, MutationMap, LambdaRequest } from '../../Context';
+import type { Headers, MutationMap, LambdaRequest, Logger } from '../../Context';
 
 const SUCCESS_HTTP_CODES = [ 200, 201, 204 ];
 const NO_RESPONSE_HTTP_CODE = 204;
@@ -14,8 +14,14 @@ type SuccessResult = { data: Record<string, unknown>; };
 type ErrorResult = { error: ErrorAttributes; };
 type Result = SuccessResult | ErrorResult;
 
+type Options = {
+  logger?: Logger
+};
+
 /** Returns helpers to process requests successfully or expect an error. */
-const execute = (service: Service, extraContext: ExtraContext) => {
+const execute = (service: Service, options: Options = {}) => {
+  const { logger = console } = options;
+
   /** Processes an operation parameters via service. */
   const exec = async (operationId: string, parameters: Parameters = {}, headers: Headers = {}) => {
     const { mutation: body, ...queryStringParameters } = parameters;
@@ -27,7 +33,7 @@ const execute = (service: Service, extraContext: ExtraContext) => {
       queryStringParameters
     } as LambdaRequest;
 
-    const response = await service.process(request, extraContext);
+    const response = await service.process(request);
 
     let result;
 
@@ -58,8 +64,8 @@ const execute = (service: Service, extraContext: ExtraContext) => {
     if (!isSuccess) {
        const { error } = (result as ErrorResult);
 
-      console.error(`\x1b[31mRequestError for "${operationId}"\x1b[37m`);
-      console.dir({ operationId, parameters, error }, { depth: null });
+      logger.error(`\x1b[31mRequestError for "${operationId}"\x1b[37m`);
+      logger.dir({ operationId, parameters, error }, { depth: null });
 
       throw Error(`RequestError for "${operationId}"`);
     }
@@ -79,8 +85,8 @@ const execute = (service: Service, extraContext: ExtraContext) => {
     if (isSuccess) {
       const { data } = (result as SuccessResult);
 
-      console.error(`\x1b[31mSuccess NOT expected for "${operationId}"\x1b[37m`);
-      console.dir({ operationId, statusCode, parameters, data }, { depth: null });
+      logger.error(`\x1b[31mSuccess NOT expected for "${operationId}"\x1b[37m`);
+      logger.dir({ operationId, statusCode, parameters, data }, { depth: null });
 
       throw Error(`Success NOT expected for "${operationId}"`);
     }

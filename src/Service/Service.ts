@@ -39,6 +39,7 @@ type Module = {
 type Options = {
   url?: string;
   path?: string;
+  context?: ExtraContext,
   createContext?: typeof createDefaultContext;
   skipOperations?: string[];
 };
@@ -50,6 +51,7 @@ class Service {
   private _validator: Validator;
   private _createContext: typeof createDefaultContext;
   private _operationsMap: Record<string, typeof Operation>;
+  private _serviceContext: ExtraContext;
 
   /** Creates service instance. */
   constructor(modules: Module[], options: Options = {}) {
@@ -63,6 +65,7 @@ class Service {
 
     const {
       path = DEFAULT_SERVICE_PATH,
+      context = {},
       createContext = createDefaultContext,
       skipOperations = DEFAULT_SKIP_OPERATIONS,
     } = options;
@@ -132,6 +135,7 @@ class Service {
     this._validator = validator;
     this._createContext = createContext;
     this._operationsMap = operationsMap;
+    this._serviceContext = context;
   }
 
   /** Returns service base URL. */
@@ -157,7 +161,10 @@ class Service {
 
   /** Processes incoming request. */
   async process(request: Request, extraContext: ExtraContext = {}) {
-    const context = this._createContext(this, request, extraContext);
+    const context = this._createContext(this, request, {
+      ...this._serviceContext,
+      ...extraContext
+    });
 
     const result =
       useOasMiddleware(this, context) &&

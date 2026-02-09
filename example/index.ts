@@ -13,14 +13,18 @@ const url = 'http://localhost:3000/';
 
 const logger = {
   ...console,
+  /** Mock logger dir method to prevent output in tests. */
+  dir: () => {},
   /** Mock logger info method to prevent output in tests. */
   info: () => {},
+  /** Mock logger error method to prevent output in tests. */
+  error: () => {},
 } as Logger;
 
-const service = new Service(operations, { url, path });
+const service = new Service(operations, { url, path, context: { logger } });
 
 /** Handles request via service. */
-const handler = (request: Request) => service.process(request, { logger });
+const handler = (request: Request) => service.process(request);
 
 export {
   handler,
