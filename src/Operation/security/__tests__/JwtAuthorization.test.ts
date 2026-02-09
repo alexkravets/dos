@@ -1,7 +1,7 @@
-import { service } from '../../../../example';
 import { LambdaRequest } from '../../../Context';
 import { createContext } from '../../../Context/__tests__/__helpers';
 import { stringifyCookie } from 'cookie';
+import { service, handler } from '../../../../example';
 import { JwtAuthorization, createAccessToken, TEST_PUBLIC_KEY as publicKey } from '../../../';
 
 describe('JwtAuthorization', () => {
@@ -45,7 +45,7 @@ describe('JwtAuthorization', () => {
         operationId: 'CreateProfile',
       } as LambdaRequest;
 
-      const { statusCode, body: json } = await service.process(request);
+      const { statusCode, body: json } = await handler(request);
 
       expect(statusCode).toEqual(401);
 
@@ -68,7 +68,7 @@ describe('JwtAuthorization', () => {
         }
       } as LambdaRequest;
 
-      const { statusCode, body: json } = await service.process(request);
+      const { statusCode, body: json } = await handler(request);
 
       expect(statusCode).toEqual(401);
 
@@ -94,7 +94,7 @@ describe('JwtAuthorization', () => {
         }
       } as LambdaRequest;
 
-      const { statusCode, body: json } = await service.process(request);
+      const { statusCode, body: json } = await handler(request);
 
       expect(statusCode).toEqual(401);
 
@@ -119,7 +119,7 @@ describe('JwtAuthorization', () => {
         }
       } as LambdaRequest;
 
-      const { statusCode, body: json } = await service.process(request);
+      const { statusCode, body: json } = await handler(request);
 
       expect(statusCode).toEqual(403);
 
@@ -147,7 +147,7 @@ describe('JwtAuthorization', () => {
         },
       } as LambdaRequest;
 
-      const { statusCode, body: json } = await service.process(request);
+      const { statusCode, body: json } = await handler(request);
 
       expect(statusCode).toEqual(201);
 
@@ -170,7 +170,7 @@ describe('JwtAuthorization', () => {
         },
       } as LambdaRequest;
 
-      const { statusCode, body: json } = await service.process(request);
+      const { statusCode, body: json } = await handler(request);
 
       expect(statusCode).toEqual(201);
 

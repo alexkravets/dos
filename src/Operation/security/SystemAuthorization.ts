@@ -77,7 +77,7 @@ class SystemAuthorization {
   static get errors() {
     return {
       AccessDeniedError: {
-        statusCode:  403,
+        statusCode: 403,
         description: MESSAGE_ACCESS_DENIED
       }
     };

@@ -6,6 +6,7 @@ import CreateProfile from './Profile/CreateProfile';
 import UpdateProfile from './Profile/UpdateProfile';
 import DeleteProfile from './Profile/DeleteProfile';
 import IndexProfiles from './Profile/IndexProfiles';
+import ReadProfileSystem from './Profile/ReadProfileSystem';
 
 const modules = [
   Profile,
@@ -15,6 +16,7 @@ const modules = [
   UpdateProfile,
   DeleteProfile,
   IndexProfiles,
+  ReadProfileSystem,
 ];
 
 export default modules;
