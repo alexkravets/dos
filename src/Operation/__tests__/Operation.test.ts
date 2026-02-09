@@ -1,4 +1,4 @@
-import { as } from '../../../examples/security';
+import { as } from '../../../example/security';
 import { User } from '../../Document/__tests__/__helpers';
 import { createContext } from '../../Context/__tests__/__helpers';
 import { Operation, Create } from '../../../src';

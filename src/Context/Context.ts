@@ -1,3 +1,4 @@
+import { parse, type Cookies } from 'cookie';
 import { inspect } from 'util';
 import getHttpPath from './getHttpPath';
 import { get, set } from 'lodash';
@@ -45,6 +46,7 @@ class Context {
   public query: QueryMap;
   public logger: Logger;
   public headers: Headers;
+  public cookies?: Cookies;
   public httpPath: string;
   public bodyJson: string | null;
   public mutation: MutationMap | null;
@@ -64,14 +66,26 @@ class Context {
     const { logger = console, ...runtime } = extraContext;
 
     const headers = {} as Headers;
+    const cookies = {} as Cookies;
 
-    for (const name in request.headers) {
-      headers[name.toLowerCase()] = request.headers[name];
+    for (const headerName in request.headers) {
+      headers[headerName.toLowerCase()] = request.headers[headerName];
+
+      const isCookieHeader = headerName.toLowerCase() === 'cookie';
+
+      if (isCookieHeader) {
+        const parsedCookies = parse(headers.cookie!);
+
+        for (const cookieName in parsedCookies) {
+          cookies[cookieName.toLowerCase()] = parsedCookies[cookieName];
+        }
+      }
     }
 
     this.query = getQueryParameters(request);
     this.logger = logger;
     this.headers = headers;
+    this.cookies = cookies;
     this.identity = {};
     this.httpPath = getHttpPath(spec, request);
     this.validator = validator;

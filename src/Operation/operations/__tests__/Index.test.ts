@@ -103,10 +103,10 @@ describe('Index(Document, actionMethod)', () => {
       it('returns pagination parameters', () => {
         expect(IndexProfiles.query).toEqual({
           limit: {
-            min: 1,
-            max: 999,
             type: 'integer',
             default: 20,
+            minimum: 1,
+            maximum: 999,
             description: 'Limit number of profiles to be returned',
           },
           sort: {

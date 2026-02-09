@@ -3,8 +3,8 @@ import Operation from '../Operation';
 import { OpenAPIV2 } from 'openapi-types';
 import { createSpec } from './spec';
 import { get, uniq, compact } from 'lodash';
-import { Schema, Validator, createSchemasMap, type ValidationError } from '@kravc/schema';
 import Context, { type ContextConfig, type Request, type ExtraContext } from '../Context';
+import { got, Schema, Validator, createSchemasMap, type ValidationError } from '@kravc/schema';
 
 import {
   type OriginalError,
@@ -85,18 +85,18 @@ class Service {
 
     schemasMap[OperationError.id] = OperationError.schema;
 
-    for (const component of components) {
-      if (!component.schema) {
-        const schema = schemasMap[component.id];
+    for (const ComponentClass of components) {
+      if (!ComponentClass.hasSchema) {
+        const schema = schemasMap[ComponentClass.id];
 
         if (!schema) {
-          throw new Error(`Schema for component "${component.id}" not found`);
+          throw new Error(`Schema for component "${ComponentClass.id}" is not found`);
         }
 
-        component.schema = schema;
+        ComponentClass.schema = schema;
       }
 
-      schemasMap[component.id] = component.schema;
+      schemasMap[ComponentClass.id] = ComponentClass.schema!;
     }
 
     const operationsMap = {} as Record<string, typeof Operation>;
@@ -147,6 +147,12 @@ class Service {
   /** Returns service specification. */
   get spec() {
     return this._spec;
+  }
+
+  /** Returns operation class by operation ID. */
+  get(operationId: string) {
+    const errorTemplate = 'Operation "$PATH" is not found';
+    return got(this._operationsMap, operationId, errorTemplate) as typeof Operation;
   }
 
   /** Processes incoming request. */

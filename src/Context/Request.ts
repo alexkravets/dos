@@ -9,7 +9,11 @@ export type ExtraContext = {
   [index: string]: unknown;
 }
 
-export type Headers = Record<string, unknown>;
+export type Headers = {
+  cookie?: string;
+  [x: string]: unknown;
+}
+
 export type QueryMap = Record<string, unknown>;
 export type MutationMap = Record<string, unknown>;
 

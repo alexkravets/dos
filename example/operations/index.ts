@@ -1,4 +1,4 @@
-import Profile from '../documents/Profile';
+import { Profile } from '../documents';
 
 import Health from './Service/Health';
 import ReadProfile from './Profile/ReadProfile'  ;

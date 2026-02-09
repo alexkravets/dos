@@ -1,6 +1,6 @@
 import { as } from '../../security';
-import Profile from '../../documents/Profile';
 import { Create } from '../../../src';
+import { Profile } from '../../documents';
 
 /** Create profile operation. */
 class CreateProfile extends as.User(Create(Profile)) {

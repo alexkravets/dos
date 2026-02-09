@@ -17,7 +17,7 @@ import CommonError from './CommonError';
  */
 class AccessDeniedError extends CommonError {
   /** Creates an instance of access denied error. */
-  constructor(message: string = 'Operation access denied') {
+  constructor(message: string) {
     super('AccessDeniedError', message);
   }
 }

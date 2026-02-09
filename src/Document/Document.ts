@@ -8,6 +8,28 @@ const DEFAULT_INDEX_SORT = 'desc';
 const DEFAULT_INDEX_LIMIT = 300;
 const DEFAULT_PARTITION_KEY = 'partition';
 
+export type IndexOptions = {
+  sort?: 'asc' | 'desc';
+  limit?: number;
+  index?: string;
+  exclusiveStartKey?: string;
+}
+
+export type IndexAllOptions = {
+  sort?: 'asc' | 'desc';
+  index?: string;
+}
+
+export type DefaultAttributes = {
+  id: string;
+  createdAt: string;
+  createdBy: string;
+  createdByUserName?: string;
+  updatedAt?: string;
+  updatedBy?: string;
+  updatedByUserName?: string;
+};
+
 type Constructor<T, D extends Document<T> = Document<T>> = {
   new(context: Context, attributes: T): D;
 
@@ -29,28 +51,6 @@ type Constructor<T, D extends Document<T> = Document<T>> = {
   _update<T>(query: QueryMap, mutation: MutationMap): Promise<T>;
 
   _delete(query: QueryMap): Promise<void>;
-};
-
-export type IndexOptions = {
-  sort?: 'asc' | 'desc';
-  limit?: number;
-  index?: string;
-  exclusiveStartKey?: string;
-}
-
-export type IndexAllOptions = {
-  sort?: 'asc' | 'desc';
-  index?: string;
-}
-
-export type DefaultAttributes = {
-  id: string;
-  createdAt: string;
-  createdBy: string;
-  createdByUserName?: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  updatedByUserName?: string;
 };
 
 /** Abstract document class. */
@@ -145,9 +145,14 @@ class Document<Attributes> extends Component<Attributes> {
     return this._schema;
   }
 
-  /** Returns body schema to validate attributes for the update method. */
+  /** Returns body schema of a document. */
   static get bodySchema() {
     return this._bodySchema;
+  }
+
+  /** Returns schema for document create and update mutations. */
+  static get mutationSchema(): Schema {
+    return this.bodySchema;
   }
 
   /** Returns partition to save document based on context and parameters. */

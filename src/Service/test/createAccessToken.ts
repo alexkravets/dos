@@ -2,6 +2,7 @@ import { TEST_PRIVATE_KEY } from './keys';
 import { sign, type SignOptions } from 'jsonwebtoken';
 
 interface Options extends SignOptions {
+  exp?: string;
   privateKey?: string;
 }
 

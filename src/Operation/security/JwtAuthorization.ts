@@ -1,4 +1,3 @@
-import cookie from 'cookie';
 import Context from '../../Context';
 import verifyToken from './verifyToken';
 import AccessDeniedError from '../errors/AccessDeniedError';
@@ -37,6 +36,12 @@ type RequirementOptions = {
 
 const DEFAULT_HEADER_NAME = 'authorization';
 
+/** Default method to normalize claims. */
+const DEFAULT_NORMALIZED_CLAIMS_METHOD = (claims: Claims) => claims;
+
+/** Default method to verify access. */
+const DEFAULT_ACCESS_VERIFICATION_METHOD = async (): Promise<[ true ]> => [ true ];
+
 /** JWT Authorization */
 class JwtAuthorization {
   private _name: string;
@@ -54,24 +59,24 @@ class JwtAuthorization {
     publicKey,
     cookieName,
     algorithm = 'RS256',
-    normalizeClaimsMethod = (claims: Claims) => claims,
+    normalizeClaimsMethod = DEFAULT_NORMALIZED_CLAIMS_METHOD,
     tokenVerificationMethod = verifyToken,
-    accessVerificationMethod = async () => [ true ],
+    accessVerificationMethod = DEFAULT_ACCESS_VERIFICATION_METHOD,
   }: {
     name: string;
     publicKey: string;
-    cookieName: string;
     algorithm?: Algorithm;
+    cookieName?: string;
     normalizeClaimsMethod?: NormalizeClaimsMethod;
     tokenVerificationMethod?: TokenVerificationMethod;
     accessVerificationMethod?: AccessVerificationMethod;
   }) {
-    this._name       = name;
-    this._publicKey  = publicKey;
-    this._algorithm  = algorithm;
-    this._cookieName = cookieName;
+    this._name = name;
+    this._publicKey = publicKey;
+    this._algorithm = algorithm;
+    this._cookieName = cookieName || name;
 
-    this._verifyToken  = tokenVerificationMethod;
+    this._verifyToken = tokenVerificationMethod;
     this._verifyAccess = accessVerificationMethod;
     this._normalizeClaims = normalizeClaimsMethod;
   }
@@ -79,7 +84,6 @@ class JwtAuthorization {
   /** Returns specification for JWT authorization security requirement. */
   static createRequirement(options: RequirementOptions): Record<string, Requirement> {
     const name = get(options, 'name', DEFAULT_HEADER_NAME);
-    const cookieName = get(options, 'cookieName', name);
     const description = get(options, 'description');
     const requirementName = get(options, 'requirementName', capitalize(name));
 
@@ -94,7 +98,7 @@ class JwtAuthorization {
         errors: JwtAuthorization.errors,
         /** Verifies context via JWT authorization requirement. */
         verify: (context: Context) => {
-          const security = new JwtAuthorization({ name, cookieName, ...options });
+          const security = new JwtAuthorization({ name, ...options });
           return security.verify(context);
         }
       }
@@ -117,17 +121,9 @@ class JwtAuthorization {
 
   /** Verifies JWT authorization. */
   async verify(context: Context): Promise<VerificationResult> {
-    let token: string | undefined;
+    const { headers, cookies } = context;
 
-    const { headers } = context;
-
-    const hasCookie = 'cookie' in headers;
-
-    if (hasCookie) {
-      const cookies = cookie.parse(headers['cookie'] as string);
-
-      token = cookies[this._cookieName] as string;
-    }
+    let token = get(cookies, this._cookieName);
 
     if (!token) {
       token = headers[this._name] as string;
@@ -147,7 +143,7 @@ class JwtAuthorization {
     const object = decode(token, { complete: true });
 
     if (!object) {
-      const error = new UnauthorizedError('Invalid authorization token');
+      const error = new UnauthorizedError(`Invalid "${this._name}" token`);
 
       return {
         isAuthorized: false,
@@ -159,7 +155,7 @@ class JwtAuthorization {
       await this._verifyToken(context, token, this._publicKey, this._algorithm);
 
     if (!isTokenOk) {
-      const error = new UnauthorizedError(tokenErrorMessage);
+      const error = new UnauthorizedError(`"${this._name}" token verification failed: ${tokenErrorMessage}`);
 
       return {
         isAuthorized: false,

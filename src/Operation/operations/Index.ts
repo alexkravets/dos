@@ -70,10 +70,10 @@ const Index = (
     static get query() {
       return {
         limit: {
-          min: 1,
-          max: this.limitMax,
           type: 'integer',
           default: this.defaultLimit,
+          minimum: 1,
+          maximum: this.limitMax,
           description: `Limit number of ${documentTitle} to be returned`,
         },
         sort: {

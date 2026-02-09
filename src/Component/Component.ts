@@ -51,6 +51,11 @@ class Component<Attributes> {
     return this._schema;
   }
 
+  /** Flag if schema is defined for a component. */
+  static get hasSchema(): boolean {
+    return !!this._schema;
+  }
+
   /** Returns schema for component mutation attributes. */
   static get mutationSchema(): Schema | undefined {
     return this.schema;

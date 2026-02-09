@@ -59,20 +59,20 @@ const createSpec = (
     securityDefinitions,
   } as OpenAPIV2.Document;
 
-  const json = JSON
+  const specJson = JSON
     .stringify(spec, null, 2)
     .replace(/"\$ref": "/g, '"$ref": "#/definitions/');
 
-  const result = JSON.parse(json);
+  const result = JSON.parse(specJson);
 
   const validator = new ZSchema({ ignoreUnknownFormats: true });
   const isValid = validator.validate(result, { ...jsonSchema, id: 'Spec' });
 
   if (!isValid) {
     const validationErrors = validator.getLastErrors();
+    const errorsJson = JSON.stringify(validationErrors, null, 2);
 
-    const json = JSON.stringify(validationErrors, null, 2);
-    throw new Error(`Service spec validation failed: ${json}`);
+    throw new Error(`Service spec validation failed: ${errorsJson}\nService spec: ${specJson}`);
   }
 
   return result;
