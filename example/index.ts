@@ -9,7 +9,7 @@ import operations from './operations';
 
 const ROOT_PATH = process.cwd();
 const path = `${ROOT_PATH}/example`;
-const url = 'http://localhost:3000/';
+const url = 'http://localhost:3000';
 
 const logger = {
   ...console,

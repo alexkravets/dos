@@ -1,8 +1,5 @@
 import type { Context, QueryMap, MutationMap } from '../Context';
 
-/** Flags if test environment. */
-const isTestEnvironment = () => process.env.NODE_APP_INSTANCE === 'test';
-
 type RequestMetadata = {
   host: string;
   requestId: string;
@@ -13,7 +10,9 @@ type RequestMetadata = {
 
 /** Logs request metadata in the non test environment. */
 const logRequest = (context: Context) => {
-  if (isTestEnvironment()) {
+  const { isTest } = context;
+
+  if (isTest) {
     return;
   }
 

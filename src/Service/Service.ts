@@ -167,7 +167,7 @@ class Service {
     });
 
     const result =
-      useOasMiddleware(this, context) &&
+      useOasMiddleware(this, context) ||
       useComposerMiddleware(this, context);
 
     if (result) {

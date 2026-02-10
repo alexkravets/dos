@@ -6,6 +6,7 @@ export type Logger = {
 }
 
 export type ExtraContext = {
+  env?: string;
   logger?: Logger;
   [index: string]: unknown;
 }

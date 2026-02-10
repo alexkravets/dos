@@ -57,13 +57,18 @@ class Context {
   public operationId: string;
   public requestReceivedAt: string;
 
+  private _env?: string;
   private _runtime: Runtime;
 
   /** Creates an instance of the context. */
   constructor(config: ContextConfig, request: Request, extraContext: ExtraContext = {}) {
     const { spec, validator } = config;
 
-    const { logger = console, ...runtime } = extraContext;
+    const {
+      env = process.env.NODE_APP_INSTANCE as string | undefined,
+      logger = console,
+      ...runtime
+    } = extraContext;
 
     const headers = {} as Headers;
     const cookies = {} as Cookies;
@@ -99,9 +104,20 @@ class Context {
     this.bodyJson = bodyJson;
     this.mutation = mutation;
 
+    this._env = env;
     this._runtime = runtime;
 
     return withSafeAttributes<Context>(this, 'Context');
+  }
+
+  /** Returns true if running in the development environment. */
+  get isDevelopment(): boolean {
+    return this._env === 'dev' || !this._env;
+  }
+
+  /** Returns true if running in the test environment. */
+  get isTest(): boolean {
+    return this._env === 'test';
   }
 
   /** Adds variable to the context runtime. */

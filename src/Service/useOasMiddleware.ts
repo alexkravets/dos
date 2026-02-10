@@ -7,22 +7,6 @@ import { readFileSync } from 'fs';
 const SWAGGER_UI_TEMPLATE_PATH = resolve(__dirname, '../../assets/index.html');
 const SWAGGER_UI_TEMPLATE = readFileSync(SWAGGER_UI_TEMPLATE_PATH, { encoding: 'utf8' });
 
-/** Returns true if running in the development environment. */
-export const isDevelopment = () =>
-  process.env.NODE_APP_INSTANCE === 'dev' || !process.env.NODE_APP_INSTANCE;
-
-/** Returns swagger ui app in the development environment. */
-const _getHomeBody = () =>
-  isDevelopment()
-    ? SWAGGER_UI_TEMPLATE.replace('$TITLE', getServiceInfo().title)
-    : 'healthy';
-
-/** Returns service specification in the development environment. */
-const _getSpecBody = (spec: OpenAPIV2.Document) =>
-  isDevelopment()
-    ? spec
-    : { info: getServiceInfo() };
-
 const TEXT_TYPE = 'text/html; charset=UTF-8';
 export const JSON_TYPE = 'application/json; charset=utf-8';
 export const OK_STATUS = 200;
@@ -31,18 +15,22 @@ export const OK_STATUS = 200;
 const useOasMiddleware = ({ spec }: { spec: OpenAPIV2.Document; }, context: Context) => {
   const {
     httpPath,
-    httpMethod
+    httpMethod,
+    isDevelopment
   } = context;
 
   const isGetRequest = httpMethod === 'get';
 
   const isRootPath = httpPath === '/';
+
   const shouldReturnBody =
     isRootPath &&
     isGetRequest;
 
   if (shouldReturnBody) {
-    const bodyText = _getHomeBody();
+    const bodyText = isDevelopment
+      ? SWAGGER_UI_TEMPLATE.replace('$TITLE', getServiceInfo().title)
+      : 'healthy';
 
     return {
       headers: {
@@ -53,13 +41,18 @@ const useOasMiddleware = ({ spec }: { spec: OpenAPIV2.Document; }, context: Cont
     };
   }
 
-  const isSpecPath = httpPath === '/Spec';
+  const isSpecPath = httpPath.toLowerCase() === '/spec';
+
   const shouldReturnSpec =
     isSpecPath &&
     isGetRequest;
 
   if (shouldReturnSpec) {
-    const bodyJson = JSON.stringify(_getSpecBody(spec), null, 2);
+    const body = isDevelopment
+      ? spec
+      : { info: getServiceInfo() };
+
+    const bodyJson = JSON.stringify(body, null, 2);
 
     return {
       headers: {

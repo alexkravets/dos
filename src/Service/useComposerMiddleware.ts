@@ -1,6 +1,6 @@
 import { sync } from 'read-yaml-file';
 import type { Context } from '../Context';
-import { isDevelopment, OK_STATUS, JSON_TYPE } from './useOasMiddleware';
+import { OK_STATUS, JSON_TYPE } from './useOasMiddleware';
 
 const ROOT_PATH = process.cwd();
 
@@ -17,7 +17,8 @@ const COMPOSER_FILES = [
 const useComposerMiddleware = (_service: unknown, context: Context) => {
   const {
     httpPath,
-    httpMethod
+    httpMethod,
+    isDevelopment
   } = context;
 
   const isGetRequest = httpMethod === 'get';
@@ -33,7 +34,7 @@ const useComposerMiddleware = (_service: unknown, context: Context) => {
   const isComposerPath = COMPOSER_FILES.includes(httpPath);
 
   const shouldReturnComposerSource =
-    isDevelopment() &&
+    isDevelopment &&
     isGetRequest &&
     isComposerPath;
 
