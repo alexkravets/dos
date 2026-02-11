@@ -61,7 +61,7 @@ class Context {
   private _runtime: Runtime;
 
   /** Creates an instance of the context. */
-  constructor(config: ContextConfig, request: Request, extraContext: ExtraContext = {}) {
+  constructor(config: ContextConfig, request: Request, extraContext: ExtraContext) {
     const { spec, validator } = config;
 
     const {

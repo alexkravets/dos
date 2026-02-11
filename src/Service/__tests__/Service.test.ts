@@ -1,14 +1,15 @@
-import { HttpRequest } from '../../Context';
+import { Profile } from '../../../example/documents';
+import { createContext } from '../../Context/__tests__/__helpers';
+import { type HttpRequest } from '../../Context';
 import { Component, createAccessToken, Service } from '../../';
 import { service, operations, url, path, logger, } from '../../../example';
 
 describe('Service', () => {
   describe('Service.constructor(modules, options)', () => {
-    it('ensures service url ends with /', () => {
-      const url = 'http://localhost:3000/';
-      const service = new Service(operations, { url, path });
+    it('ensures service url ends with / and uses default options', () => {
+      const service = new Service(operations);
 
-      expect(service.baseUrl).toEqual(url);
+      expect(service.baseUrl).toEqual('http://localhost:3000/');
     });
 
     it('throws exception if component schema is missing', () => {
@@ -53,7 +54,7 @@ describe('Service', () => {
       });
     });
 
-    it('returns InvalidInputError if input validation failed', async () => {
+    it('returns InvalidInputError if operation input validation failed', async () => {
       const Authorization = createAccessToken({}, { permissions: [ 'profiles-write' ] });
 
       const request = {
@@ -79,6 +80,41 @@ describe('Service', () => {
               code: 'INVALID_TYPE',
               path: '#/mutation',
               message: 'Expected type object but found type null',
+            },
+          ],
+        }
+      });
+    });
+
+    it('returns InvalidOutputError if operation output validation failed', async () => {
+      const context = createContext();
+      const { id } = await Profile.create(context, { example: 'test' });
+
+      const Authorization = createAccessToken({}, { permissions: [ 'profiles-read' ] });
+
+      const request = {
+        url: `http://localhost:3000/ReadProfile?id=${id}`,
+        path: '/ReadProfile',
+        method: 'get',
+        headers: { Authorization }
+      } as HttpRequest;
+
+      const { body: json, statusCode } = await service.process(request);
+
+      expect(statusCode).toEqual(500);
+
+      const body = JSON.parse(json!);
+
+      expect(body).toEqual({
+        error: {
+          code: 'InvalidOutputError',
+          message: 'Invalid operation output',
+          statusCode: 500,
+          validationErrors: [
+            {
+              code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
+              path: '#/data',
+              message: 'Missing required property: name',
             },
           ],
         }

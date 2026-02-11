@@ -12,7 +12,7 @@ describe('JwtAuthorization', () => {
       expect(CreateProfile.security[0].Authorization).toBeDefined();
     });
 
-    it('supports default access verification method', async () => {
+    it('supports default access verification method without permissions map', async () => {
       const Authorization = createAccessToken({}, { permissions: [] });
 
       const request = {
@@ -28,6 +28,28 @@ describe('JwtAuthorization', () => {
       const result = await verify(context);
 
       expect(result.isAuthorized).toBe(true);
+    });
+
+    it('supports default access verification method with permissions map', async () => {
+      const Authorization = createAccessToken({}, { permissions: [ 'profiles-read' ] });
+
+      const request = {
+        headers: { authorization: Authorization },
+        operationId: 'CreateProfile'
+      } as LambdaRequest;
+
+      const context = createContext({ request });
+
+      const requirement = JwtAuthorization.createRequirement({
+        publicKey,
+        permissions: { 'profiles-write': [ 'CreateProfile' ] }
+      });
+
+      const verify = requirement.Authorization.verify;
+
+      const result = await verify(context);
+
+      expect(result.isAuthorized).toBe(false);
     });
   });
 
