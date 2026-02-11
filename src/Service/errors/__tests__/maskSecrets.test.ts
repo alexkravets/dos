@@ -10,12 +10,13 @@ describe('maskSecrets', () => {
     expect(input).toEqual({ password: 'secret' });
   });
 
-  it('masks keys matching SECRET_REGEXP (password, code, token, authorization, cookie)', () => {
+  it('masks keys matching SECRET_REGEXP (password, code, token, authorization, authentication, cookie)', () => {
     const input = {
       password: 'p',
       code: 'c',
       token: 't',
       authorization: 'a',
+      authentication: 'auth',
       cookie: 'k',
       user: 'u'
     };
@@ -26,6 +27,7 @@ describe('maskSecrets', () => {
       code: '[MASKED]',
       token: '[MASKED]',
       authorization: '[MASKED]',
+      authentication: '[MASKED]',
       cookie: '[MASKED]',
       user: 'u'
     });
@@ -48,50 +50,21 @@ describe('maskSecrets', () => {
     });
   });
 
-  it('masks secret keys regardless of value type (primitive, object, array)', () => {
+  it('masks secret keys regardless of value type and recursively in nested structures', () => {
     const input = {
       password: 'plain',
       token: { nested: 'x' },
-      code: [1, 2, 3]
+      code: [1, 2, 3],
+      inner: { password: 'p', items: [{ token: 't' }] },
+      list: [1, 'a', null, { password: 'p' }]
     };
     const result = maskSecrets(input);
 
     expect(result).toEqual({
       password: '[MASKED]',
       token: '[MASKED]',
-      code: '[MASKED]'
-    });
-  });
-
-  it('recursively masks secrets in nested objects', () => {
-    const input = {
-      user: 'u',
-      inner: { password: 'p', name: 'n' }
-    };
-    const result = maskSecrets(input);
-
-    expect(result).toEqual({
-      user: 'u',
-      inner: { password: '[MASKED]', name: 'n' }
-    });
-  });
-
-  it('recursively masks secrets in arrays of objects', () => {
-    const input = {
-      items: [{ token: 't1' }, { token: 't2', id: 'i' }]
-    };
-    const result = maskSecrets(input);
-
-    expect(result).toEqual({
-      items: [{ token: '[MASKED]' }, { token: '[MASKED]', id: 'i' }]
-    });
-  });
-
-  it('skips non-object array elements', () => {
-    const input = { list: [1, 'a', null, { password: 'p' }] };
-    const result = maskSecrets(input);
-
-    expect(result).toEqual({
+      code: '[MASKED]',
+      inner: { password: '[MASKED]', items: [{ token: '[MASKED]' }] },
       list: [1, 'a', null, { password: '[MASKED]' }]
     });
   });
@@ -108,7 +81,12 @@ describe('maskSecrets', () => {
     expect(Object.prototype.hasOwnProperty.call(result, 'hidden')).toBe(false);
   });
 
-  it('handles empty object', () => {
+  it('handles empty object, array at top level, and null input', () => {
     expect(maskSecrets({})).toEqual({});
+
+    const arrayInput = [1, { token: 'x' }] as unknown as Record<string, unknown>;
+    expect(maskSecrets(arrayInput)).toEqual([1, { token: '[MASKED]' }]);
+
+    expect(maskSecrets(null as unknown as Record<string, unknown>)).toBe(null);
   });
 });

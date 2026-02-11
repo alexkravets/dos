@@ -71,6 +71,7 @@ const Index = (
       return {
         limit: {
           type: 'integer',
+          example: this.defaultLimit,
           default: this.defaultLimit,
           minimum: 1,
           maximum: this.limitMax,
@@ -105,10 +106,12 @@ const Index = (
             },
             count: {
               type: 'integer',
+              example: 0,
               description: `Number of ${documentTitle}`,
             },
             limit: {
               type: 'integer',
+              example: 100,
               description: `Limit number of ${documentTitle} to be returned`,
             },
             lastEvaluatedKey: {

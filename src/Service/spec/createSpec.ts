@@ -1,9 +1,8 @@
-import ZSchema from 'z-schema';
-import { parse } from 'url';
+import { get } from 'lodash';
 import Operation from '../../Operation';
 import { Schema } from '@kravc/schema';
-import jsonSchema from '../../../assets/schemas/oas2.json';
 import getOperation from './getOperation';
+import validateSpec from './validateSpec';
 import { OpenAPIV2 } from 'openapi-types';
 import getHttpMethod from './getHttpMethod';
 import getServiceInfo from './getServiceInfo';
@@ -17,13 +16,11 @@ const createSpec = (
   schemasMap: Record<string, Schema>,
   url: string
 ): OpenAPIV2.Document => {
-  const {
-    path: basePath,
-    protocol: _protocol,
-    host,
-  } = parse(url);
+  const _url = new URL(url);
 
-  const protocol = (_protocol || '').replace(':', '');
+  const host = _url.host;
+  const basePath = get(_url, 'pathname', '/');
+  const protocol = _url.protocol.replace(':', '');
 
   const info = getServiceInfo();
   const tags = getServiceTags(operations);
@@ -63,17 +60,7 @@ const createSpec = (
     .stringify(spec, null, 2)
     .replace(/"\$ref": "/g, '"$ref": "#/definitions/');
 
-  const result = JSON.parse(specJson);
-
-  const validator = new ZSchema({ ignoreUnknownFormats: true });
-  const isValid = validator.validate(result, { ...jsonSchema, id: 'Spec' });
-
-  if (!isValid) {
-    const validationErrors = validator.getLastErrors();
-    const errorsJson = JSON.stringify(validationErrors, null, 2);
-
-    throw new Error(`Service spec validation failed: ${errorsJson}\nService spec: ${specJson}`);
-  }
+  const result = validateSpec(specJson);
 
   return result;
 };

@@ -104,6 +104,7 @@ describe('Index(Document, actionMethod)', () => {
         expect(IndexProfiles.query).toEqual({
           limit: {
             type: 'integer',
+            example: 20,
             default: 20,
             minimum: 1,
             maximum: 999,
@@ -145,10 +146,12 @@ describe('Index(Document, actionMethod)', () => {
               },
               count: {
                 type: 'integer',
+                example: 0,
                 description: 'Number of profiles',
               },
               limit: {
                 type: 'integer',
+                example: 100,
                 description: 'Limit number of profiles to be returned',
               },
               lastEvaluatedKey: {

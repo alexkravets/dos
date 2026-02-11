@@ -21,7 +21,7 @@
     "src": "src"
   },
   "scripts": {
-    "test": "eslint --fix src/ examples/ && jest --coverage",
+    "test": "eslint --fix src/ example/ && jest --coverage",
     "prebuild": "rimraf dist",
     "build": "tsc",
     "prepare": "npm run build",

@@ -1,5 +1,4 @@
 import { get } from 'lodash';
-import { parse } from 'url';
 import type { QueryMap, Request } from './Request';
 
 /** Returns query parameters of a request. */
@@ -9,7 +8,8 @@ const getQueryParameters = (request: Request): QueryMap => {
   const url = get(request, 'url');
 
   if (url) {
-    parameters = parse(url, true).query;
+    const { searchParams } = new URL(url);
+    parameters = Object.fromEntries(searchParams);
   }
 
   const queryStringParameters = get(request, 'queryStringParameters');

@@ -1,4 +1,4 @@
-import { parse } from 'url';
+import { get } from 'lodash';
 import { OpenAPIV2 } from 'openapi-types';
 import type { Request, LambdaRequest, HttpRequest } from './Request';
 
@@ -16,7 +16,8 @@ const getHttpPath = (spec: OpenAPIV2.Document, request: Request): string => {
   let { path } = httpRequest;
 
   if (!path) {
-    path = parse(httpRequest.url!, true).pathname!;
+    const _url = new URL(httpRequest.url!);
+    path = get(_url, 'pathname', '/');
   }
 
   const httpPath = path
