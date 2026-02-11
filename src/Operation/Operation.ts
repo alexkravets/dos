@@ -144,6 +144,11 @@ class Operation {
     return capitalize(`${this.componentAction} ${componentName}`);
   }
 
+  /** Returns a list of permissions to access operation. */
+  static get permissions(): null | string[] {
+    return null;
+  }
+
   /** Returns operation description. */
   static get description() {
     return '';

@@ -12,6 +12,11 @@ const systemAuthorization = () => {
       static get security() {
         return [ authorizationRequirement ];
       }
+
+      /** Returns a list of permissions to access operation. */
+      static get permissions() {
+        return [ 'System' ];
+      }
     };
 };
 

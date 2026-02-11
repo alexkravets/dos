@@ -17,12 +17,17 @@ const getOperation = (OperationClass: typeof Operation): OpenAPIV2.OperationObje
     isCreate,
     hasOutput,
     description,
+    permissions,
     outputSchema,
   } = OperationClass;
 
+  const operationSummary = permissions
+    ? `[${permissions.join(',')}] ${summary}`
+    : summary;
+
   const operationSpec = {
     tags: operationTags,
-    summary,
+    summary: operationSummary,
     description,
     operationId,
   } as OpenAPIV2.OperationObject;
