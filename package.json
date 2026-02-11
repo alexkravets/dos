@@ -21,6 +21,7 @@
     "src": "src"
   },
   "scripts": {
+    "start": "npx http example/index.ts",
     "test": "eslint --fix src/ example/ && jest --coverage",
     "prebuild": "rimraf dist",
     "build": "tsc",
@@ -33,6 +34,7 @@
     "@kravc/schema": "^2.8.0-alpha.7",
     "@types/jsonwebtoken": "^9.0.10",
     "cookie": "^1.1.1",
+    "flatted": "^3.3.3",
     "jsonwebtoken": "^9.0.3",
     "lodash": "^4.17.23",
     "openapi-types": "^12.1.3",
@@ -43,6 +45,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@kravc/http": "^0.5.0",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.23",
     "@types/pluralize": "^0.0.33",
@@ -51,6 +54,7 @@
     "globals": "^17.1.0",
     "jest": "^30.2.0",
     "rimraf": "^6.1.2",
+    "ts-node": "^10.9.2",
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0"

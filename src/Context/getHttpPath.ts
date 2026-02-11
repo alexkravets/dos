@@ -16,7 +16,13 @@ const getHttpPath = (spec: OpenAPIV2.Document, request: Request): string => {
   let { path } = httpRequest;
 
   if (!path) {
-    const _url = new URL(httpRequest.url!);
+    const { url } = httpRequest;
+    const isLocalhost = url.startsWith('/');
+
+    const _url = isLocalhost
+      ? new URL(`http://localhost:3000/${url}`)
+      : new URL(url);
+
     path = get(_url, 'pathname', '/');
   }
 

@@ -107,6 +107,25 @@ describe('Context', () => {
       expect(context.httpMethod).toEqual('get');
       expect(context.operationId).toBe(operationId);
     });
+
+    it('should create instance for local HTTP request', () => {
+      const uuid = randomUUID();
+
+      const request = {
+        url: `/${operationId}?id=ID`,
+        headers: { Accept: 'application/json' },
+        httpMethod: 'get',
+        requestContext: {
+          requestId: uuid,
+        },
+      } as HttpRequest;
+
+      const context = createContext({ request });
+
+      expect(context.httpPath).toEqual(`/${operationId}`);
+      expect(context.httpMethod).toEqual('get');
+      expect(context.operationId).toBe(operationId);
+    });
   });
 
   describe('.set(name, value)', () => {

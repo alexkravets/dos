@@ -21,6 +21,7 @@ const logRequest = (context: Context) => {
     query,
     logger,
     mutation,
+    httpPath,
     requestId,
     headers,
     requestReceivedAt
@@ -39,7 +40,11 @@ const logRequest = (context: Context) => {
     metadata.mutation = mutation;
   }
 
-  logger.info(`${operationId}: ${JSON.stringify(metadata, null, 2)}`);
+  const prefix = operationId === 'undefined'
+    ? httpPath
+    : operationId;
+
+  logger.info(`${prefix}: ${JSON.stringify(metadata, null, 2)}`);
 };
 
 export default logRequest;

@@ -3,7 +3,7 @@ import Context from '../../Context';
 import AccessDeniedError from '../errors/AccessDeniedError';
 import type { Requirement, VerificationResult } from '../../Service/authorize';
 
-const SYSTEM_NAME = 'System';
+const NAME = 'System';
 const DESCRIPTION = 'This security definition and a header for system' +
   ' operations should be ignored. The verification method of system' +
   ' operations relies on a gateway that adds headers for all' +
@@ -53,7 +53,7 @@ class LambdaAuthorization {
   static createRequirement(options: RequirementOptions = {}): Record<string, Requirement> {
     const name = get(options, 'name', DEFAULT_HEADER_NAME);
     const description = get(options, 'description', DESCRIPTION);
-    const requirementName = get(options, 'requirementName', SYSTEM_NAME);
+    const requirementName = get(options, 'requirementName', NAME);
 
     return {
       [requirementName]: {

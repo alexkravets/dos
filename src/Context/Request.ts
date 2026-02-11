@@ -1,7 +1,7 @@
 
 export type Logger = {
   dir: (object: Record<string, unknown>, options: Record<string, unknown>) => void;
-  info: (message: string) => void;
+  info: (message: string, object?: unknown) => void;
   error: (message: string) => void;
 }
 

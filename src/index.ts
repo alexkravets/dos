@@ -1,5 +1,4 @@
 import { got } from '@kravc/schema';
-
 export { got };
 
 export * from './Component';

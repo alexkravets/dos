@@ -144,6 +144,17 @@ describe('Service', () => {
       expect(body).toEqual('healthy');
     });
 
+    it('returns 404 status code for /favicon.ico path', async () => {
+      const request = {
+        path: '/favicon.ico',
+        method: 'get'
+      } as HttpRequest;
+
+      const { statusCode } = await service.process(request);
+
+      expect(statusCode).toEqual(404);
+    });
+
     it('returns service specification for /spec path', async () => {
       const request = {
         path: '/spec',

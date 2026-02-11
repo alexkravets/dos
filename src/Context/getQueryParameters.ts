@@ -8,7 +8,12 @@ const getQueryParameters = (request: Request): QueryMap => {
   const url = get(request, 'url');
 
   if (url) {
-    const { searchParams } = new URL(url);
+    const isLocalhost = url.startsWith('/');
+
+    const { searchParams } = isLocalhost
+      ? new URL(`http://localhost:3000/${url}`)
+      : new URL(url);
+
     parameters = Object.fromEntries(searchParams);
   }
 

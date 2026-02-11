@@ -1,5 +1,6 @@
 import Component from '../Component';
 import Operation from '../Operation';
+import { stringify } from 'flatted';
 import { OpenAPIV2 } from 'openapi-types';
 import { createSpec } from './spec';
 import { get, uniq, compact } from 'lodash';
@@ -171,9 +172,10 @@ class Service {
 
     } catch (error) {
       const logger = get({ ...this._serviceContext, ...extraContext }, 'logger', console);
-      const requestJson = JSON.stringify(request);
 
+      const requestJson = stringify(request, undefined, 2);
       logger.error(`Failed to create context for request: ${requestJson}`);
+
       throw error;
     }
 
