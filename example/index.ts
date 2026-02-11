@@ -27,6 +27,10 @@ const service = new Service(operations, { url, path, context: { logger } });
 const handler = (request: Request) => service.process(request);
 
 export {
+  url,
+  path,
+  logger,
   handler,
   service,
+  operations,
 };

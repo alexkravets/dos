@@ -1,11 +1,15 @@
 import verifyToken from './verifyToken';
 import JwtAuthorization from './JwtAuthorization';
-import SystemAuthorization from './SystemAuthorization';
+import userAuthorization from './userAuthorization';
+import systemAuthorization from './systemAuthorization';
+import LambdaAuthorization from './LambdaAuthorization';
 
 export {
   verifyToken,
   JwtAuthorization,
-  SystemAuthorization
+  userAuthorization,
+  systemAuthorization,
+  LambdaAuthorization,
 };
 
 export type * from './JwtAuthorization';

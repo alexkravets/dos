@@ -3,17 +3,17 @@ import { LambdaRequest } from '../../../Context';
 import { createContext } from '../../../Context/__tests__/__helpers';
 import { service, handler } from '../../../../example';
 
-describe('SystemAuthorization', () => {
+describe('LambdaAuthorization', () => {
   const operationId = 'ReadProfileSystem';
   const ReadProfileSystem = service.get(operationId);
 
-  describe('SystemAuthorization.createRequirement(options)', () => {
+  describe('LambdaAuthorization.createRequirement(options)', () => {
     it('extends operation with System security requirements', () => {
       expect(ReadProfileSystem.security[0].System).toBeDefined();
     });
   });
 
-  describe('SystemAuthorization.errors', () => {
+  describe('LambdaAuthorization.errors', () => {
     it('includes authorization related errors', () => {
       const errorCodes = Object.keys(ReadProfileSystem.errors);
       expect(errorCodes).toContain('AccessDeniedError');

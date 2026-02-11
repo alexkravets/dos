@@ -238,10 +238,15 @@ describe('Context', () => {
 
   describe('.[inspect.custom]()', () => {
     it('returns object serializable for logging', () => {
-      const identity = { name: 'John Doe' };
-      const context = createContext({ identity });
-
+      const context = createContext();
       console.log(context);
+    });
+  });
+
+  describe('.isLive', () => {
+    it('flags if running in non test environment', () => {
+      const context = createContext();
+      expect(context.isLive).toEqual(true);
     });
   });
 });

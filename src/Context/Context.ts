@@ -120,6 +120,11 @@ class Context {
     return this._env === 'test';
   }
 
+  /** Returns true if running in the live, non test environment. */
+  get isLive(): boolean {
+    return !this.isTest;
+  }
+
   /** Adds variable to the context runtime. */
   set(path: string, value: unknown) {
     set(this._runtime, path, value);

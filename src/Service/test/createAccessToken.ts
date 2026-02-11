@@ -1,5 +1,5 @@
-import { TEST_PRIVATE_KEY } from './keys';
 import { sign, type SignOptions } from 'jsonwebtoken';
+import { TEST_ISSUER, TEST_PRIVATE_KEY } from './keys';
 
 interface Options extends SignOptions {
   exp?: string;
@@ -9,6 +9,7 @@ interface Options extends SignOptions {
 /** Creates access token. */
 const createAccessToken = (options: Options, claims: Record<string, unknown>) => {
   const {
+    issuer = TEST_ISSUER,
     algorithm = 'RS256',
     privateKey = TEST_PRIVATE_KEY,
     ...signOptions
@@ -19,7 +20,7 @@ const createAccessToken = (options: Options, claims: Record<string, unknown>) =>
     ...claims
   };
 
-  const token = sign(payload, privateKey, { algorithm, ...signOptions });
+  const token = sign(payload, privateKey, { algorithm, issuer, ...signOptions });
 
   return `Bearer ${token}`;
 };

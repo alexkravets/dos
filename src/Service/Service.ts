@@ -161,10 +161,21 @@ class Service {
 
   /** Processes incoming request. */
   async process(request: Request, extraContext: ExtraContext = {}) {
-    const context = this._createContext(this, request, {
-      ...this._serviceContext,
-      ...extraContext
-    });
+    let context: Context;
+
+    try {
+      context = this._createContext(this, request, {
+        ...this._serviceContext,
+        ...extraContext
+      });
+
+    } catch (error) {
+      const logger = get({ ...this._serviceContext, ...extraContext }, 'logger', console);
+      const requestJson = JSON.stringify(request);
+
+      logger.error(`Failed to create context for request: ${requestJson}`);
+      throw error;
+    }
 
     const result =
       useOasMiddleware(this, context) ||
@@ -239,7 +250,7 @@ class Service {
     };
   }
 
-  // eslint-disable-next-line jsdoc/require-jsdoc
+  /** Validates operation input and returns normalized parameters. */
   _getParameters(inputSchema: Schema | null, context: Context, shouldNullifyEmptyValues: boolean) {
     if (!inputSchema) {
       return {};

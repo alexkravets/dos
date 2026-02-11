@@ -6,7 +6,12 @@ import { get, capitalize } from 'lodash';
 import { decode, type Algorithm } from 'jsonwebtoken';
 import type { VerificationResult, Requirement } from '../../Service/authorize';
 
-type Claims = Record<string, unknown>;
+type Claims = {
+  sub?: string;
+  iss?: string;
+  permissions?: string[];
+  [x: string]: unknown;
+}
 
 type TokenVerificationMethod = (
   context: Context,
@@ -17,16 +22,19 @@ type TokenVerificationMethod = (
 
 type AccessVerificationMethod = (
   context: Context,
-  claims: Claims
+  claims: Claims,
+  permissions?: Permissions,
 ) => Promise<[ true ] | [ false, string ]>;
 
 type NormalizeClaimsMethod = (claims: Claims) => Claims;
 
 type RequirementOptions = {
   name?: string;
+  issuer?: string;
   publicKey: string;
   cookieName?: string;
   description?: string;
+  permissions?: Permissions;
   requirementName?: string;
   algorithm?: Algorithm;
   normalizeClaimsMethod?: NormalizeClaimsMethod;
@@ -34,20 +42,50 @@ type RequirementOptions = {
   accessVerificationMethod?: AccessVerificationMethod;
 }
 
+export type Permissions = Record<string, string[]>;
+
 const DEFAULT_HEADER_NAME = 'authorization';
+
+const MESSAGE_ACCESS_DENIED = 'Access denied';
 
 /** Default method to normalize claims. */
 const DEFAULT_NORMALIZED_CLAIMS_METHOD = (claims: Claims) => claims;
 
-/** Default method to verify access. */
-const DEFAULT_ACCESS_VERIFICATION_METHOD = async (): Promise<[ true ]> => [ true ];
+/** Ensures permissions claim includes permissions required by an operation. */
+const DEFAULT_ACCESS_VERIFICATION_METHOD = async (
+  context: Context,
+  claims: Claims,
+  permissionsMap?: Permissions
+): Promise<[ true ] | [ false, string ]> => {
+  if (!permissionsMap) {
+    return [ true ];
+  }
+
+  const { operationId } = context;
+
+  const permissionsClaim = get(claims, 'permissions', []);
+
+  for (const permission of permissionsClaim) {
+    const operationIds = get(permissionsMap, permission, []) as string[];
+
+    const hasAccess = operationIds.includes(operationId);
+
+    if (hasAccess) {
+      return [ true ];
+    }
+  }
+
+  return [ false, MESSAGE_ACCESS_DENIED ];
+};
 
 /** JWT Authorization */
 class JwtAuthorization {
   private _name: string;
+  private _issuer?: string;
   private _publicKey: string;
   private _algorithm: Algorithm;
   private _cookieName: string;
+  private _permissions?: Permissions;
 
   private _verifyToken: TokenVerificationMethod;
   private _verifyAccess: AccessVerificationMethod;
@@ -56,25 +94,31 @@ class JwtAuthorization {
   /** Creates an instance of JWT authorization security. */
   constructor({
     name,
+    issuer,
     publicKey,
     cookieName,
+    permissions,
     algorithm = 'RS256',
     normalizeClaimsMethod = DEFAULT_NORMALIZED_CLAIMS_METHOD,
     tokenVerificationMethod = verifyToken,
     accessVerificationMethod = DEFAULT_ACCESS_VERIFICATION_METHOD,
   }: {
     name: string;
+    issuer?: string;
     publicKey: string;
     algorithm?: Algorithm;
     cookieName?: string;
+    permissions?: Permissions;
     normalizeClaimsMethod?: NormalizeClaimsMethod;
     tokenVerificationMethod?: TokenVerificationMethod;
     accessVerificationMethod?: AccessVerificationMethod;
   }) {
     this._name = name;
+    this._issuer = issuer;
     this._publicKey = publicKey;
     this._algorithm = algorithm;
     this._cookieName = cookieName || name;
+    this._permissions = permissions;
 
     this._verifyToken = tokenVerificationMethod;
     this._verifyAccess = accessVerificationMethod;
@@ -165,7 +209,22 @@ class JwtAuthorization {
 
     const claims = object.payload as Claims;
 
-    const [ isAccessOk, accessErrorMessage ] = await this._verifyAccess(context, claims);
+    if (this._issuer) {
+      const { iss } = claims;
+
+      const isValidIssuer = iss === this._issuer;
+
+      if (!isValidIssuer) {
+        const error = new UnauthorizedError(`Invalid issuer of "${this._name}" token`);
+
+        return {
+          isAuthorized: false,
+          error
+        };
+      }
+    }
+
+    const [ isAccessOk, accessErrorMessage ] = await this._verifyAccess(context, claims, this._permissions);
 
     if (!isAccessOk) {
       const error = new AccessDeniedError(accessErrorMessage);

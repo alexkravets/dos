@@ -1,3 +1,5 @@
+const TEST_ISSUER = 'http://localhost:3000';
+
 const TEST_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA8+PZ2JWhsb9kwI4gdEhr
 xaRimI6p/zYgYY9pb16wmiR5T2JaStWJU0Whbd8SImqgNPpNUkBhjMU1gY2rdYDr
@@ -67,6 +69,7 @@ SOnb9KGxz2qg82zm6YtSRrrh6WwlrapSP5IaX6gTgE6gXa57hDsq/faTqzo8nO5C
 -----END PRIVATE KEY-----`;
 
 export {
+  TEST_ISSUER,
   TEST_PUBLIC_KEY,
   TEST_PRIVATE_KEY,
 };

@@ -109,6 +109,32 @@ describe('JwtAuthorization', () => {
       });
     });
 
+    it('returns UnauthorizedError if invalid token issuer', async () => {
+      const issuer = 'http://example.com';
+      const Authorization = createAccessToken({ issuer }, {});
+
+      const request = {
+        operationId: 'CreateProfile',
+        headers: {
+          Authorization,
+        }
+      } as LambdaRequest;
+
+      const { statusCode, body: json } = await handler(request);
+
+      expect(statusCode).toEqual(401);
+
+      const body = JSON.parse(json!);
+
+      expect(body).toEqual({
+        error: {
+          code: 'UnauthorizedError',
+          message: 'Invalid issuer of "authorization" token',
+          statusCode: 401,
+        }
+      });
+    });
+
     it('returns AccessDeniedError if access verification failed', async () => {
       const Authorization = createAccessToken({}, { permissions: [] });
 
