@@ -2,6 +2,8 @@ import { get } from 'lodash';
 import { OpenAPIV2 } from 'openapi-types';
 import type { Request, LambdaRequest, HttpRequest } from './Request';
 
+const BASE_URL = 'http://localhost:3000';
+
 /** Returns HTTP path of a request. */
 const getHttpPath = (spec: OpenAPIV2.Document, request: Request): string => {
   const { basePath } = spec;
@@ -17,11 +19,7 @@ const getHttpPath = (spec: OpenAPIV2.Document, request: Request): string => {
 
   if (!path) {
     const { url } = httpRequest;
-    const isLocalhost = url.startsWith('/');
-
-    const _url = isLocalhost
-      ? new URL(`http://localhost:3000/${url}`)
-      : new URL(url);
+    const _url = new URL(url, BASE_URL);
 
     path = get(_url, 'pathname', '/');
   }

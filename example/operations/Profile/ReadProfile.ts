@@ -1,5 +1,5 @@
 import { as } from '../../security';
-import { Read } from '../../../src';
+import { Read } from '../../lib';
 import { Profile } from '../../documents';
 
 /** Read profile operation. */

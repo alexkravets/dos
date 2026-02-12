@@ -7,8 +7,9 @@ import { Service, type Request, type Logger } from '../src';
 import operations from './operations';
 
 const ROOT_PATH = process.cwd();
-const path = `${ROOT_PATH}/example`;
+
 const url = 'http://localhost:3000';
+const path = `${ROOT_PATH}/example`;
 
 const logger = process.env.NODE_ENV === 'test'
   ? {

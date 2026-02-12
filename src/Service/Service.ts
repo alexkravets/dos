@@ -1,6 +1,6 @@
 import Component from '../Component';
 import Operation from '../Operation';
-import { stringify } from 'flatted';
+import stringify from 'safe-stable-stringify';
 import { OpenAPIV2 } from 'openapi-types';
 import { createSpec } from './spec';
 import { get, uniq, compact } from 'lodash';

@@ -350,8 +350,18 @@ class Operation {
   async after(
     _parameters: Record<string, unknown>,
     result?: Record<string, unknown>
-  ): Promise<Record<string, unknown> | void> {
+  ): Promise<Result | void> {
     return result;
+  }
+
+  /** Creates activity for mutation operation. */
+  async createActivity(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _input: Record<string, unknown>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _data?: Result
+  ): Promise<void> {
+    return;
   }
 
   /** Executes operation for the request input. */
@@ -376,6 +386,9 @@ class Operation {
             : afterResult
         )
       : result;
+
+    const { data } = result;
+    await this.createActivity(input, data as Result | undefined);
 
     return {
       result,

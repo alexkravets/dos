@@ -1,5 +1,5 @@
 import { as } from '../../security';
-import { Create } from '../../../src';
+import { Create } from '../../lib';
 import { Profile } from '../../documents';
 
 /** Create profile operation. */

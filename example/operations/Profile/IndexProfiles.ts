@@ -1,5 +1,5 @@
 import { as } from '../../security';
-import { Index } from '../../../src';
+import { Index } from '../../lib';
 import { Profile } from '../../documents';
 
 /** Index profiles operation. */

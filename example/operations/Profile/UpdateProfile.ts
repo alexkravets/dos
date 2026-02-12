@@ -1,5 +1,5 @@
 import { as } from '../../security';
-import { Update } from '../../../src';
+import { Update } from '../../lib';
 import { Profile } from '../../documents';
 
 /** Update profile operation. */

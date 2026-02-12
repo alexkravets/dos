@@ -1,6 +1,8 @@
 import { get } from 'lodash';
 import type { QueryMap, Request } from './Request';
 
+const BASE_URL = 'http://localhost:3000';
+
 /** Returns query parameters of a request. */
 const getQueryParameters = (request: Request): QueryMap => {
   let parameters = {} as QueryMap;
@@ -8,12 +10,7 @@ const getQueryParameters = (request: Request): QueryMap => {
   const url = get(request, 'url');
 
   if (url) {
-    const isLocalhost = url.startsWith('/');
-
-    const { searchParams } = isLocalhost
-      ? new URL(`http://localhost:3000/${url}`)
-      : new URL(url);
-
+    const { searchParams } = new URL(url, BASE_URL);
     parameters = Object.fromEntries(searchParams);
   }
 

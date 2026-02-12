@@ -1,5 +1,5 @@
 import { as } from '../../security';
-import { Delete } from '../../../src';
+import { Delete } from '../../lib';
 import { Profile } from '../../documents';
 
 /** Delete profile operation. */

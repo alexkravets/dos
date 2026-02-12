@@ -6,6 +6,7 @@ import Index from './operations/Index';
 import Create from './operations/Create';
 import Update from './operations/Update';
 import Delete from './operations/Delete';
+import { withActivity, type CreateActivityProps } from './helpers';
 
 export default Operation;
 
@@ -17,7 +18,12 @@ export {
   Update,
   Delete,
   Operation,
+  withActivity,
 };
 
 export * from './errors';
 export * from './security';
+
+export type {
+  CreateActivityProps
+};
