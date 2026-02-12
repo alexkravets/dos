@@ -1,5 +1,5 @@
 import { got } from '@kravc/schema';
-import type { QueryMap, MutationMap } from '../Context';
+import Context, { type QueryMap, type MutationMap } from '../Context';
 import { get, set,  last, unset, cloneDeep, sortBy } from 'lodash';
 import { DocumentExistsError, DocumentNotFoundError } from '../Operation';
 import Document, { type IndexOptions, type IndexAllOptions } from './Document';
@@ -10,6 +10,9 @@ type Item = {
 };
 
 const _MEMORY_STORE = {} as Record<string, Record<string, Item>>;
+
+const QUERY_ERROR_TEMPLATE = 'Query parameter "$PATH" is required';
+const ATTRIBUTE_ERROR_TEMPLATE = 'Attribute "$PATH" is required';
 
 /** Example implementation of a document class stored in memory. */
 class MemoryDocument<T> extends Document<T> {
@@ -102,7 +105,7 @@ class MemoryDocument<T> extends Document<T> {
 
   /** Implements interface to get a document. */
   static async _read<T>(query: QueryMap): Promise<T> {
-    const idValue = got(query, this.idKey, 'Query parameter "$PATH" is required') as string;
+    const idValue = got(query, this.idKey, QUERY_ERROR_TEMPLATE) as string;
 
     const item = get(this.collection, idValue) as T;
 
@@ -113,9 +116,10 @@ class MemoryDocument<T> extends Document<T> {
     return cloneDeep(item);
   }
 
-  /** Implements interface to save a document, returns false if document is not created. */
-  static async _create<T>(attributes: T): Promise<void> {
-    const idValue = got(attributes, this.idKey, 'Attribute "$PATH" is required') as string;
+  /** Implements interface to save a document. */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static async _create<T>(attributes: T, _context: Context): Promise<void> {
+    const idValue = got(attributes, this.idKey, ATTRIBUTE_ERROR_TEMPLATE) as string;
 
     const item = get(this.collection, idValue) as T;
 
@@ -127,8 +131,9 @@ class MemoryDocument<T> extends Document<T> {
   }
 
   /** Implements interface to update a document. */
-  static async _update<T>(query: QueryMap, mutation: MutationMap): Promise<T> {
-    const idValue = got(query, this.idKey, 'Query parameter "$PATH" is required') as string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static async _update<T>(query: QueryMap, mutation: MutationMap, _context: Context): Promise<T> {
+    const idValue = got(query, this.idKey, QUERY_ERROR_TEMPLATE) as string;
 
     const componentTitle = this.getTitle();
     const item = got(this.collection, idValue, `${componentTitle} with ID "$PATH" is not found`) as T;
@@ -139,8 +144,9 @@ class MemoryDocument<T> extends Document<T> {
   }
 
   /** Implements interface to delete a document. */
-  static async _delete<T>(query: QueryMap): Promise<void> {
-    const idValue = got(query, this.idKey, 'Query parameter "$PATH" is required') as string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static async _delete<T>(query: QueryMap, _context: Context): Promise<void> {
+    const idValue = got(query, this.idKey, QUERY_ERROR_TEMPLATE) as string;
 
     const componentTitle = this.getTitle();
     got(this.collection, idValue, `${componentTitle} with ID "$PATH" is not found`) as T;

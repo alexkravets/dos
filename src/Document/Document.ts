@@ -46,11 +46,11 @@ type Constructor<T, D extends Document<T> = Document<T>> = {
 
   _read(query: QueryMap, options: unknown): Promise<T>;
 
-  _create(attributes: T): Promise<void>;
+  _create(attributes: T, context?: Context): Promise<void>;
 
-  _update<T>(query: QueryMap, mutation: MutationMap): Promise<T>;
+  _update<T>(query: QueryMap, mutation: MutationMap, context?: Context): Promise<T>;
 
-  _delete(query: QueryMap): Promise<void>;
+  _delete(query: QueryMap, context?: Context): Promise<void>;
 };
 
 /** Abstract document class. */
@@ -194,6 +194,15 @@ class Document<Attributes> extends Component<Attributes> {
     mutation.updatedAt = timestamp;
     mutation.updatedBy = context.identityId;
     mutation.updatedByUserName = context.identityName;
+  }
+
+  /** Extends mutation with deleted stamps. */
+  static _extendWithDeletedStamps(context: Context, mutation: MutationMap) {
+    const timestamp = new Date().toJSON();
+
+    mutation.deletedAt = timestamp;
+    mutation.deletedBy = context.identityId;
+    mutation.deletedByUserName = context.identityName;
   }
 
   /** Returns documents in batches. */
@@ -386,7 +395,7 @@ class Document<Attributes> extends Component<Attributes> {
     const attributes = await this._read(query, {});
     const object = new this(context, attributes);
 
-    await this._delete(query);
+    await this._delete(query, context);
 
     await _this.afterDelete(context, query, object);
 

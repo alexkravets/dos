@@ -181,7 +181,7 @@ describe('Service', () => {
       expect(body).toEqual({
         info: {
           title: '@kravc/dos',
-          version: '2.0.0-alpha.0',
+          version: '2.0.0-alpha.3',
         },
       });
     });

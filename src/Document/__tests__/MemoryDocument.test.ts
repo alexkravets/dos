@@ -53,6 +53,22 @@ describe('MemoryDocument', () => {
     });
   });
 
+  describe('MemoryDocument._extendWithDeletedStamps', () => {
+    it('returns document body schema', () => {
+      const mutation = {
+        deletedAt: undefined,
+        deletedBy: undefined,
+        deletedByUserName: undefined,
+      };
+
+      Profile._extendWithDeletedStamps(context, mutation);
+
+      expect(mutation.deletedAt).toBeDefined();
+      expect(mutation.deletedBy).toEqual('SYSTEM');
+      expect(mutation.deletedByUserName).toBeNull();
+    });
+  });
+
   describe('MemoryDocument.create(context, query, mutation)', () => {
     it('creates a document from mutation', async () => {
       const profile = await Profile.create(context, {}, attributes);

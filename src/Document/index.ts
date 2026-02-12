@@ -1,4 +1,4 @@
-import Document, { type DefaultAttributes } from './Document';
+import Document from './Document';
 import MemoryDocument from './MemoryDocument';
 
 export {
@@ -6,6 +6,4 @@ export {
   MemoryDocument,
 };
 
-export type {
-  DefaultAttributes,
-};
+export type * from './Document';
