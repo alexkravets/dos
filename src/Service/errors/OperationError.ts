@@ -2,7 +2,7 @@ import path from 'path';
 import Component from '../../Component';
 import { Context } from '../../Context';
 import { loadSync } from '@kravc/schema';
-import { OperationErrorAttibutes } from './OperationErrorAttributes';
+import { OperationErrorAttributes } from './OperationErrorAttributes';
 import logOperationError, { type OriginalError, type ErrorAttributes } from './logOperationError';
 
 const SCHEMA_PATH = path.resolve(__dirname) + '/OperationError.yaml';
@@ -28,7 +28,7 @@ const INTERNAL_ERROR_CODE = 500;
  * This class acts as the final error handler in the operation processing pipeline,
  * transforming any thrown error into a standardized, schema-validated response format.
  */
-class OperationError extends Component<OperationErrorAttibutes> {
+class OperationError extends Component<OperationErrorAttributes> {
   /** Returns schema of the operation error. */
   static get schema() {
     return operationErrorSchema;

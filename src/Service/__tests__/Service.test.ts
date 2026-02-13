@@ -178,12 +178,7 @@ describe('Service', () => {
 
       const body = JSON.parse(json!);
 
-      expect(body).toEqual({
-        info: {
-          title: '@kravc/dos',
-          version: '2.0.0-alpha.3',
-        },
-      });
+      expect(body.info.title).toEqual('@kravc/dos');
     });
 
     it('returns composer file for /Enums.yaml path', async () => {

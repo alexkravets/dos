@@ -95,7 +95,7 @@ describe('Index(Document, actionMethod)', () => {
         const errorCodes = Object.keys(IndexProfiles.errors);
         expect(errorCodes).toContain('InvalidInputError');
         expect(errorCodes).toContain('InvalidOutputError');
-        expect(errorCodes).toContain('UnprocessibleConditionError');
+        expect(errorCodes).toContain('UnprocessableConditionError');
       });
     });
 

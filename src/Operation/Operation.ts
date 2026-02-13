@@ -184,11 +184,11 @@ class Operation {
       errors.InvalidParametersError = {
         statusCode: 400,
         description: 'Invalid operation parameters, input syntax is correct,' +
-          ' but input values are not processible'
+          ' but input values are not processable'
       };
     }
 
-    errors.UnprocessibleConditionError = {
+    errors.UnprocessableConditionError = {
       statusCode: 422,
       description: 'Operation failed to process the request cause of expected' +
         ' exit condition'

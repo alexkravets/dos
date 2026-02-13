@@ -99,7 +99,7 @@ describe('Delete(Document, actionMethod)', () => {
       it('includes related errors', () => {
         const errorCodes = Object.keys(DeleteProfile.errors);
         expect(errorCodes).toContain('InvalidInputError');
-        expect(errorCodes).toContain('UnprocessibleConditionError');
+        expect(errorCodes).toContain('UnprocessableConditionError');
         expect(errorCodes).toContain('DocumentNotFoundError');
       });
     });

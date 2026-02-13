@@ -1,9 +1,9 @@
 import CommonError from './CommonError';
 
 /**
- * Unprocessible Condition Error
+ * Unprocessable Condition Error
  *
- * `UnprocessibleConditionError` represents a **422 Unprocessable Entity** error that occurs
+ * `UnprocessableConditionError` represents a **422 Unprocessable Entity** error that occurs
  * when an operation encounters an expected exit condition that prevents it from processing
  * the request. This error indicates that the request is well-formed and valid, but the
  * operation cannot proceed due to business logic constraints or state conditions.
@@ -22,11 +22,11 @@ import CommonError from './CommonError';
  * The 422 status code indicates that the server understands the request but cannot process
  * it due to semantic errors or business logic constraints.
  */
-class UnprocessibleConditionError extends CommonError {
-  /** Creates an instance of unprocessible condition error. */
-  constructor(message: string = 'Unprocessible condition') {
-    super('UnprocessibleConditionError', message);
+class UnprocessableConditionError extends CommonError {
+  /** Creates an instance of unprocessable condition error. */
+  constructor(message: string = 'Unprocessable condition') {
+    super('UnprocessableConditionError', message);
   }
 }
 
-export default UnprocessibleConditionError;
+export default UnprocessableConditionError;

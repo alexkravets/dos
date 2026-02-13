@@ -93,7 +93,7 @@ describe('List(Document, actionMethod)', () => {
       it('includes related errors', () => {
         const errorCodes = Object.keys(ListProfiles.errors);
         expect(errorCodes).toContain('InvalidOutputError');
-        expect(errorCodes).toContain('UnprocessibleConditionError');
+        expect(errorCodes).toContain('UnprocessableConditionError');
       });
     });
 

@@ -1,4 +1,4 @@
-export type OperationErrorAttibutes = {
+export type OperationErrorAttributes = {
   error: {
     code: string;
     message: string;

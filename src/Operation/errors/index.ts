@@ -4,7 +4,7 @@ import AccessDeniedError from './AccessDeniedError';
 import DocumentExistsError from './DocumentExistsError';
 import DocumentNotFoundError from './DocumentNotFoundError';
 import InvalidParametersError from './InvalidParametersError';
-import UnprocessibleConditionError from './UnprocessibleConditionError';
+import UnprocessableConditionError from './UnprocessableConditionError';
 
 export {
   CommonError,
@@ -13,5 +13,5 @@ export {
   DocumentExistsError,
   DocumentNotFoundError,
   InvalidParametersError,
-  UnprocessibleConditionError,
+  UnprocessableConditionError,
 };

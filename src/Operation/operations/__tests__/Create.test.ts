@@ -100,7 +100,7 @@ describe('Create(Document, actionMethod)', () => {
         const errorCodes = Object.keys(CreateProfile.errors);
         expect(errorCodes).toContain('InvalidInputError');
         expect(errorCodes).toContain('InvalidOutputError');
-        expect(errorCodes).toContain('UnprocessibleConditionError');
+        expect(errorCodes).toContain('UnprocessableConditionError');
         expect(errorCodes).toContain('DocumentExistsError');
       });
     });
