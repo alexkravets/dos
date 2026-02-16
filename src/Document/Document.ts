@@ -22,6 +22,7 @@ export type IndexAllOptions = {
 
 export type DefaultAttributes = {
   id: string;
+  partition: string;
   createdAt: string;
   createdBy: string;
   createdByUserName?: string;
