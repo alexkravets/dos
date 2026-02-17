@@ -39,13 +39,13 @@ const List = (
     async action(parameters: Record<string, unknown>) {
       const {
         sort,
-        index,
+        indexName,
         ...query
       } = parameters;
 
       const options = {
         sort,
-        index,
+        indexName,
       };
 
       const { componentActionMethod } = this.constructor as typeof Operation;

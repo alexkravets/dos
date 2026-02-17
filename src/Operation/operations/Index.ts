@@ -127,7 +127,7 @@ const Index = (
       const {
         sort,
         limit,
-        index,
+        indexName,
         exclusiveStartKey,
         ...query
       } = parameters;
@@ -135,7 +135,7 @@ const Index = (
       const options = {
         sort,
         limit,
-        index,
+        indexName,
         exclusiveStartKey,
       };
 

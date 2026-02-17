@@ -11,13 +11,13 @@ const DEFAULT_PARTITION_KEY = 'partition';
 export type IndexOptions = {
   sort?: 'asc' | 'desc';
   limit?: number;
-  index?: string;
+  indexName?: string;
   exclusiveStartKey?: string;
 }
 
 export type IndexAllOptions = {
   sort?: 'asc' | 'desc';
-  index?: string;
+  indexName?: string;
 }
 
 export type DefaultAttributes = {
