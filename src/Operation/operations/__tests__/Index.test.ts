@@ -107,7 +107,7 @@ describe('Index(Document, actionMethod)', () => {
             example: 20,
             default: 20,
             minimum: 1,
-            maximum: 999,
+            maximum: 100,
             description: 'Limit number of profiles to be returned',
           },
           sort: {
@@ -146,12 +146,12 @@ describe('Index(Document, actionMethod)', () => {
               },
               count: {
                 type: 'integer',
-                example: 0,
+                example: 5,
                 description: 'Number of profiles',
               },
               limit: {
                 type: 'integer',
-                example: 100,
+                example: 20,
                 description: 'Limit number of profiles to be returned',
               },
               lastEvaluatedKey: {

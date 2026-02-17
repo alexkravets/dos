@@ -38,6 +38,7 @@ class MemoryDocument<T> extends Document<T> {
 
   /** Implements interface to get documents in batches. */
   static async _index<T>(query: QueryMap, options: IndexOptions): Promise<{
+    limit: number;
     count: number;
     items: T[];
     lastEvaluatedKey?: string;
@@ -84,6 +85,7 @@ class MemoryDocument<T> extends Document<T> {
     }
 
     return {
+      limit: limit || count,
       items,
       count,
       lastEvaluatedKey,

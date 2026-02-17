@@ -1,5 +1,5 @@
 import Component from '../../Component';
-import { capitalize } from 'lodash';
+import { get, capitalize } from 'lodash';
 import Operation, { type Result } from '../Operation';
 import { type PropertiesSchemaSource } from '@kravc/schema';
 
@@ -9,7 +9,7 @@ const SORT_ORDER = {
 };
 
 const DEFAULT_LIMIT = 20;
-const DEFAULT_LIMIT_MAX = 999;
+const DEFAULT_LIMIT_MAX = 100;
 const DEFAULT_SORT_ORDER = SORT_ORDER.DESC;
 
 export type PageInfo = {
@@ -53,12 +53,12 @@ const Index = (
 
     /** Returns default value for a limit parameter. */
     static get defaultLimit() {
-      return DEFAULT_LIMIT;
+      return get(ComponentClass, 'indexDefaultLimit', DEFAULT_LIMIT);
     }
 
     /** Returns maximum number for a limit parameter. */
     static get limitMax() {
-      return DEFAULT_LIMIT_MAX;
+      return get(ComponentClass, 'indexLimitMax', DEFAULT_LIMIT_MAX);
     }
 
     /** Returns default value for a sort parameter. */
@@ -106,12 +106,12 @@ const Index = (
             },
             count: {
               type: 'integer',
-              example: 0,
+              example: 5,
               description: `Number of ${documentTitle}`,
             },
             limit: {
               type: 'integer',
-              example: 100,
+              example: get(ComponentClass, 'indexDefaultLimit', DEFAULT_LIMIT),
               description: `Limit number of ${documentTitle} to be returned`,
             },
             lastEvaluatedKey: {

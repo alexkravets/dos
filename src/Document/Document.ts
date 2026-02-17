@@ -5,7 +5,9 @@ import Context, { type QueryMap, type MutationMap } from '../Context';
 import { get, set, omit, pick, cloneDeep, capitalize } from 'lodash';
 
 const DEFAULT_INDEX_SORT = 'desc';
-const DEFAULT_INDEX_LIMIT = 300;
+const DEFAULT_INDEX_LIMIT = 20;
+const DEFAULT_INDEX_LIMIT_MAX = 100;
+
 const DEFAULT_PARTITION_KEY = 'partition';
 
 export type IndexOptions = {
@@ -35,6 +37,7 @@ type Constructor<T, D extends Document<T> = Document<T>> = {
   new(context: Context, attributes: T): D;
 
   _index(query: QueryMap, options: IndexOptions): Promise<{
+    limit: number;
     count: number;
     items: T[];
     lastEvaluatedKey?: string;
@@ -83,6 +86,11 @@ class Document<Attributes> extends Component<Attributes> {
   /** Defines default limit for index action. */
   static get indexDefaultLimit(): number {
     return DEFAULT_INDEX_LIMIT;
+  }
+
+  /** Defines limit maximum value for index action. */
+  static get indexLimitMax(): number {
+    return DEFAULT_INDEX_LIMIT_MAX;
   }
 
   /** Generates ID for new document unless it's defined in parameters. */
@@ -213,6 +221,7 @@ class Document<Attributes> extends Component<Attributes> {
     query: QueryMap = {},
     options: IndexOptions = {}
   ): Promise<{
+    limit: number;
     count: number;
     objects: D[];
     lastEvaluatedKey?: string;
@@ -228,10 +237,15 @@ class Document<Attributes> extends Component<Attributes> {
       options.sort = _this.indexDefaultSort;
     }
 
-    const { items, count, lastEvaluatedKey, ...otherPagination } = await this._index(query, options);
+    const { count, limit, items, lastEvaluatedKey } = await this._index(query, options);
     const objects = items.map(attributes => new this(context, attributes));
 
-    return { objects, count, lastEvaluatedKey, ...otherPagination };
+    return {
+      limit,
+      count,
+      objects,
+      lastEvaluatedKey,
+    };
   }
 
   /** Returns all documents. */
