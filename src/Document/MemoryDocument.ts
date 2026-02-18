@@ -134,7 +134,7 @@ class MemoryDocument<T> extends Document<T> {
 
   /** Implements interface to update a document. */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static async _update<T>(query: QueryMap, mutation: MutationMap, _context: Context): Promise<T> {
+  static async _update<T>(query: QueryMap, mutation: MutationMap, _context: Context, _previousAttributes: T): Promise<T> {
     const idValue = got(query, this.idKey, QUERY_ERROR_TEMPLATE) as string;
 
     const componentTitle = this.getTitle();
@@ -147,7 +147,7 @@ class MemoryDocument<T> extends Document<T> {
 
   /** Implements interface to delete a document. */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static async _delete<T>(query: QueryMap, _context: Context): Promise<void> {
+  static async _delete<T>(query: QueryMap, _context: Context, _previousAttributes: T): Promise<void> {
     const idValue = got(query, this.idKey, QUERY_ERROR_TEMPLATE) as string;
 
     const componentTitle = this.getTitle();

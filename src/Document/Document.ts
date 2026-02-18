@@ -48,13 +48,13 @@ type Constructor<T, D extends Document<T> = Document<T>> = {
     items: T[];
   }>;
 
-  _read(query: QueryMap, options: unknown): Promise<T>;
+  _read(query: QueryMap): Promise<T>;
 
-  _create(attributes: T, context?: Context): Promise<void>;
+  _create(attributes: T, context: Context): Promise<void>;
 
-  _update<T>(query: QueryMap, mutation: MutationMap, context?: Context): Promise<T>;
+  _update<T>(query: QueryMap, mutation: MutationMap, context: Context, previousAttributes: T): Promise<T>;
 
-  _delete(query: QueryMap, context?: Context): Promise<void>;
+  _delete(query: QueryMap, context: Context, previousAttributes: T): Promise<void>;
 };
 
 /** Abstract document class. */
@@ -276,12 +276,11 @@ class Document<Attributes> extends Component<Attributes> {
     this: Constructor<T, D>,
     context: Context,
     query: QueryMap,
-    options?: unknown
   ): Promise<D> {
     const _this = this as unknown as typeof Document;
     _this._extendWithPartition(context, query);
 
-    const attributes = await this._read(query, options);
+    const attributes = await this._read(query);
     const object = new this(context, attributes);
 
     return object;
@@ -323,7 +322,7 @@ class Document<Attributes> extends Component<Attributes> {
 
     await _this.beforeCreate(context, query, attributes);
 
-    await this._create(attributes as T);
+    await this._create(attributes as T, context);
     const object = new this(context, attributes as T);
 
     await _this.afterCreate(context, query, mutation, object);
@@ -370,10 +369,10 @@ class Document<Attributes> extends Component<Attributes> {
     /* NOTE: Ensure that document to be updated exists and save it in the
              context so can be referenced in the after action helper. */
     if (!previousAttributes) {
-      previousAttributes = await this._read(query, {});
+      previousAttributes = await this._read(query);
     }
 
-    const updatedAttributes = await this._update(query, mutation) as T;
+    const updatedAttributes = await this._update(query, mutation, context, previousAttributes) as T;
     const object = new this(context, updatedAttributes);
 
     object._previousAttributes = previousAttributes;
@@ -407,14 +406,14 @@ class Document<Attributes> extends Component<Attributes> {
 
     await _this.beforeDelete(context, query);
 
-    const attributes = await this._read(query, {});
-    const object = new this(context, attributes);
+    const previousAttributes = await this._read(query);
 
-    await this._delete(query, context);
+    await this._delete(query, context, previousAttributes);
 
-    await _this.afterDelete(context, query, object);
+    const deletedObject = new this(context, previousAttributes);
+    await _this.afterDelete(context, query, deletedObject);
 
-    return object;
+    return deletedObject;
   }
 
   /** Before delete hook. */
