@@ -331,7 +331,7 @@ class Operation {
   }
 
   /** Executes component action. */
-  async action(parameters: Record<string, unknown>) {
+  async action(parameters: Record<string, unknown>): Promise<{ data?: Result }> {
     const { Component } = this.constructor as typeof Operation;
 
     if (!Component) {
@@ -343,14 +343,11 @@ class Operation {
 
     const data = await componentActionMethod(this.context, query, mutation as MutationMap);
 
-    return { data } as { data?: Result };
+    return { data };
   }
 
   /** Post-processes operation result after action. */
-  async after(
-    _parameters: Record<string, unknown>,
-    result?: Record<string, unknown>
-  ): Promise<Result | void> {
+  async after(_parameters: Record<string, unknown>, result?: unknown): Promise<unknown | void> {
     return result;
   }
 
@@ -367,7 +364,7 @@ class Operation {
   /** Executes operation for the request input. */
   async exec(input: Record<string, unknown>): Promise<OperationResponse> {
     let parameters = cloneDeep(input);
-    let result;
+    let result: Result;
 
     const beforeResult = await this.before(parameters);
 
@@ -383,7 +380,7 @@ class Operation {
       ? (
           result.data
             ? { ...result, data: afterResult }
-            : afterResult
+            : afterResult as Result
         )
       : result;
 
