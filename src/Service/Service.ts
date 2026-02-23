@@ -34,7 +34,6 @@ const createDefaultContext = (
 
 type Module = {
   id: string;
-  get isComponent(): boolean;
 };
 
 type Options = {
@@ -44,6 +43,17 @@ type Options = {
   createContext?: typeof createDefaultContext;
   skipOperations?: string[];
 };
+
+/** Returns true if TargetClass is a constructor whose prototype extends BaseClass. */
+function isExtendedFrom(
+  TargetClass: unknown,
+  BaseClass: typeof Operation | typeof Component
+): boolean {
+  return (
+    typeof TargetClass === 'function' &&
+    (TargetClass as abstract new (...args: unknown[]) => unknown).prototype instanceof BaseClass
+  );
+}
 
 /** Service */
 class Service {
@@ -71,11 +81,14 @@ class Service {
       skipOperations = DEFAULT_SKIP_OPERATIONS,
     } = options;
 
-    let components = modules
-      .filter(ModuleClass => ModuleClass.isComponent) as (typeof Component)[];
+    const nonSchemas = modules
+      .filter(m => !(m instanceof Schema));
 
-    const operations = modules
-      .filter(ModuleClass => !ModuleClass.isComponent)
+    let components = nonSchemas
+      .filter(m => isExtendedFrom(m, Component)) as (typeof Component)[];
+
+    const operations = nonSchemas
+      .filter(m => isExtendedFrom(m, Operation))
       .filter(({ id: operationId }) => !skipOperations.includes(operationId)) as (typeof Operation)[];
 
     const referencedComponents = compact(operations.map(({ Component }) => Component));
