@@ -10,7 +10,7 @@ type Parameters = {
   [index: string]: unknown;
 }
 
-type SuccessResult = { data: Record<string, unknown>; };
+type SuccessResult = { data: Record<string, unknown>[] | Record<string, unknown>; };
 type ErrorResult = { error: ErrorAttributes; };
 type Result = SuccessResult | ErrorResult;
 
