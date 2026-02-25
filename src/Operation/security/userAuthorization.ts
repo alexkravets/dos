@@ -2,8 +2,10 @@ import Operation from '../Operation';
 import JwtAuthorization, { type Permissions } from './JwtAuthorization';
 
 type Props = {
+  name?: string;
   issuer: string;
   publicKey: string;
+  description?: string;
   permissions?: Permissions;
 }
 
