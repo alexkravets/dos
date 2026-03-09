@@ -35,6 +35,18 @@ const List = (
       return componentAction;
     }
 
+    /** Returns schema source for the operation output with pagination. */
+    static get output() {
+      return {
+        data: {
+          items: {
+            $ref: ComponentClass.schema!.id
+          },
+          required: true,
+        },
+      };
+    }
+
     /** Executes components list action. */
     async action(parameters: Record<string, unknown>) {
       const {
