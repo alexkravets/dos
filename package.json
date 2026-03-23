@@ -1,6 +1,6 @@
 {
   "name": "@kravc/dos",
-  "version": "2.0.0-alpha.20",
+  "version": "2.0.0-alpha.21",
   "description": "Convention-based, easy-to-use library for building API-driven serverless services.",
   "keywords": [
     "Service",
@@ -14,7 +14,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "spec": "./bin/spec.js"
+    "spec": "bin/spec.js"
   },
   "repository": {
     "type": "git",
@@ -24,7 +24,6 @@
     "src": "src"
   },
   "scripts": {
-    "spec": "npx ts-node scripts/spec.ts ./example",
     "start": "npx http example/index.ts",
     "test": "eslint --fix src/ example/ && jest --coverage",
     "prebuild": "rimraf dist",
