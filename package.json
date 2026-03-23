@@ -14,7 +14,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "spec": "./scripts/spec.ts"
+    "spec": "./bin/spec.js"
   },
   "repository": {
     "type": "git",
