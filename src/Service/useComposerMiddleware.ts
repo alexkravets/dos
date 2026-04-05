@@ -1,4 +1,5 @@
-import { sync } from 'read-yaml-file';
+import { readFileSync } from 'fs';
+import { load } from 'js-yaml';
 import type { Context } from '../Context';
 import { OK_STATUS, JSON_TYPE } from './useOasMiddleware';
 
@@ -26,7 +27,7 @@ const useComposerMiddleware = (_service: unknown, context: Context) => {
   /** Returns specified composer source file. */
   const readFileJson = (httpPath: string) => {
     const fileName = httpPath.replace('/', '');
-    const composerSource = sync(`${ROOT_PATH}/.composer/${fileName}`);
+    const composerSource = load(readFileSync(`${ROOT_PATH}/.composer/${fileName}`, 'utf8'));
 
     return JSON.stringify(composerSource, null, 2);
   };
