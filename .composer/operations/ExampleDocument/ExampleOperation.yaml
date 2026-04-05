@@ -1,0 +1,9 @@
+operationId: ExampleOperation
+baseAction: Read
+isPublic: true
+isSystem: false
+permissions: []
+summary: Example operation.
+description: Example operation demonstrating the composer operation format.
+query: {}
+mutation: {}

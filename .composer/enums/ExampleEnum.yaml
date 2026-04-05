@@ -1,0 +1,5 @@
+name: ExampleEnum
+values:
+  - value: ExampleValue
+    name: ''
+    description: ''

@@ -1,0 +1,9 @@
+operationId: ExampleOperation
+query:
+  - name: id
+    title: ID
+    description: ID of the example resource
+    required: true
+    type: string
+    isEnum: false
+    isArray: false

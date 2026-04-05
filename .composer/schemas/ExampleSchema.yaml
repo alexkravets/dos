@@ -1,0 +1,9 @@
+name: ExampleSchema
+attributes:
+  - name: id
+    title: ID
+    description: Unique identifier
+    required: true
+    type: string
+    isEnum: false
+    isArray: false

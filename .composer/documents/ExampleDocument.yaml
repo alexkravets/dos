@@ -1,0 +1,9 @@
+name: ExampleDocument
+attributes:
+  - name: title
+    title: Title
+    description: Title of the document
+    required: true
+    type: string
+    isEnum: false
+    isArray: false

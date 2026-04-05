@@ -192,6 +192,26 @@ describe('Service', () => {
       expect(statusCode).toEqual(200);
     });
 
+    it('returns operations grouped by document for /Operations.yaml path', async () => {
+      const request = {
+        path: '/Operations.yaml',
+        method: 'get'
+      } as HttpRequest;
+
+      const { statusCode, body } = await service.process(request);
+
+      expect(statusCode).toEqual(200);
+
+      const data = JSON.parse(body!);
+
+      expect(data).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          document: expect.any(String),
+          operations: expect.any(Array),
+        }),
+      ]));
+    });
+
     it('supports operations without parameters', async () => {
       const request = {
         path: '/Health',

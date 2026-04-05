@@ -1,0 +1,17 @@
+code: E1
+title: exampleScenario
+summary: Example scenario demonstrating basic operation flow
+parameters:
+  - name: id
+    value: EXAMPLE_1
+variableNames:
+  - id
+steps:
+  - summary: Operation is executed successfully
+    role: USER
+    operationId: ExampleOperation
+    parameters:
+      - name: id
+    result:
+      - has:
+          path: id
