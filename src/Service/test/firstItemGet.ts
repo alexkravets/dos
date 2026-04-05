@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import { get } from 'lodash';
 import { got } from '@kravc/schema';
 import { type Items } from './findItem';

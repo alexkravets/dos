@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import findItem, { type Items, type Query } from './findItem';
 
 /** Ensures item does not exist in a list for specified query. */
