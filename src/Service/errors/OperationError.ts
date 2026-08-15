@@ -1,12 +1,7 @@
-import path from 'path';
 import Component from '../../Component';
 import { Context } from '../../Context';
-import { loadSync } from '@kravc/schema';
-import { OperationErrorAttributes } from './OperationErrorAttributes';
+import operationErrorSchema, { type OperationErrorAttributes } from './OperationErrorSchema';
 import logOperationError, { type OriginalError, type ErrorAttributes } from './logOperationError';
-
-const SCHEMA_PATH = path.resolve(__dirname) + '/OperationError.yaml';
-const operationErrorSchema = loadSync(SCHEMA_PATH);
 
 const INTERNAL_ERROR_CODE = 500;
 

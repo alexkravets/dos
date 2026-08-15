@@ -1,5 +1,4 @@
 import { DefaultAttributes } from '../../../src';
+import { ProfileBodyAttributes } from './ProfileSchema';
 
-export interface ProfileAttributes extends DefaultAttributes {
-  name: string;
-}
+export type ProfileAttributes = ProfileBodyAttributes & DefaultAttributes;

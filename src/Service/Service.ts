@@ -3,9 +3,9 @@ import Operation from '../Operation';
 import stringify from 'safe-stable-stringify';
 import { OpenAPIV2 } from 'openapi-types';
 import { createSpec } from './spec';
-import { get, uniq, compact } from 'lodash';
+import { get, uniq, keyBy, compact } from 'lodash';
 import Context, { type ContextConfig, type Request, type ExtraContext } from '../Context';
-import { got, Schema, Validator, createSchemasMap, type ValidationError } from '@kravc/schema';
+import { got, Schema, Validator, type ValidationError } from '@kravc/schema';
 
 import {
   type OriginalError,
@@ -20,9 +20,7 @@ import logRequest from './logRequest';
 import useOasMiddleware from './useOasMiddleware';
 import useComposerMiddleware from './useComposerMiddleware';
 
-const ROOT_PATH = process.cwd();
 const DEFAULT_URL = 'http://localhost:3000/';
-const DEFAULT_SERVICE_PATH = `${ROOT_PATH}/src`;
 const DEFAULT_SKIP_OPERATIONS = [] as string[];
 
 /** Creates operation context using default Context class. */
@@ -38,7 +36,6 @@ type Module = {
 
 type Options = {
   url?: string;
-  path?: string;
   context?: ExtraContext,
   createContext?: typeof createDefaultContext;
   skipOperations?: string[];
@@ -75,11 +72,13 @@ class Service {
     }
 
     const {
-      path = DEFAULT_SERVICE_PATH,
       context = {},
       createContext = createDefaultContext,
       skipOperations = DEFAULT_SKIP_OPERATIONS,
     } = options;
+
+    const schemas = modules
+      .filter(m => m instanceof Schema) as Schema[];
 
     const nonSchemas = modules
       .filter(m => !(m instanceof Schema));
@@ -98,7 +97,7 @@ class Service {
       ...referencedComponents
     ]);
 
-    const schemasMap = createSchemasMap(path, modules);
+    const schemasMap = keyBy(schemas, 'id') as Record<string, Schema>;
 
     schemasMap[OperationError.id] = OperationError.schema;
 
@@ -141,8 +140,7 @@ class Service {
     }
 
     const spec = createSpec(operations, schemasMap, url);
-    const schemas = Object.values(schemasMap);
-    const validator = new Validator(schemas);
+    const validator = new Validator(Object.values(schemasMap));
 
     this._url = url;
     this._spec = spec;

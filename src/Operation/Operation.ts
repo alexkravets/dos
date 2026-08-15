@@ -260,8 +260,8 @@ class Operation {
     return new Schema(source as PropertiesSchemaSource, `${this.id}Input`);
   }
 
-  /** Returns operation output schema source. */
-  static get output(): null | PropertiesSchemaSource {
+  /** Returns operation output schema instance or schema source. */
+  static get output(): null | Schema | PropertiesSchemaSource {
     if (!this.componentSchema) {
       return null;
     }

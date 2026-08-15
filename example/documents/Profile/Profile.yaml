@@ -1,6 +1,0 @@
-name:
-  example: 'John Doe'
-  required: true
-  minLength: 1
-  maxLength: 256
-  description: 'Profile name'

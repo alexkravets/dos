@@ -29,13 +29,12 @@
     "prebuild": "rimraf dist",
     "build": "tsc",
     "prepare": "npm run build",
-    "prepublishOnly": "npm run build",
-    "postbuild": "cp -r src/Service/errors/*.yaml dist/Service/errors 2>/dev/null || true"
+    "prepublishOnly": "npm run build"
   },
   "author": "Oleksandr Kravets <a@kra.vc>",
   "license": "ISC",
   "dependencies": {
-    "@kravc/schema": "^2.8.3",
+    "@kravc/schema": "^3.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "cookie": "^1.1.1",
     "js-yaml": "^4.1.1",

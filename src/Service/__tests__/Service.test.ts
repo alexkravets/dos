@@ -2,7 +2,7 @@ import { Profile } from '../../../example/documents';
 import { createContext } from '../../Context/__tests__/__helpers';
 import { type HttpRequest } from '../../Context';
 import { Component, createAccessToken, Service } from '../../';
-import { service, operations, url, path, logger, } from '../../../example';
+import { service, operations, url, logger, } from '../../../example';
 
 describe('Service', () => {
   describe('Service.constructor(modules, options)', () => {
@@ -21,7 +21,7 @@ describe('Service', () => {
       class User extends Component<UserAttributes> {
       }
 
-      expect(() => new Service([ User, ...operations ], { url, path }))
+      expect(() => new Service([ User, ...operations ], { url }))
         .toThrow('Schema for component "User" is not found');
     });
   });
@@ -229,7 +229,7 @@ describe('Service', () => {
         throw Error('Simutated context error');
       };
 
-      const service = new Service(operations, { url, path, createContext, context: { logger } });
+      const service = new Service(operations, { url, createContext, context: { logger } });
 
       const request = {
         path: '/',
