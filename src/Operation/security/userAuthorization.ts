@@ -13,9 +13,11 @@ type Props = {
 const userAuthorization = (props: Props) => {
   const authorizationRequirement = JwtAuthorization.createRequirement(props);
 
-  return (OperationClass: typeof Operation): typeof Operation =>
+  return <OperationType>(OperationClass: OperationType): OperationType => {
+    const BaseOperation = OperationClass as unknown as typeof Operation;
+
     /** Extended operation class. */
-    class extends OperationClass {
+    return class extends BaseOperation {
       /** Returns operation security requirements. */
       static get security() {
         return [ authorizationRequirement ];
@@ -43,7 +45,8 @@ const userAuthorization = (props: Props) => {
 
         return operationPermissions;
       }
-    };
+    } as unknown as OperationType;
+  };
 };
 
 export default userAuthorization;

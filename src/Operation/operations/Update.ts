@@ -1,18 +1,40 @@
-import Operation from '../Operation';
+import Operation, { type OperationClass } from '../Operation';
 import Component from '../../Component';
 
+/** Query an update operation contributes. */
+type UpdateQuery = {
+  id: { description: string; required: true };
+};
+
+/**
+ * A component an update operation takes its mutation from, where the mutation
+ * drops what an update does not require, the way the operation does at runtime.
+ */
+type MutableComponent = {
+  mutationSchema?: { pure(id?: string): unknown };
+};
+
+type UpdateMutation<ComponentType extends MutableComponent> =
+  ComponentType['mutationSchema'] extends { pure(id?: string): infer Pured }
+    ? Pured
+    : null;
+
+type UpdateOperationClass<ComponentType extends MutableComponent> = OperationClass<{
+  query: UpdateQuery;
+  mutation: UpdateMutation<ComponentType>;
+}>;
+
 /** Returns class for an update operation. */
-const Update = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ComponentClass: any,
+const Update = <ComponentType extends MutableComponent>(
+  component: ComponentType,
   componentAction: string = Operation.types.UPDATE
-): typeof Operation => {
+): UpdateOperationClass<ComponentType> => {
+  const ComponentClass = component as unknown as typeof Component;
+
   if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "Update" operation' +
       ' function');
   }
-
-  ComponentClass = ComponentClass as unknown as typeof Component;
 
   const componentTitle = ComponentClass.getTitle();
   const componentTitleLower = componentTitle.toLowerCase();
@@ -52,9 +74,9 @@ const Update = (
           description: `ID of ${componentTitleLower} to be updated`,
           required: true
         }
-      };
+      } as const;
     }
-  };
+  } as unknown as UpdateOperationClass<ComponentType>;
 };
 
 export default Update;

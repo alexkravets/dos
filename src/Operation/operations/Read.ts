@@ -1,12 +1,19 @@
-import Operation from '../Operation';
+import Operation, { type OperationClass } from '../Operation';
 import Component from '../../Component';
+
+/** Query a read operation contributes. */
+type ReadQuery = {
+  id: { description: string; required: true };
+};
+
+type ReadOperationClass = OperationClass<{ query: ReadQuery }>;
 
 /** Returns class for a read operation. */
 const Read = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ComponentClass: any,
   componentAction: string = Operation.types.READ
-): typeof Operation => {
+): ReadOperationClass => {
   if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "Read" operation' +
       ' function');
@@ -47,7 +54,7 @@ const Read = (
           description: `ID of ${componentTitleLower} to be returned`,
           required: true
         }
-      };
+      } as const;
     }
   };
 };

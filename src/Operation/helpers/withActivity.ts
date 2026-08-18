@@ -14,13 +14,20 @@ export type CreateActivityProps = {
 }
 
 /** Extends operation with a custom create activity method. */
-const withActivity = (
-  baseAction: BaseAction,
+const withActivity = <Action extends BaseAction>(
+  baseAction: Action,
   createActivity: (props: CreateActivityProps) => Promise<void>
-): (ComponentClass: unknown, componentAction?: string) => typeof Operation => {
-  return (ComponentClass, componentAction) => {
+) => {
+  return (ComponentClass: unknown, componentAction?: string): ReturnType<Action> => {
+    const baseFactory = baseAction as (
+      component: unknown,
+      action?: string
+    ) => typeof Operation;
+
+    const BaseOperation = baseFactory(ComponentClass, componentAction);
+
     /** Operation class with create activity method. */
-    return class extends baseAction(ComponentClass, componentAction) {
+    return class extends BaseOperation {
       /** Creates activity after default exec is done */
       async createActivity(
         parameters: Record<string, unknown>,
@@ -36,7 +43,7 @@ const withActivity = (
           componentName,
         });
       }
-    };
+    } as unknown as ReturnType<Action>;
   };
 };
 

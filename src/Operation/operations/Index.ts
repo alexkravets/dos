@@ -1,7 +1,6 @@
 import Component from '../../Component';
 import { get, capitalize } from 'lodash';
-import Operation, { type Result } from '../Operation';
-import { type PropertiesSchemaSource } from '@kravc/schema';
+import Operation, { type Result, type OperationClass } from '../Operation';
 
 const SORT_ORDER = {
   ASC: 'asc',
@@ -19,12 +18,21 @@ export type PageInfo = {
   lastEvaluatedKey?: string;
 }
 
+/** Query an index operation contributes. */
+type IndexQuery = {
+  limit: { type: 'integer'; default: number };
+  sort: { enum: readonly ('asc' | 'desc')[]; default: 'asc' | 'desc' };
+  exclusiveStartKey: { description: string };
+};
+
+type IndexOperationClass = OperationClass<{ query: IndexQuery }>;
+
 /** Returns class for an index operation. */
 const Index = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ComponentClass: any,
   componentAction: string = 'index'
-): typeof Operation => {
+): IndexOperationClass => {
   if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "Index"' +
       ' operation function');
@@ -85,7 +93,7 @@ const Index = (
         exclusiveStartKey: {
           description: `Exclusive start key to return next batch of ${documentTitle}`,
         }
-      } as PropertiesSchemaSource;
+      } as IndexQuery;
     }
 
     /** Returns schema source for the operation output with pagination. */

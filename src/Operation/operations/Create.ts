@@ -1,18 +1,31 @@
-import Operation from '../Operation';
+import Operation, { type OperationClass } from '../Operation';
 import Component from '../../Component';
 
+/**
+ * A component a create operation takes its mutation from.
+ *
+ * Reading the schema off the component is what lets a mutation describe a type:
+ * a component declaring the type of its schema passes it on to the operation.
+ */
+type MutableComponent = {
+  mutationSchema?: unknown;
+};
+
+type CreateOperationClass<ComponentType extends MutableComponent> = OperationClass<{
+  mutation: ComponentType['mutationSchema'];
+}>;
+
 /** Returns class for a create operation. */
-const Create = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ComponentClass: any,
+const Create = <ComponentType extends MutableComponent>(
+  component: ComponentType,
   componentAction: string = Operation.types.CREATE
-): typeof Operation => {
+): CreateOperationClass<ComponentType> => {
+  const ComponentClass = component as unknown as typeof Component;
+
   if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "Create" operation' +
       ' function');
   }
-
-  ComponentClass = ComponentClass as unknown as typeof Component;
 
   const componentTitle = ComponentClass.getTitle();
 
@@ -43,7 +56,7 @@ const Create = (
         }
       };
     }
-  };
+  } as unknown as CreateOperationClass<ComponentType>;
 };
 
 export default Create;

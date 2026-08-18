@@ -1,12 +1,19 @@
-import Operation from '../Operation';
+import Operation, { type OperationClass } from '../Operation';
 import Component from '../../Component';
+
+/** Query a delete operation contributes. */
+type DeleteQuery = {
+  id: { description: string; required: true };
+};
+
+type DeleteOperationClass = OperationClass<{ query: DeleteQuery }>;
 
 /** Returns class for a delete operation. */
 const Delete = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ComponentClass: any,
   componentAction: string = Operation.types.DELETE
-): typeof Operation => {
+): DeleteOperationClass => {
   if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "Delete" operation' +
       ' function');
@@ -52,7 +59,7 @@ const Delete = (
           description: `ID of ${componentTitleLower} to be deleted`,
           required: true
         }
-      };
+      } as const;
     }
 
     /** No output for a delete operation. */

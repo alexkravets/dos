@@ -5,9 +5,11 @@ const authorizationRequirement = LambdaAuthorization.createRequirement();
 
 /** Returns helper to extend operation class with system authorization requirements. */
 const systemAuthorization = () => {
-  return (OperationClass: typeof Operation): typeof Operation =>
+  return <OperationType>(OperationClass: OperationType): OperationType => {
+    const BaseOperation = OperationClass as unknown as typeof Operation;
+
     /** Extended operation class. */
-    class extends OperationClass {
+    return class extends BaseOperation {
       /** Returns operation security requirements. */
       static get security() {
         return [ authorizationRequirement ];
@@ -17,7 +19,8 @@ const systemAuthorization = () => {
       static get permissions() {
         return [ 'System' ];
       }
-    };
+    } as unknown as OperationType;
+  };
 };
 
 export default systemAuthorization;

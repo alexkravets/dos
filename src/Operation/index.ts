@@ -1,4 +1,4 @@
-import Operation from './Operation';
+import Operation, { type Input, type OperationClass } from './Operation';
 
 import Read from './operations/Read';
 import List from './operations/List';
@@ -25,5 +25,7 @@ export * from './errors';
 export * from './security';
 
 export type {
+  Input,
+  OperationClass,
   CreateActivityProps
 };

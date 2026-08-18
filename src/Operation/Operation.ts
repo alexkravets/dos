@@ -1,7 +1,7 @@
 import pluralize from 'pluralize';
 import Component from '../Component';
 import { OriginalError } from '../Service/errors';
-import { Schema, type PropertiesSchemaSource } from '@kravc/schema';
+import { Schema, type Infer, type PropertiesSchemaSource } from '@kravc/schema';
 import type { SecurityRequirements, ErrorResponse } from '../Service/authorize';
 import { get, isEmpty, cloneDeep, startCase, capitalize } from 'lodash';
 import Context, { withSafeAttributes, type QueryMap, type MutationMap } from '../Context';
@@ -13,6 +13,66 @@ type ComponentActionMethod = (
   query: QueryMap,
   mutation: MutationMap
 ) => Promise<Result>;
+
+/** Flattens an intersection so that it reads as a single object type. */
+type Prettify<T> = { [K in keyof T]: T[K] };
+
+/**
+ * Resolves a query schema source to the parameters it describes.
+ *
+ * A source that is the schema source type itself, rather than a particular one,
+ * describes nothing, so an operation that declares no query of its own adds no
+ * parameters.
+ */
+type QueryParameters<Query> = [PropertiesSchemaSource] extends [Query]
+  ? object
+  : Query extends PropertiesSchemaSource
+    ? Infer<Schema<Query>>
+    : object;
+
+/** Resolves a mutation schema to the parameter it is nested under. */
+type MutationParameter<Mutation> = Mutation extends Schema
+  ? { mutation: Infer<Mutation> }
+  : Mutation extends PropertiesSchemaSource
+    ? { mutation: Infer<Schema<Mutation>> }
+    : object;
+
+/**
+ * Parameters an operation receives, read from its own `query` and `mutation`,
+ * so that an operation overriding either is described by what it declares.
+ */
+export type Input<T extends { query: unknown; mutation: unknown }> = Prettify<
+  & EffectiveQuery<T>
+  & EffectiveMutation<T>
+>;
+
+declare const contributed: unique symbol;
+
+/**
+ * A class an operation function returns: the operation, carrying what that
+ * function contributes to the query and mutation.
+ *
+ * The contribution is held apart from `query` and `mutation` themselves, so
+ * that an operation stays free to declare either as it needs, which narrowing
+ * the statics directly would prevent.
+ */
+export type OperationClass<Contributed = object> = typeof Operation & {
+  readonly [contributed]?: Contributed;
+};
+
+/** Returns what an operation function contributed to a class. */
+type Contribution<T> = T extends { [contributed]?: infer C } ? C : object;
+
+/** Returns the query an operation is described by, its own or the contributed one. */
+type EffectiveQuery<T extends { query: unknown }> =
+  & QueryParameters<T['query']>
+  & QueryParameters<Contribution<T> extends { query: infer Q } ? Q : null>;
+
+/** Returns the mutation an operation is described by, its own or the contributed one. */
+type EffectiveMutation<T extends { mutation: unknown }> =
+  [null | Schema | PropertiesSchemaSource] extends [T['mutation']]
+    ? MutationParameter<Contribution<T> extends { mutation: infer M } ? M : null>
+    : MutationParameter<T['mutation']>;
 
 export type OperationResponse = {
   result: Record<string, unknown>;
