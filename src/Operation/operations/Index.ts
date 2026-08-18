@@ -1,6 +1,6 @@
 import Component from '../../Component';
 import { get, capitalize } from 'lodash';
-import Operation, { type Result, type OperationClass } from '../Operation';
+import Operation, { type Result, type OperationClass, type OperationComponent } from '../Operation';
 
 const SORT_ORDER = {
   ASC: 'asc',
@@ -29,16 +29,15 @@ type IndexOperationClass = OperationClass<{ query: IndexQuery }>;
 
 /** Returns class for an index operation. */
 const Index = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ComponentClass: any,
+  component: OperationComponent,
   componentAction: string = 'index'
 ): IndexOperationClass => {
+  const ComponentClass = component as unknown as typeof Component;
+
   if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "Index"' +
       ' operation function');
   }
-
-  ComponentClass = ComponentClass as unknown as typeof Component;
 
   const documentTitle = ComponentClass.getTitle(false, true);
 

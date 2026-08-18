@@ -1,22 +1,18 @@
-import Operation, { type OperationClass } from '../Operation';
+import Operation, { type OperationClass, type OperationComponent } from '../Operation';
 import Component from '../../Component';
 
 /**
- * A component a create operation takes its mutation from.
+ * The mutation a create operation takes from its component.
  *
  * Reading the schema off the component is what lets a mutation describe a type:
  * a component declaring the type of its schema passes it on to the operation.
  */
-type MutableComponent = {
-  mutationSchema?: unknown;
-};
-
-type CreateOperationClass<ComponentType extends MutableComponent> = OperationClass<{
+type CreateOperationClass<ComponentType extends OperationComponent> = OperationClass<{
   mutation: ComponentType['mutationSchema'];
 }>;
 
 /** Returns class for a create operation. */
-const Create = <ComponentType extends MutableComponent>(
+const Create = <ComponentType extends OperationComponent>(
   component: ComponentType,
   componentAction: string = Operation.types.CREATE
 ): CreateOperationClass<ComponentType> => {

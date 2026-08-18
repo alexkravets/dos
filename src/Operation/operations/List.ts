@@ -1,19 +1,18 @@
 import Component from '../../Component';
 import { capitalize } from 'lodash';
-import Operation, { type Result, type OperationClass } from '../Operation';
+import Operation, { type Result, type OperationClass, type OperationComponent } from '../Operation';
 
 /** Returns class for an list operation. */
 const List = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ComponentClass: any,
+  component: OperationComponent,
   componentAction: string = 'indexAll'
 ): OperationClass => {
+  const ComponentClass = component as unknown as typeof Component;
+
   if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "List"' +
       ' operation function');
   }
-
-  ComponentClass = ComponentClass as unknown as typeof Component;
 
   const documentTitle = ComponentClass.getTitle(false, true);
 

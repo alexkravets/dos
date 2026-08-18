@@ -46,6 +46,20 @@ export type Input<T extends { query: unknown; mutation: unknown }> = Prettify<
   & EffectiveMutation<T>
 >;
 
+/**
+ * A component an operation is built for.
+ *
+ * Describes what an operation function reads off a component rather than the
+ * component class itself, whose constructor is generic over its attributes and
+ * so accepts no particular component.
+ */
+export type OperationComponent = {
+  isComponent: boolean;
+  getTitle(isCapitalized?: boolean, isPlural?: boolean): string;
+  schema?: unknown;
+  mutationSchema?: unknown;
+};
+
 declare const contributed: unique symbol;
 
 /**

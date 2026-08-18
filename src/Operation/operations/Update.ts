@@ -1,4 +1,4 @@
-import Operation, { type OperationClass } from '../Operation';
+import Operation, { type OperationClass, type OperationComponent } from '../Operation';
 import Component from '../../Component';
 
 /** Query an update operation contributes. */
@@ -7,25 +7,21 @@ type UpdateQuery = {
 };
 
 /**
- * A component an update operation takes its mutation from, where the mutation
- * drops what an update does not require, the way the operation does at runtime.
+ * The mutation an update operation takes from its component, which drops what
+ * an update does not require, the way the operation does at runtime.
  */
-type MutableComponent = {
-  mutationSchema?: { pure(id?: string): unknown };
-};
-
-type UpdateMutation<ComponentType extends MutableComponent> =
+type UpdateMutation<ComponentType extends OperationComponent> =
   ComponentType['mutationSchema'] extends { pure(id?: string): infer Pured }
     ? Pured
     : null;
 
-type UpdateOperationClass<ComponentType extends MutableComponent> = OperationClass<{
+type UpdateOperationClass<ComponentType extends OperationComponent> = OperationClass<{
   query: UpdateQuery;
   mutation: UpdateMutation<ComponentType>;
 }>;
 
 /** Returns class for an update operation. */
-const Update = <ComponentType extends MutableComponent>(
+const Update = <ComponentType extends OperationComponent>(
   component: ComponentType,
   componentAction: string = Operation.types.UPDATE
 ): UpdateOperationClass<ComponentType> => {

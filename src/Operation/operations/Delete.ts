@@ -1,4 +1,4 @@
-import Operation, { type OperationClass } from '../Operation';
+import Operation, { type OperationClass, type OperationComponent } from '../Operation';
 import Component from '../../Component';
 
 /** Query a delete operation contributes. */
@@ -10,16 +10,15 @@ type DeleteOperationClass = OperationClass<{ query: DeleteQuery }>;
 
 /** Returns class for a delete operation. */
 const Delete = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ComponentClass: any,
+  component: OperationComponent,
   componentAction: string = Operation.types.DELETE
 ): DeleteOperationClass => {
+  const ComponentClass = component as unknown as typeof Component;
+
   if (!ComponentClass?.isComponent) {
     throw new Error('Argument "ComponentClass" is undefined for "Delete" operation' +
       ' function');
   }
-
-  ComponentClass = ComponentClass as unknown as typeof Component;
 
   const componentTitle = ComponentClass.getTitle();
   const componentTitleLower = componentTitle.toLowerCase();
