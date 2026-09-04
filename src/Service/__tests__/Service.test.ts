@@ -1,7 +1,14 @@
 import { Profile } from '../../../example/documents';
 import { createContext } from '../../Context/__tests__/__helpers';
 import { type HttpRequest } from '../../Context';
-import { Component, createAccessToken, Service } from '../../';
+import {
+  Component,
+  createAccessToken,
+  DocumentNotFoundError,
+  Operation,
+  Service,
+  UnprocessableConditionError,
+} from '../../';
 import { service, operations, url, logger, } from '../../../example';
 
 describe('Service', () => {
@@ -117,6 +124,70 @@ describe('Service', () => {
               message: 'Missing required property: name',
             },
           ],
+        }
+      });
+    });
+
+    it('returns a generic error if an operation throws an error it does not declare', async () => {
+      /** Example of an operation throwing an error it does not declare. */
+      class ReadHealth extends Operation {
+        /** Throws an error the operation does not declare. */
+        async before() {
+          throw new DocumentNotFoundError(Profile, { id: 'PRF_1' });
+        }
+      }
+
+      const healthService = new Service([ ReadHealth ], { url, context: { logger } });
+
+      const request = {
+        url: 'http://localhost:3000/ReadHealth',
+        path: '/ReadHealth',
+        method: 'get'
+      } as HttpRequest;
+
+      const { body: json, statusCode } = await healthService.process(request, { env: 'test' });
+
+      expect(statusCode).toEqual(500);
+
+      const body = JSON.parse(json!);
+
+      expect(body).toEqual({
+        error: {
+          code: 'OperationError',
+          message: 'Unexpected operation error',
+          statusCode: 500,
+        }
+      });
+    });
+
+    it('returns the original error if an operation throws an error it declares', async () => {
+      /** Example of an operation throwing an error it declares. */
+      class ReadStatus extends Operation {
+        /** Throws an error the operation declares. */
+        async before() {
+          throw new UnprocessableConditionError('Status is not available');
+        }
+      }
+
+      const statusService = new Service([ ReadStatus ], { url, context: { logger } });
+
+      const request = {
+        url: 'http://localhost:3000/ReadStatus',
+        path: '/ReadStatus',
+        method: 'get'
+      } as HttpRequest;
+
+      const { body: json, statusCode } = await statusService.process(request, { env: 'test' });
+
+      expect(statusCode).toEqual(422);
+
+      const body = JSON.parse(json!);
+
+      expect(body).toEqual({
+        error: {
+          code: 'UnprocessableConditionError',
+          message: 'Status is not available',
+          statusCode: 422,
         }
       });
     });

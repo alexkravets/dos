@@ -62,6 +62,28 @@ describe('Operation', () => {
     });
   });
 
+  describe('Operation.hasError()', () => {
+    it('returns true for a declared error code', () => {
+      /** Example of an operation with a create action. */
+      class CreateUser extends Create(User) {
+      }
+
+      expect(CreateUser.hasError('DocumentExistsError')).toBe(true);
+    });
+
+    it('returns false for an error code the operation does not declare', () => {
+      /** Example of an operation with a create action. */
+      class CreateUser extends Create(User) {
+      }
+
+      expect(CreateUser.hasError('DocumentNotFoundError')).toBe(false);
+    });
+
+    it('returns false for an error with no code', () => {
+      expect(Health.hasError()).toBe(false);
+    });
+  });
+
   describe('Operation.output', () => {
     it('returns null', () => {
       expect(Health.output).toBeNull();

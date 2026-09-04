@@ -30,7 +30,12 @@ class OperationError extends Component<OperationErrorAttributes> {
   }
 
   /** Creates instance of an operation error. */
-  constructor(context: Context, statusCode: number, originalError: OriginalError) {
+  constructor(
+    context: Context,
+    statusCode: number,
+    originalError: OriginalError,
+    isDeclaredError = true
+  ) {
     const {
       code,
       message,
@@ -48,7 +53,7 @@ class OperationError extends Component<OperationErrorAttributes> {
       error.validationErrors = validationErrors;
     }
 
-    const isUnexpectedError = !isCommonError;
+    const isUnexpectedError = !isCommonError || !isDeclaredError;
 
     if (isUnexpectedError) {
       error.code = 'OperationError';

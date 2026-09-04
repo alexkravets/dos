@@ -7,3 +7,5 @@ export {
 };
 
 export * from './test';
+
+export type { ErrorResponse } from './authorize';

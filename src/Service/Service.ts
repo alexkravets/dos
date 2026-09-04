@@ -235,11 +235,27 @@ class Service {
       multiValueHeaders = response.multiValueHeaders;
 
     } catch (error) {
-      const errorStatusCode = OperationClass
+      /*
+       * An error an operation does not declare is a spec/implementation
+       * mismatch, so it is reported as an unexpected error rather than with a
+       * code the published contract never advertised.
+       */
+      const errorCode = get(error, 'code') as string | undefined;
+
+      const isDeclaredError = OperationClass
+        ? OperationClass.hasError(errorCode)
+        : true;
+
+      const errorStatusCode = OperationClass && isDeclaredError
         ? OperationClass.getErrorStatusCode(error as OriginalError)
         : get(error, 'statusCode', 500);
 
-      const operationError = new OperationError(context, errorStatusCode, error as OriginalError);
+      const operationError = new OperationError(
+        context,
+        errorStatusCode,
+        error as OriginalError,
+        isDeclaredError
+      );
 
       output = operationError.validate();
       statusCode = errorStatusCode;

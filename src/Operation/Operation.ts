@@ -285,6 +285,17 @@ class Operation {
     return get(this.errors, `${code}.statusCode`, 500) as number;
   }
 
+  /** Flags if an error code is declared by the operation. */
+  static hasError(code?: string): boolean {
+    if (!code) {
+      return false;
+    }
+
+    const hasErrorDeclared = code in this.errors;
+
+    return hasErrorDeclared;
+  }
+
   /** Returns operation query schema source. */
   static get query(): null | PropertiesSchemaSource {
     return null;
